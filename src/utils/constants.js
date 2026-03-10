@@ -2,6 +2,11 @@
 export const GAME_WIDTH = 960;
 export const GAME_HEIGHT = 540;
 
+// ── Game Boy Device Layout ───────────────────────────
+export const VIEWPORT_HEIGHT_PERCENT = 0.70;
+export const CONTROLS_HEIGHT_PERCENT = 0.30;
+export const MAX_DEVICE_WIDTH = 430;
+
 // ── Palette ──────────────────────────────────────────
 export const BG_COLOR = 0x0a0805;
 export const AMBER = 0xc07a2a;
@@ -136,11 +141,14 @@ export const CHAR_INPUT_MOBILE_WIDTH = 80;
 export const CHAR_INPUT_MOBILE_HEIGHT = 22;
 export const PORTRAIT_HINT_THRESHOLD = 500;
 
-// ── D-Pad (Mobile Touch Controls) ──────────────────
-export const DPAD_BUTTON_SIZE = 60;
+// ── D-Pad (Control Panel) ────────────────────────────
+export const DPAD_BUTTON_SIZE = 52;
 export const DPAD_MARGIN = 20;
 export const DPAD_ALPHA = 0.35;
 export const DPAD_PRESSED_ALPHA = 0.6;
 export const DPAD_COLOR = 0xffffff;
 export const DPAD_BG_COLOR = 0x000000;
 export const DPAD_BG_ALPHA = 0.2;
+
+// ── Action Buttons (Control Panel) ───────────────────
+export const ACTION_BUTTON_SIZE = 52;

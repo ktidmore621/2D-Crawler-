@@ -6,16 +6,413 @@
     <title>Crawl Craft: Episode Earth</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0805; }
-      #app { width: 100%; height: 100%; }
-      canvas { display: block; }
+      html, body {
+        width: 100%; height: 100%; overflow: hidden;
+        background: #0a0805;
+        font-family: 'Rajdhani', sans-serif;
+      }
+
+      /* ── Animated background that shows behind/around the device ── */
+      #bg-canvas {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 0; pointer-events: none;
+      }
+
+      /* ── Device Shell ── */
+      #device-frame {
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%; max-width: 430px;
+        height: 100%;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        border-radius: 24px;
+        overflow: hidden;
+
+        /* Cracked brick wall bezel */
+        background:
+          /* Mortar base */
+          linear-gradient(135deg, #1a1510 0%, #0f0d0a 50%, #1a1510 100%);
+        box-shadow:
+          0 0 60px rgba(0,0,0,0.8),
+          inset 0 0 30px rgba(0,0,0,0.4);
+      }
+
+      /* Brick texture overlay via layered gradients */
+      #device-frame::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          /* Horizontal brick rows */
+          repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 22px,
+            rgba(15,11,8,0.7) 22px,
+            rgba(15,11,8,0.7) 24px
+          ),
+          /* Vertical brick offsets (even rows) */
+          repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 48px,
+            rgba(15,11,8,0.5) 48px,
+            rgba(15,11,8,0.5) 50px
+          ),
+          /* Brick color variation */
+          linear-gradient(160deg,
+            rgba(46,31,20,0.6) 0%,
+            rgba(58,37,24,0.5) 25%,
+            rgba(46,31,20,0.7) 50%,
+            rgba(58,37,24,0.4) 75%,
+            rgba(46,31,20,0.6) 100%
+          );
+        opacity: 0.85;
+      }
+
+      /* Crack SVG overlay */
+      #device-frame::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.3;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='900'%3E%3Cpath d='M80 0 L78 40 L85 80 L72 130 L79 180 L68 240 L75 300 L70 380 L82 440 L76 520 L80 600 L73 680 L78 760 L82 840 L79 900' fill='none' stroke='rgba(40,30,20,0.6)' stroke-width='1.5'/%3E%3Cpath d='M350 0 L355 60 L348 120 L360 200 L352 280 L358 360 L345 440 L355 520 L350 600 L358 700 L353 800 L348 900' fill='none' stroke='rgba(40,30,20,0.5)' stroke-width='1'/%3E%3Cpath d='M200 100 L210 130 L195 160 L208 200 L190 230' fill='none' stroke='rgba(40,30,20,0.4)' stroke-width='1'/%3E%3Cpath d='M150 400 L160 430 L145 470 L155 510 L140 540' fill='none' stroke='rgba(40,30,20,0.4)' stroke-width='0.8'/%3E%3Cpath d='M300 300 L290 340 L305 380 L288 420' fill='none' stroke='rgba(40,30,20,0.3)' stroke-width='0.8'/%3E%3C/svg%3E");
+        background-size: cover;
+        /* Dust/grain noise */
+        filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3C/svg%3E#n");
+      }
+
+      /* ── Game Screen (top 70%) ── */
+      #game-screen {
+        position: relative;
+        flex: 0 0 70%;
+        margin: 10px 10px 0 10px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0a0805;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        z-index: 2;
+      }
+
+      /* Scanline effect */
+      #game-screen::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent 0px,
+          transparent 2px,
+          rgba(0,0,0,0.08) 2px,
+          rgba(0,0,0,0.08) 4px
+        );
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+      }
+
+      #app canvas {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* ── Amber LED separator ── */
+      #led-strip {
+        flex: 0 0 1px;
+        margin: 0 10px;
+        background: rgba(192,122,42,0.4);
+        z-index: 2;
+      }
+
+      /* ── Control Panel (bottom 30%) ── */
+      #control-panel {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 16px;
+        z-index: 2;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* ── D-Pad ── */
+      .dpad-container {
+        display: grid;
+        grid-template-columns: 52px 52px 52px;
+        grid-template-rows: 52px 52px 52px;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .dpad-btn {
+        width: 52px;
+        height: 52px;
+        background: rgba(26,26,26,0.7);
+        border: 1.5px solid rgba(192,122,42,0.5);
+        border-radius: 6px;
+        color: rgba(192,122,42,0.8);
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.1s, border-color 0.1s;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .dpad-btn:active, .dpad-btn.pressed {
+        background: rgba(192,122,42,0.25);
+        border-color: rgba(192,122,42,0.8);
+      }
+
+      .dpad-spacer {
+        /* Empty grid cells */
+      }
+
+      /* ── Center Status Strip ── */
+      .status-strip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex: 1;
+        min-width: 0;
+        padding: 0 8px;
+      }
+
+      .status-strip .player-name {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 9px;
+        color: rgba(232,213,176,0.7);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 80px;
+      }
+
+      .status-bar {
+        width: 60px;
+        height: 6px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .status-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.3s;
+      }
+
+      .health-fill {
+        width: 100%;
+        background: linear-gradient(90deg, #8b1a1a, #cc3333);
+      }
+
+      .stamina-fill {
+        width: 100%;
+        background: linear-gradient(90deg, #1a6b1a, #33cc33);
+      }
+
+      /* ── Action Buttons (Diamond Layout) ── */
+      .action-container {
+        display: grid;
+        grid-template-columns: 52px 52px 52px;
+        grid-template-rows: 52px 52px 52px;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .action-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 1.5px solid;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background 0.1s, transform 0.1s;
+        background: rgba(26,26,26,0.7);
+      }
+
+      .action-btn:active, .action-btn.pressed {
+        transform: scale(0.92);
+      }
+
+      .action-btn .icon {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .action-btn .label {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 7px;
+        letter-spacing: 0.5px;
+        margin-top: 1px;
+        opacity: 0.7;
+      }
+
+      /* Roll (top) — grey-green */
+      .btn-roll {
+        border-color: rgba(122,184,110,0.6);
+        color: #7ab86e;
+      }
+      .btn-roll:active, .btn-roll.pressed {
+        background: rgba(122,184,110,0.2);
+      }
+
+      /* Interact (left) — amber */
+      .btn-interact {
+        border-color: rgba(192,122,42,0.6);
+        color: #c07a2a;
+      }
+      .btn-interact:active, .btn-interact.pressed {
+        background: rgba(192,122,42,0.2);
+      }
+
+      /* Attack (right) — red-orange */
+      .btn-attack {
+        border-color: rgba(192,74,42,0.6);
+        color: #c04a2a;
+      }
+      .btn-attack:active, .btn-attack.pressed {
+        background: rgba(192,74,42,0.2);
+      }
+
+      /* Map/Inventory (bottom) — slate blue */
+      .btn-inventory {
+        border-color: rgba(100,120,180,0.6);
+        color: #6478b4;
+      }
+      .btn-inventory:active, .btn-inventory.pressed {
+        background: rgba(100,120,180,0.2);
+      }
+
+      /* ── Responsive: Desktop/Tablet letterboxing ── */
+      @media (min-width: 431px) {
+        body {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        #device-frame {
+          max-height: 100vh;
+          max-height: 100dvh;
+        }
+      }
+
+      /* ── Phone portrait (full screen) ── */
+      @media (max-width: 430px) {
+        #device-frame {
+          border-radius: 0;
+          max-width: 100%;
+          height: 100%;
+          height: 100dvh;
+        }
+        #device-frame::before {
+          border-radius: 0;
+        }
+        #device-frame::after {
+          border-radius: 0;
+        }
+      }
     </style>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Device Frame (Game Boy shell) -->
+    <div id="device-frame">
+      <!-- Game Screen (top 70%) -->
+      <div id="game-screen">
+        <div id="app"></div>
+      </div>
+
+      <!-- Amber LED strip separator -->
+      <div id="led-strip"></div>
+
+      <!-- Control Panel (bottom 30%) -->
+      <div id="control-panel">
+        <!-- D-Pad (left) -->
+        <div class="dpad-container">
+          <div class="dpad-spacer"></div>
+          <button class="dpad-btn" data-dir="up">▲</button>
+          <div class="dpad-spacer"></div>
+
+          <button class="dpad-btn" data-dir="left">◀</button>
+          <div class="dpad-spacer"></div>
+          <button class="dpad-btn" data-dir="right">▶</button>
+
+          <div class="dpad-spacer"></div>
+          <button class="dpad-btn" data-dir="down">▼</button>
+          <div class="dpad-spacer"></div>
+        </div>
+
+        <!-- Center Status Strip -->
+        <div class="status-strip">
+          <div class="player-name" id="status-player-name">SURVIVOR</div>
+          <div class="status-bar">
+            <div class="status-bar-fill health-fill" id="health-bar"></div>
+          </div>
+          <div class="status-bar">
+            <div class="status-bar-fill stamina-fill" id="stamina-bar"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons (right, diamond layout) -->
+        <div class="action-container">
+          <div class="dpad-spacer"></div>
+          <button class="action-btn btn-roll" data-action="roll">
+            <span class="icon">⟳</span>
+            <span class="label">ROLL</span>
+          </button>
+          <div class="dpad-spacer"></div>
+
+          <button class="action-btn btn-interact" data-action="interact">
+            <span class="icon">!</span>
+            <span class="label">ACT</span>
+          </button>
+          <div class="dpad-spacer"></div>
+          <button class="action-btn btn-attack" data-action="attack">
+            <span class="icon">⚔</span>
+            <span class="label">ATK</span>
+          </button>
+
+          <div class="dpad-spacer"></div>
+          <button class="action-btn btn-inventory" data-action="inventory">
+            <span class="icon">▤</span>
+            <span class="label">MAP</span>
+          </button>
+          <div class="dpad-spacer"></div>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
