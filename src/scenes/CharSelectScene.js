@@ -38,19 +38,18 @@ function computeLayout(w, h) {
   const subtitleSize = Math.min(14, Math.max(9, vmin * 0.025));
   const labelSize = Math.min(14, Math.max(8, vmin * 0.025));
   const previewScale = Math.min(3, Math.max(1.2, cardWidth / 70));
-  const inputWidth = Math.min(160, Math.max(70, cardWidth * 0.85));
-  const inputHeight = Math.min(30, Math.max(20, vmin * 0.04));
-  const inputFontSize = Math.min(14, Math.max(10, vmin * 0.025));
+  const nameTagSize = Math.min(12, Math.max(8, vmin * 0.02));
 
   const buttonWidth = Math.min(220, Math.max(120, w * 0.35));
-  const buttonHeight = Math.min(56, Math.max(36, vmin * 0.08));
-  const buttonFontSize = Math.min(22, Math.max(14, vmin * 0.04));
+  const buttonHeight = Math.max(56, vmin * 0.08);
+  const buttonFontSize = Math.max(16, Math.min(22, vmin * 0.04));
 
   // Vertical layout
   const titleY = Math.max(20, h * 0.05);
   const subtitleY = titleY + titleSize * 0.9;
   const cardTopY = subtitleY + subtitleSize + Math.max(8, h * 0.02);
-  const buttonY = h - buttonHeight / 2 - Math.max(12, h * 0.03);
+  // BEGIN button in bottom 20% of screen, with safe area padding
+  const buttonY = h - Math.max(buttonHeight / 2 + 12, h * 0.1);
 
   // Portrait hint
   const showPortraitHint = w < PORTRAIT_HINT_THRESHOLD && h > w;
@@ -58,7 +57,7 @@ function computeLayout(w, h) {
   return {
     cardWidth, cardHeight, cardGap,
     titleSize, subtitleSize, labelSize,
-    previewScale, inputWidth, inputHeight, inputFontSize,
+    previewScale, nameTagSize,
     buttonWidth, buttonHeight, buttonFontSize,
     titleY, subtitleY, cardTopY, buttonY,
     showPortraitHint, isSmall,
@@ -77,13 +76,13 @@ export default class CharSelectScene {
     this.selectedType = null;
     this.names = {};
     this.cards = {};
-    this.inputEls = [];
     this.beginBtn = null;
     this.beginBtnBg = null;
     this.elapsed = 0;
-    this._positionCallbacks = [];
     this._hintEl = null;
     this._resizeHandler = null;
+    this._bottomSheet = null;
+    this._sheetType = null;
   }
 
   async init() {
@@ -189,61 +188,31 @@ export default class CharSelectScene {
     label.y = L.cardHeight * 0.65;
     cardContainer.addChild(label);
 
-    // ── Name input (HTML overlay) ──
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Name...';
-    input.maxLength = 16;
-    Object.assign(input.style, {
-      position: 'absolute',
-      width: `${L.inputWidth}px`,
-      height: `${L.inputHeight}px`,
-      background: '#0a0805',
-      border: `1px solid ${AMBER_HEX}`,
-      borderRadius: '4px',
-      color: '#e8d5b0',
-      fontFamily: 'Pirata One, serif',
-      fontSize: `${L.inputFontSize}px`,
-      textAlign: 'center',
-      outline: 'none',
-      padding: '0 4px',
-      zIndex: '10',
+    // ── Name tag (shown after name is entered) ──
+    const nameTag = new Text({
+      text: '',
+      style: {
+        fontFamily: 'Pirata One, serif',
+        fontSize: L.nameTagSize,
+        fill: AMBER_HEX,
+      },
     });
-    input.addEventListener('input', () => {
-      this.names[type] = input.value.trim();
-      this._updateBeginState();
-    });
-    input.addEventListener('keydown', (e) => e.stopPropagation());
-    input.addEventListener('keyup', (e) => e.stopPropagation());
-    document.body.appendChild(input);
-    this.inputEls.push(input);
-
-    // Position callback for input overlay
-    const positionInput = () => {
-      const canvas = this.app.canvas;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = rect.width / this.app.screen.width;
-      const scaleY = rect.height / this.app.screen.height;
-      const worldX = cardContainer.x - L.inputWidth / 2;
-      const worldY = cardContainer.y + L.cardHeight * 0.75;
-      input.style.left = `${rect.left + worldX * scaleX}px`;
-      input.style.top = `${rect.top + worldY * scaleY}px`;
-      input.style.transform = `scale(${scaleX}, ${scaleY})`;
-      input.style.transformOrigin = 'top left';
-    };
-    this._positionCallbacks.push(positionInput);
-    positionInput();
+    nameTag.anchor.set(0.5);
+    nameTag.y = L.cardHeight * 0.8;
+    nameTag.visible = false;
+    cardContainer.addChild(nameTag);
 
     // ── Selection handling ──
     const borderGfx = new Graphics();
     cardContainer.addChildAt(borderGfx, 0);
 
-    this.cards[type] = { container: cardContainer, bg, borderGfx, preview, label, L };
+    this.cards[type] = { container: cardContainer, bg, borderGfx, preview, label, nameTag, L };
 
     cardContainer.on('pointerdown', () => {
       this.selectedType = type;
       this._updateSelection();
       this._updateBeginState();
+      this._openBottomSheet(type);
     });
   }
 
@@ -268,6 +237,202 @@ export default class CharSelectScene {
         card.borderGfx.stroke({ color: CHAR_CARD_SELECTED_BORDER, width: 2, alpha: 0.4 });
       }
     }
+  }
+
+  // ── Bottom Sheet Modal ──
+
+  _openBottomSheet(type) {
+    // Remove any existing sheet first
+    this._closeBottomSheet(false);
+    this._sheetType = type;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'charselect-bottom-sheet-overlay';
+    Object.assign(overlay.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      background: 'rgba(0,0,0,0.6)',
+      zIndex: '1000',
+      display: 'flex',
+      alignItems: 'flex-end',
+      justifyContent: 'center',
+      opacity: '0',
+      transition: 'opacity 0.2s ease',
+    });
+
+    const sheet = document.createElement('div');
+    Object.assign(sheet.style, {
+      width: '100%',
+      maxWidth: '420px',
+      background: '#1a1510',
+      borderTop: `2px solid ${AMBER_HEX}`,
+      borderRadius: '16px 16px 0 0',
+      padding: '20px 24px',
+      paddingBottom: `calc(20px + env(safe-area-inset-bottom))`,
+      transform: 'translateY(100%)',
+      transition: 'transform 0.25s ease-out',
+      boxSizing: 'border-box',
+    });
+
+    // Cancel button (top-right)
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '✕';
+    Object.assign(cancelBtn.style, {
+      position: 'absolute',
+      top: '12px',
+      right: '16px',
+      background: 'none',
+      border: 'none',
+      color: '#8a7a60',
+      fontSize: '20px',
+      cursor: 'pointer',
+      padding: '4px 8px',
+      lineHeight: '1',
+      touchAction: 'manipulation',
+    });
+    cancelBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      this._closeBottomSheet(false);
+    });
+    sheet.style.position = 'relative';
+    sheet.appendChild(cancelBtn);
+
+    // Title
+    const title = document.createElement('div');
+    title.textContent = `NAME YOUR ${CHARACTER_LABELS[type]}`;
+    Object.assign(title.style, {
+      color: AMBER_HEX,
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '12px',
+      letterSpacing: '3px',
+      textAlign: 'center',
+      marginBottom: '16px',
+      marginTop: '4px',
+    });
+    sheet.appendChild(title);
+
+    // Name input
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Enter name...';
+    input.maxLength = 16;
+    input.value = this.names[type] || '';
+    Object.assign(input.style, {
+      display: 'block',
+      width: '100%',
+      height: '48px',
+      background: '#0a0805',
+      border: `2px solid ${AMBER_HEX}`,
+      borderRadius: '8px',
+      color: '#e8d5b0',
+      fontFamily: 'Pirata One, serif',
+      fontSize: '16px',
+      textAlign: 'center',
+      outline: 'none',
+      padding: '0 12px',
+      boxSizing: 'border-box',
+      touchAction: 'manipulation',
+    });
+    input.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') {
+        this._confirmSheet(input);
+      }
+    });
+    input.addEventListener('keyup', (e) => e.stopPropagation());
+    sheet.appendChild(input);
+
+    // Confirm button
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'CONFIRM';
+    Object.assign(confirmBtn.style, {
+      display: 'block',
+      width: '100%',
+      height: '56px',
+      marginTop: '14px',
+      background: AMBER_HEX,
+      border: 'none',
+      borderRadius: '8px',
+      color: '#0a0805',
+      fontFamily: 'Pirata One, serif',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      letterSpacing: '4px',
+      cursor: 'pointer',
+      touchAction: 'manipulation',
+    });
+    confirmBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      this._confirmSheet(input);
+    });
+    sheet.appendChild(confirmBtn);
+
+    overlay.appendChild(sheet);
+
+    // Close on overlay tap (outside sheet)
+    overlay.addEventListener('pointerdown', (e) => {
+      if (e.target === overlay) {
+        this._closeBottomSheet(false);
+      }
+    });
+
+    document.body.appendChild(overlay);
+    this._bottomSheet = overlay;
+    this._bottomSheetInner = sheet;
+    this._bottomSheetInput = input;
+
+    // Trigger animation after DOM insertion
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+      sheet.style.transform = 'translateY(0)';
+      // Autofocus input after slide animation
+      setTimeout(() => input.focus(), 260);
+    });
+  }
+
+  _confirmSheet(input) {
+    const name = input.value.trim();
+    if (!name) {
+      input.focus();
+      return;
+    }
+    const type = this._sheetType;
+    this.names[type] = name;
+
+    // Show name tag on card
+    const card = this.cards[type];
+    if (card && card.nameTag) {
+      card.nameTag.text = name;
+      card.nameTag.visible = true;
+    }
+
+    this._closeBottomSheet(true);
+    this._updateBeginState();
+  }
+
+  _closeBottomSheet(confirmed) {
+    if (!this._bottomSheet) return;
+    const overlay = this._bottomSheet;
+    const sheet = this._bottomSheetInner;
+
+    // Blur input to dismiss keyboard
+    if (this._bottomSheetInput) {
+      this._bottomSheetInput.blur();
+    }
+
+    overlay.style.opacity = '0';
+    sheet.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+      overlay.remove();
+    }, 250);
+
+    this._bottomSheet = null;
+    this._bottomSheetInner = null;
+    this._bottomSheetInput = null;
+    this._sheetType = null;
   }
 
   _createBeginButton(cx, cy, L) {
@@ -378,20 +543,13 @@ export default class CharSelectScene {
 
   update(deltaSeconds) {
     this.elapsed += deltaSeconds;
-    if (this._positionCallbacks) {
-      for (const cb of this._positionCallbacks) cb();
-    }
   }
 
   destroy() {
     if (this._resizeHandler) {
       window.removeEventListener('resize', this._resizeHandler);
     }
-    for (const input of this.inputEls) {
-      input.remove();
-    }
-    this.inputEls = [];
-    this._positionCallbacks = null;
+    this._closeBottomSheet(false);
     if (this._hintEl) {
       this._hintEl.remove();
       this._hintEl = null;
