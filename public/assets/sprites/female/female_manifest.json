@@ -1,0 +1,120 @@
+{
+  "character": "female",
+  "frameSize": {
+    "w": 48,
+    "h": 64
+  },
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "animations": {
+    "idle": {
+      "image": "female_idle.png",
+      "atlas": "female_idle.json",
+      "framesPerDirection": 4,
+      "sheetSize": {
+        "w": 192,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "walk": {
+      "image": "female_walk.png",
+      "atlas": "female_walk.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "run": {
+      "image": "female_run.png",
+      "atlas": "female_run.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "attack": {
+      "image": "female_attack.png",
+      "atlas": "female_attack.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "roll": {
+      "image": "female_roll.png",
+      "atlas": "female_roll.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "hurt": {
+      "image": "female_hurt.png",
+      "atlas": "female_hurt.json",
+      "framesPerDirection": 3,
+      "sheetSize": {
+        "w": 144,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "death": {
+      "image": "female_death.png",
+      "atlas": "female_death.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    }
+  }
+}

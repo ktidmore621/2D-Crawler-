@@ -1,0 +1,120 @@
+{
+  "character": "androgynous",
+  "frameSize": {
+    "w": 48,
+    "h": 64
+  },
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "animations": {
+    "idle": {
+      "image": "androgynous_idle.png",
+      "atlas": "androgynous_idle.json",
+      "framesPerDirection": 4,
+      "sheetSize": {
+        "w": 192,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "walk": {
+      "image": "androgynous_walk.png",
+      "atlas": "androgynous_walk.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "run": {
+      "image": "androgynous_run.png",
+      "atlas": "androgynous_run.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "attack": {
+      "image": "androgynous_attack.png",
+      "atlas": "androgynous_attack.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "roll": {
+      "image": "androgynous_roll.png",
+      "atlas": "androgynous_roll.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "hurt": {
+      "image": "androgynous_hurt.png",
+      "atlas": "androgynous_hurt.json",
+      "framesPerDirection": 3,
+      "sheetSize": {
+        "w": 144,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "death": {
+      "image": "androgynous_death.png",
+      "atlas": "androgynous_death.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    }
+  }
+}

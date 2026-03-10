@@ -1,0 +1,120 @@
+{
+  "character": "male",
+  "frameSize": {
+    "w": 48,
+    "h": 64
+  },
+  "directions": [
+    "down",
+    "left",
+    "right",
+    "up"
+  ],
+  "animations": {
+    "idle": {
+      "image": "male_idle.png",
+      "atlas": "male_idle.json",
+      "framesPerDirection": 4,
+      "sheetSize": {
+        "w": 192,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "walk": {
+      "image": "male_walk.png",
+      "atlas": "male_walk.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "run": {
+      "image": "male_run.png",
+      "atlas": "male_run.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "attack": {
+      "image": "male_attack.png",
+      "atlas": "male_attack.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "roll": {
+      "image": "male_roll.png",
+      "atlas": "male_roll.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "hurt": {
+      "image": "male_hurt.png",
+      "atlas": "male_hurt.json",
+      "framesPerDirection": 3,
+      "sheetSize": {
+        "w": 144,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    },
+    "death": {
+      "image": "male_death.png",
+      "atlas": "male_death.json",
+      "framesPerDirection": 6,
+      "sheetSize": {
+        "w": 288,
+        "h": 256
+      },
+      "rowOrder": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    }
+  }
+}

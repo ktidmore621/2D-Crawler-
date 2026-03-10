@@ -93,3 +93,34 @@ export const EMBER_MIN_SPEED = 25;                  // px/s upward
 export const EMBER_MAX_SPEED = 70;
 export const EMBER_SPREAD = 60;                     // horizontal spread from fire
 export const EMBER_COLORS = [0x66ff33, 0x88ff44, 0xccff66, 0xffff88, 0xffffcc];
+
+// ── Sprite / Player ─────────────────────────────────
+export const SPRITE_FRAME_WIDTH = 48;
+export const SPRITE_FRAME_HEIGHT = 64;
+export const PLAYER_SPEED = 260;               // px per second
+export const PLAYER_ANIM_SPEED = 0.15;         // frames per tick for AnimatedSprite
+export const PLAYER_SCALE = 2.5;               // scale up 48×64 sprites
+export const PLAYER_NAME_FONT_SIZE = 12;
+export const PLAYER_NAME_OFFSET_Y = -10;       // px above sprite anchor
+
+// ── Character Types ─────────────────────────────────
+export const CHARACTER_TYPES = ['male', 'female', 'androgynous'];
+export const CHARACTER_LABELS = {
+  male: 'MALE SURVIVOR',
+  female: 'FEMALE SURVIVOR',
+  androgynous: 'WANDERER',
+};
+
+// ── Character Select Scene ──────────────────────────
+export const CHAR_CARD_WIDTH = 200;
+export const CHAR_CARD_HEIGHT = 280;
+export const CHAR_CARD_GAP = 40;
+export const CHAR_CARD_BG = 0x1a1510;
+export const CHAR_CARD_BORDER = 0x3a3020;
+export const CHAR_CARD_SELECTED_BORDER = 0xc07a2a;
+export const CHAR_CARD_BORDER_WIDTH = 2;
+export const CHAR_SELECT_TITLE_SIZE = 36;
+export const CHAR_LABEL_FONT_SIZE = 14;
+export const CHAR_INPUT_WIDTH = 160;
+export const CHAR_INPUT_HEIGHT = 30;
+export const CHAR_PREVIEW_SCALE = 3;
