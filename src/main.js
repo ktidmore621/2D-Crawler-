@@ -1,3 +1,5 @@
 import { bootstrapGame } from './game.js';
 
-bootstrapGame();
+bootstrapGame().catch((err) => {
+  console.error('Failed to start game:', err);
+});
