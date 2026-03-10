@@ -53,3 +53,34 @@ export const BUTTON_HEIGHT = 56;
 export const BUTTON_RADIUS = 6;
 export const BUTTON_FONT_SIZE = 22;
 export const VERSION_FONT_SIZE = 12;
+
+// ── Menu Background Scene ──────────────────────────
+export const MENU_SKY_COLOR_TOP = 0x0a1a12;      // deep dark green-navy
+export const MENU_SKY_COLOR_MID = 0x0d2818;       // slightly lighter green
+export const MENU_AURORA_COLOR = 0x1a6b3a;        // green aurora glow
+export const MENU_GRASS_COLOR = 0x1a3a1a;         // dark green grass
+export const MENU_PATH_COLOR = 0xa0622a;          // warm orange-brown dirt
+export const MENU_PATH_WIDTH = 64;                // dirt path width in px
+export const MENU_TREE_COLOR = 0x0d1a0d;          // dark silhouette trees
+export const MENU_STAR_COUNT = 40;
+export const MENU_STAR_COLOR = 0xccddcc;          // pale green-white stars
+export const MENU_STAR_TWINKLE_SPEED = 1.5;       // radians/s
+
+// ── Green Fire ─────────────────────────────────────
+export const FIRE_BASE_X_RATIO = 0.5;             // centered horizontally
+export const FIRE_BASE_Y_RATIO = 0.78;            // in lower portion
+export const FIRE_WIDTH = 40;
+export const FIRE_HEIGHT = 70;
+export const FIRE_PULSE_SPEED = 4;                // radians/s
+export const FIRE_COLORS = [0x1a6b2a, 0x2d9b3a, 0x4dcc4d, 0x7fff00, 0xccffcc];
+export const FIRE_GLOW_COLOR = 0x3a6b2a;
+export const FIRE_GLOW_RADIUS = 120;
+
+// ── Ember Particles ────────────────────────────────
+export const EMBER_COUNT = 35;
+export const EMBER_MIN_SIZE = 1;
+export const EMBER_MAX_SIZE = 3;
+export const EMBER_MIN_SPEED = 20;                // px/s upward
+export const EMBER_MAX_SPEED = 60;
+export const EMBER_SPREAD = 80;                   // horizontal spread from fire
+export const EMBER_COLORS = [0x7fff00, 0xaaff44, 0xffffaa, 0xffff66];
