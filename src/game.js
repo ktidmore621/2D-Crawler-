@@ -14,6 +14,9 @@ export async function bootstrapGame() {
   });
 
   const appElement = document.getElementById('app');
+  if (!appElement) {
+    throw new Error('Missing #app element in index.html');
+  }
   appElement.appendChild(app.canvas);
 
   // Scene setup
