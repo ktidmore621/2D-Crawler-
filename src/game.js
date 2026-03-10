@@ -1,6 +1,7 @@
 import { Application } from 'pixi.js';
 import { GAME_WIDTH, GAME_HEIGHT, BG_COLOR } from './utils/constants.js';
 import MenuScene from './scenes/MenuScene.js';
+import CharSelectScene from './scenes/CharSelectScene.js';
 import GameScene from './scenes/GameScene.js';
 
 export async function bootstrapGame() {
@@ -20,20 +21,24 @@ export async function bootstrapGame() {
 
   let currentScene = null;
 
-  function switchScene(SceneClass, ...args) {
+  async function switchScene(SceneClass, ...args) {
     if (currentScene) {
       currentScene.destroy();
       app.stage.removeChildren();
       currentScene = null;
     }
     const scene = new SceneClass(app, ...args);
-    scene.init();
+    await scene.init();
     currentScene = scene;
   }
 
   function startMenu() {
     switchScene(MenuScene, () => {
-      switchScene(GameScene);
+      // PLAY clicked → go to character select
+      switchScene(CharSelectScene, (characterType, characterName) => {
+        // BEGIN clicked → go to game
+        switchScene(GameScene, characterType, characterName);
+      });
     });
   }
 
