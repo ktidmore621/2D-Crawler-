@@ -124,3 +124,23 @@ export const CHAR_LABEL_FONT_SIZE = 14;
 export const CHAR_INPUT_WIDTH = 160;
 export const CHAR_INPUT_HEIGHT = 30;
 export const CHAR_PREVIEW_SCALE = 3;
+
+// ── Mobile Character Select ────────────────────────
+export const CHAR_CARD_MIN_WIDTH = 90;
+export const CHAR_CARD_MIN_HEIGHT = 160;
+export const CHAR_CARD_MIN_GAP = 8;
+export const CHAR_CARD_MOBILE_PREVIEW_SCALE = 1.5;
+export const CHAR_LABEL_MOBILE_FONT_SIZE = 10;
+export const CHAR_SELECT_MOBILE_TITLE_SIZE = 22;
+export const CHAR_INPUT_MOBILE_WIDTH = 80;
+export const CHAR_INPUT_MOBILE_HEIGHT = 22;
+export const PORTRAIT_HINT_THRESHOLD = 500;
+
+// ── D-Pad (Mobile Touch Controls) ──────────────────
+export const DPAD_BUTTON_SIZE = 60;
+export const DPAD_MARGIN = 20;
+export const DPAD_ALPHA = 0.35;
+export const DPAD_PRESSED_ALPHA = 0.6;
+export const DPAD_COLOR = 0xffffff;
+export const DPAD_BG_COLOR = 0x000000;
+export const DPAD_BG_ALPHA = 0.2;
