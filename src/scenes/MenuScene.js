@@ -1,8 +1,6 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import {
   BG_COLOR,
-  AMBER_HEX,
-  TOXIC_GREEN_HEX,
   TITLE_COLOR,
   SUBTITLE_COLOR,
   TAGLINE_COLOR,
@@ -21,14 +19,16 @@ import {
   BUTTON_FONT_SIZE,
   VERSION_FONT_SIZE,
   VIGNETTE_ALPHA,
-  GRAIN_ALPHA,
   CORNER_LINE_LENGTH,
   CORNER_LINE_WIDTH,
   CORNER_MARGIN,
   CORNER_ALPHA,
 } from '../utils/constants.js';
-import { createTileGridState, updateTileGrid, drawTileGrid } from '../systems/tileGrid.js';
-import { createParticleState, updateParticles } from '../systems/particles.js';
+import {
+  createMenuBackgroundState,
+  updateMenuBackground,
+  drawMenuBackground,
+} from '../systems/menuBackground.js';
 
 export default class MenuScene {
   constructor(app, onPlay) {
@@ -43,23 +43,13 @@ export default class MenuScene {
     this.app.renderer.background.color = BG_COLOR;
     this.app.stage.addChild(this.container);
 
-    // ── Tile grid layer ──
-    this.gridGfx = new Graphics();
-    this.container.addChild(this.gridGfx);
-    this.tileState = createTileGridState();
-
-    // ── Particle layer ──
-    this.particleGfx = new Graphics();
-    this.container.addChild(this.particleGfx);
-    this.particleState = createParticleState(width, height);
+    // ── Animated background layer ──
+    this.bgGfx = new Graphics();
+    this.container.addChild(this.bgGfx);
+    this.bgState = createMenuBackgroundState(width, height);
 
     // ── Vignette overlay ──
     this._drawVignette(width, height);
-
-    // ── Grain overlay ──
-    this.grainGfx = new Graphics();
-    this.container.addChild(this.grainGfx);
-    this._drawGrain(width, height);
 
     // ── Corner decorations ──
     this._drawCorners(width, height);
@@ -148,8 +138,7 @@ export default class MenuScene {
     this.ui.addChild(version);
 
     // Draw initial frame
-    drawTileGrid(this.gridGfx, this.tileState, width, height);
-    this._drawParticles();
+    drawMenuBackground(this.bgGfx, this.bgState, width, height, 0);
   }
 
   _createPlayButton(cx, cy) {
@@ -200,48 +189,6 @@ export default class MenuScene {
   }
 
   _drawVignette(w, h) {
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-
-    const gradient = ctx.createRadialGradient(w / 2, h / 2, w * 0.25, w / 2, h / 2, w * 0.75);
-    gradient.addColorStop(0, 'rgba(0,0,0,0)');
-    gradient.addColorStop(1, `rgba(0,0,0,${VIGNETTE_ALPHA})`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
-
-    const gfx = new Graphics();
-    const texture = this.app.renderer.generateTexture({
-      target: (() => {
-        const sprite = new Graphics();
-        sprite.rect(0, 0, 1, 1).fill({ color: 0x000000 });
-        return sprite;
-      })(),
-    });
-
-    // Use a simple darkened rectangle approach for vignette
-    const vignetteContainer = new Container();
-    // Top-left corner shadow
-    const corners = [
-      { x: 0, y: 0 },
-      { x: w, y: 0 },
-      { x: 0, y: h },
-      { x: w, y: h },
-    ];
-
-    const vigGfx = new Graphics();
-    vigGfx.rect(0, 0, w, h);
-    vigGfx.fill({ color: 0x000000 });
-    vigGfx.alpha = VIGNETTE_ALPHA;
-
-    // Create a circular mask to cut out the center
-    const maskGfx = new Graphics();
-    maskGfx.ellipse(w / 2, h / 2, w * 0.55, h * 0.6);
-    maskGfx.fill({ color: 0xffffff });
-
-    // Instead of complex masking, use a simpler approach with corner gradients
-    // Just add semi-transparent edges
     const edgeGfx = new Graphics();
 
     // Top edge
@@ -254,21 +201,6 @@ export default class MenuScene {
     edgeGfx.rect(w * 0.88, 0, w * 0.12, h).fill({ color: 0x000000, alpha: VIGNETTE_ALPHA * 0.5 });
 
     this.container.addChild(edgeGfx);
-  }
-
-  _drawGrain(w, h) {
-    // Procedural noise via small random dots
-    const gfx = this.grainGfx;
-    gfx.clear();
-    const step = 4;
-    for (let y = 0; y < h; y += step) {
-      for (let x = 0; x < w; x += step) {
-        if (Math.random() < 0.35) {
-          const brightness = Math.random() < 0.5 ? 0x000000 : 0xffffff;
-          gfx.rect(x, y, step, step).fill({ color: brightness, alpha: GRAIN_ALPHA * Math.random() });
-        }
-      }
-    }
   }
 
   _drawCorners(w, h) {
@@ -297,25 +229,13 @@ export default class MenuScene {
     this.container.addChild(gfx);
   }
 
-  _drawParticles() {
-    const gfx = this.particleGfx;
-    gfx.clear();
-    for (const p of this.particleState.particles) {
-      gfx.circle(p.x, p.y, p.size).fill({ color: p.color, alpha: p.alpha });
-    }
-  }
-
   update(deltaSeconds) {
     this.elapsed += deltaSeconds;
     const { width, height } = this.app.screen;
 
-    // Animate tile grid
-    updateTileGrid(this.tileState, deltaSeconds);
-    drawTileGrid(this.gridGfx, this.tileState, width, height);
-
-    // Animate particles
-    updateParticles(this.particleState, width, height, this.elapsed, deltaSeconds);
-    this._drawParticles();
+    // Animate background scene
+    updateMenuBackground(this.bgState, width, height, this.elapsed, deltaSeconds);
+    drawMenuBackground(this.bgGfx, this.bgState, width, height, this.elapsed);
 
     // Subtle title pulse
     if (this.titleText) {
