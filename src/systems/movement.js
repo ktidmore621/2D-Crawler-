@@ -14,11 +14,13 @@ export function createMovementState() {
     keys,
     onKeyDown(event) {
       if (event.code in keys) {
+        event.preventDefault();
         keys[event.code] = true;
       }
     },
     onKeyUp(event) {
       if (event.code in keys) {
+        event.preventDefault();
         keys[event.code] = false;
       }
     },

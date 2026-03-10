@@ -5,3 +5,4 @@ export const BACKGROUND_COLOR = 0x101820;
 
 export const PLAYER_RADIUS = 24;
 export const PLAYER_COLOR = 0x3ddc97;
+export const PLAYER_SPEED = 260;

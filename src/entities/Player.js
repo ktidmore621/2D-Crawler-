@@ -1,9 +1,9 @@
 import { Graphics } from 'pixi.js';
-import { PLAYER_COLOR, PLAYER_RADIUS } from '../utils/constants.js';
+import { PLAYER_COLOR, PLAYER_RADIUS, PLAYER_SPEED } from '../utils/constants.js';
 
 export class Player {
   constructor() {
-    this.speed = 260;
+    this.speed = PLAYER_SPEED;
     this.radius = PLAYER_RADIUS;
 
     // The visible shape (a simple circle)
