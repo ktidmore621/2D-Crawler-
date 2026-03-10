@@ -14,45 +14,37 @@ import {
   CHAR_CARD_BORDER,
   CHAR_CARD_SELECTED_BORDER,
   CHAR_CARD_BORDER_WIDTH,
-  PORTRAIT_HINT_THRESHOLD,
   PLAYER_ANIM_SPEED,
 } from '../utils/constants.js';
 import { loadAtlas, createAnimatedSprite } from '../systems/animation.js';
 
 /**
- * Compute responsive layout values based on screen dimensions.
- * Mobile-first: everything scales with vw/vh/vmin equivalents.
+ * Compute responsive layout values for the game viewport (portrait-first).
  */
 function computeLayout(w, h) {
   const vmin = Math.min(w, h);
-  const isSmall = w < 600;
 
-  // Cards always in a horizontal row — compute sizes to fit
-  const cardGap = Math.max(8, vmin * 0.02);
-  const availableWidth = w * 0.92; // 4% margin each side
-  const totalGapWidth = cardGap * 2; // 2 gaps between 3 cards
-  const cardWidth = Math.min(200, Math.max(90, (availableWidth - totalGapWidth) / 3));
-  const cardHeight = Math.min(280, Math.max(140, cardWidth * 1.55));
+  // Cards stacked vertically or in a tight horizontal row
+  const cardGap = Math.max(6, vmin * 0.015);
+  const availableWidth = w * 0.92;
+  const totalGapWidth = cardGap * 2;
+  const cardWidth = Math.min(130, Math.max(70, (availableWidth - totalGapWidth) / 3));
+  const cardHeight = Math.min(180, Math.max(110, cardWidth * 1.4));
 
-  const titleSize = Math.min(36, Math.max(18, vmin * 0.06));
-  const subtitleSize = Math.min(14, Math.max(9, vmin * 0.025));
-  const labelSize = Math.min(14, Math.max(8, vmin * 0.025));
-  const previewScale = Math.min(3, Math.max(1.2, cardWidth / 70));
-  const nameTagSize = Math.min(12, Math.max(8, vmin * 0.02));
+  const titleSize = Math.min(28, Math.max(16, vmin * 0.06));
+  const subtitleSize = Math.min(11, Math.max(8, vmin * 0.025));
+  const labelSize = Math.min(11, Math.max(7, vmin * 0.022));
+  const previewScale = Math.min(2, Math.max(1, cardWidth / 80));
+  const nameTagSize = Math.min(10, Math.max(7, vmin * 0.018));
 
-  const buttonWidth = Math.min(220, Math.max(120, w * 0.35));
-  const buttonHeight = Math.max(56, vmin * 0.08);
-  const buttonFontSize = Math.max(16, Math.min(22, vmin * 0.04));
+  const buttonWidth = Math.min(180, Math.max(110, w * 0.4));
+  const buttonHeight = Math.max(38, vmin * 0.08);
+  const buttonFontSize = Math.max(14, Math.min(18, vmin * 0.04));
 
-  // Vertical layout
-  const titleY = Math.max(20, h * 0.05);
-  const subtitleY = titleY + titleSize * 0.9;
-  const cardTopY = subtitleY + subtitleSize + Math.max(8, h * 0.02);
-  // BEGIN button in bottom 20% of screen, with safe area padding
-  const buttonY = h - Math.max(buttonHeight / 2 + 12, h * 0.1);
-
-  // Portrait hint
-  const showPortraitHint = w < PORTRAIT_HINT_THRESHOLD && h > w;
+  const titleY = Math.max(16, h * 0.04);
+  const subtitleY = titleY + titleSize * 0.85;
+  const cardTopY = subtitleY + subtitleSize + Math.max(6, h * 0.015);
+  const buttonY = h - Math.max(buttonHeight / 2 + 8, h * 0.06);
 
   return {
     cardWidth, cardHeight, cardGap,
@@ -60,15 +52,10 @@ function computeLayout(w, h) {
     previewScale, nameTagSize,
     buttonWidth, buttonHeight, buttonFontSize,
     titleY, subtitleY, cardTopY, buttonY,
-    showPortraitHint, isSmall,
   };
 }
 
 export default class CharSelectScene {
-  /**
-   * @param {import('pixi.js').Application} app
-   * @param {(type: string, name: string) => void} onBegin
-   */
   constructor(app, onBegin) {
     this.app = app;
     this.onBegin = onBegin;
@@ -79,7 +66,6 @@ export default class CharSelectScene {
     this.beginBtn = null;
     this.beginBtnBg = null;
     this.elapsed = 0;
-    this._hintEl = null;
     this._resizeHandler = null;
     this._bottomSheet = null;
     this._sheetType = null;
@@ -93,7 +79,6 @@ export default class CharSelectScene {
     this.layout = computeLayout(width, height);
     await this._buildUI();
 
-    // Listen for resize to rebuild layout
     this._resizeHandler = () => this._onResize();
     window.addEventListener('resize', this._resizeHandler);
   }
@@ -123,7 +108,7 @@ export default class CharSelectScene {
         fontFamily: 'Arial, sans-serif',
         fontSize: L.subtitleSize,
         fill: AMBER_HEX,
-        letterSpacing: Math.max(2, L.subtitleSize * 0.4),
+        letterSpacing: Math.max(2, L.subtitleSize * 0.35),
       },
     });
     this.subtitleText.anchor.set(0.5);
@@ -131,7 +116,7 @@ export default class CharSelectScene {
     this.subtitleText.y = L.subtitleY;
     this.container.addChild(this.subtitleText);
 
-    // ── Character cards (always horizontal row) ──
+    // ── Character cards (horizontal row) ──
     const totalWidth = CHARACTER_TYPES.length * L.cardWidth + (CHARACTER_TYPES.length - 1) * L.cardGap;
     const startX = (width - totalWidth) / 2;
 
@@ -144,9 +129,6 @@ export default class CharSelectScene {
     // ── BEGIN button ──
     this._createBeginButton(width / 2, L.buttonY, L);
     this._updateBeginState();
-
-    // ── Portrait rotation hint (DOM overlay) ──
-    this._updatePortraitHint();
   }
 
   async _createCard(type, cx, top, L) {
@@ -155,7 +137,6 @@ export default class CharSelectScene {
     cardContainer.y = top;
     this.container.addChild(cardContainer);
 
-    // Card background
     const bg = new Graphics();
     bg.roundRect(-L.cardWidth / 2, 0, L.cardWidth, L.cardHeight, 6);
     bg.fill({ color: CHAR_CARD_BG });
@@ -188,7 +169,7 @@ export default class CharSelectScene {
     label.y = L.cardHeight * 0.65;
     cardContainer.addChild(label);
 
-    // ── Name tag (shown after name is entered) ──
+    // ── Name tag ──
     const nameTag = new Text({
       text: '',
       style: {
@@ -242,7 +223,6 @@ export default class CharSelectScene {
   // ── Bottom Sheet Modal ──
 
   _openBottomSheet(type) {
-    // Remove any existing sheet first
     this._closeBottomSheet(false);
     this._sheetType = type;
 
@@ -277,9 +257,9 @@ export default class CharSelectScene {
       boxSizing: 'border-box',
     });
 
-    // Cancel button (top-right)
+    // Cancel button
     const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = '✕';
+    cancelBtn.textContent = '\u2715';
     Object.assign(cancelBtn.style, {
       position: 'absolute',
       top: '12px',
@@ -338,9 +318,7 @@ export default class CharSelectScene {
     });
     input.addEventListener('keydown', (e) => {
       e.stopPropagation();
-      if (e.key === 'Enter') {
-        this._confirmSheet(input);
-      }
+      if (e.key === 'Enter') this._confirmSheet(input);
     });
     input.addEventListener('keyup', (e) => e.stopPropagation());
     sheet.appendChild(input);
@@ -372,11 +350,8 @@ export default class CharSelectScene {
 
     overlay.appendChild(sheet);
 
-    // Close on overlay tap (outside sheet)
     overlay.addEventListener('pointerdown', (e) => {
-      if (e.target === overlay) {
-        this._closeBottomSheet(false);
-      }
+      if (e.target === overlay) this._closeBottomSheet(false);
     });
 
     document.body.appendChild(overlay);
@@ -384,25 +359,19 @@ export default class CharSelectScene {
     this._bottomSheetInner = sheet;
     this._bottomSheetInput = input;
 
-    // Trigger animation after DOM insertion
     requestAnimationFrame(() => {
       overlay.style.opacity = '1';
       sheet.style.transform = 'translateY(0)';
-      // Autofocus input after slide animation
       setTimeout(() => input.focus(), 260);
     });
   }
 
   _confirmSheet(input) {
     const name = input.value.trim();
-    if (!name) {
-      input.focus();
-      return;
-    }
+    if (!name) { input.focus(); return; }
     const type = this._sheetType;
     this.names[type] = name;
 
-    // Show name tag on card
     const card = this.cards[type];
     if (card && card.nameTag) {
       card.nameTag.text = name;
@@ -418,16 +387,11 @@ export default class CharSelectScene {
     const overlay = this._bottomSheet;
     const sheet = this._bottomSheetInner;
 
-    // Blur input to dismiss keyboard
-    if (this._bottomSheetInput) {
-      this._bottomSheetInput.blur();
-    }
+    if (this._bottomSheetInput) this._bottomSheetInput.blur();
 
     overlay.style.opacity = '0';
     sheet.style.transform = 'translateY(100%)';
-    setTimeout(() => {
-      overlay.remove();
-    }, 250);
+    setTimeout(() => overlay.remove(), 250);
 
     this._bottomSheet = null;
     this._bottomSheetInner = null;
@@ -505,40 +469,8 @@ export default class CharSelectScene {
     }
   }
 
-  _updatePortraitHint() {
-    const { width, height } = this.app.screen;
-    const showHint = width < PORTRAIT_HINT_THRESHOLD && height > width;
-
-    if (showHint && !this._hintEl) {
-      const hint = document.createElement('div');
-      Object.assign(hint.style, {
-        position: 'fixed',
-        bottom: '8px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(0,0,0,0.7)',
-        color: '#c07a2a',
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '11px',
-        padding: '6px 14px',
-        borderRadius: '12px',
-        zIndex: '100',
-        whiteSpace: 'nowrap',
-        pointerEvents: 'none',
-      });
-      hint.textContent = '↻ Rotate device for best experience';
-      document.body.appendChild(hint);
-      this._hintEl = hint;
-    } else if (!showHint && this._hintEl) {
-      this._hintEl.remove();
-      this._hintEl = null;
-    }
-  }
-
   _onResize() {
-    // Recalculate layout and update portrait hint
     this.layout = computeLayout(this.app.screen.width, this.app.screen.height);
-    this._updatePortraitHint();
   }
 
   update(deltaSeconds) {
@@ -550,10 +482,6 @@ export default class CharSelectScene {
       window.removeEventListener('resize', this._resizeHandler);
     }
     this._closeBottomSheet(false);
-    if (this._hintEl) {
-      this._hintEl.remove();
-      this._hintEl = null;
-    }
     this.container.destroy({ children: true });
   }
 }
