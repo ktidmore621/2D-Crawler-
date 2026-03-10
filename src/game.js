@@ -1,6 +1,7 @@
 import { Application } from 'pixi.js';
-import { GameScene } from './scenes/GameScene.js';
-import { GAME_HEIGHT, GAME_WIDTH, BACKGROUND_COLOR } from './utils/constants.js';
+import { GAME_WIDTH, GAME_HEIGHT, BG_COLOR } from './utils/constants.js';
+import MenuScene from './scenes/MenuScene.js';
+import GameScene from './scenes/GameScene.js';
 
 export async function bootstrapGame() {
   const app = new Application();
@@ -8,24 +9,40 @@ export async function bootstrapGame() {
   await app.init({
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
-    background: BACKGROUND_COLOR,
+    backgroundColor: BG_COLOR,
     antialias: true,
     resizeTo: window,
   });
 
-  const appElement = document.getElementById('app');
-  if (!appElement) {
-    throw new Error('Missing #app element in index.html');
+  const appEl = document.getElementById('app');
+  if (!appEl) throw new Error('Missing #app element in DOM');
+  appEl.appendChild(app.canvas);
+
+  let currentScene = null;
+
+  function switchScene(SceneClass, ...args) {
+    if (currentScene) {
+      currentScene.destroy();
+      app.stage.removeChildren();
+      currentScene = null;
+    }
+    const scene = new SceneClass(app, ...args);
+    scene.init();
+    currentScene = scene;
   }
-  appElement.appendChild(app.canvas);
 
-  // Scene setup
-  const scene = new GameScene(app);
-  scene.init();
+  function startMenu() {
+    switchScene(MenuScene, () => {
+      switchScene(GameScene);
+    });
+  }
 
-  // Main game loop (runs every frame)
+  startMenu();
+
   app.ticker.add((ticker) => {
     const deltaSeconds = ticker.deltaMS / 1000;
-    scene.update(deltaSeconds);
+    if (currentScene && currentScene.update) {
+      currentScene.update(deltaSeconds);
+    }
   });
 }
