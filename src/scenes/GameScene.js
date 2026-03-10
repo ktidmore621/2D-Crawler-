@@ -1,7 +1,8 @@
 import { Container } from 'pixi.js';
 import { BG_COLOR } from '../utils/constants.js';
 import Player from '../entities/Player.js';
-import { createMovementState } from '../systems/movement.js';
+import { createInputState } from '../systems/input.js';
+import { createDpad, positionDpad } from '../systems/dpad.js';
 
 export default class GameScene {
   /**
@@ -14,8 +15,9 @@ export default class GameScene {
     this.characterType = characterType;
     this.characterName = characterName;
     this.container = new Container();
-    this.movementState = null;
+    this.inputState = null;
     this.player = null;
+    this.dpad = null;
   }
 
   async init() {
@@ -30,27 +32,35 @@ export default class GameScene {
     this.player.y = height / 2;
     this.container.addChild(this.player.view);
 
-    // Set up keyboard input
-    this.movementState = createMovementState();
-    this._onKeyDown = this.movementState.onKeyDown;
-    this._onKeyUp = this.movementState.onKeyUp;
+    // Set up unified input (keyboard + touch)
+    this.inputState = createInputState();
+    this._onKeyDown = this.inputState.onKeyDown;
+    this._onKeyUp = this.inputState.onKeyUp;
     window.addEventListener('keydown', this._onKeyDown);
     window.addEventListener('keyup', this._onKeyUp);
+
+    // If touch device, add D-pad
+    if (this.inputState.isTouchDevice) {
+      this.dpad = createDpad(this.inputState.setTouchDir);
+      positionDpad(this.dpad, width, height);
+      this.container.addChild(this.dpad);
+    }
   }
 
   update(deltaSeconds) {
-    if (!this.player || !this.movementState) return;
+    if (!this.player || !this.inputState) return;
 
-    const keys = this.movementState.keys;
-    const dirs = {
-      up: keys.ArrowUp || keys.KeyW,
-      down: keys.ArrowDown || keys.KeyS,
-      left: keys.ArrowLeft || keys.KeyA,
-      right: keys.ArrowRight || keys.KeyD,
-    };
+    // Merge keyboard + touch into dirs
+    this.inputState.updateDirs();
 
     const { width, height } = this.app.screen;
-    this.player.update(dirs, width, height, deltaSeconds);
+
+    // Reposition D-pad on resize
+    if (this.dpad) {
+      positionDpad(this.dpad, width, height);
+    }
+
+    this.player.update(this.inputState.dirs, width, height, deltaSeconds);
   }
 
   destroy() {

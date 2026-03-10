@@ -70,6 +70,13 @@ export default class MenuScene {
         fill: SUBTITLE_COLOR,
         letterSpacing: SUBTITLE_LETTER_SPACING,
         fontWeight: '600',
+        dropShadow: {
+          color: '#000000',
+          blur: 6,
+          distance: 2,
+          angle: Math.PI / 4,
+          alpha: 0.8,
+        },
       },
     });
     subtitle.anchor.set(0.5);
@@ -88,10 +95,10 @@ export default class MenuScene {
         fill: TITLE_COLOR,
         dropShadow: {
           color: '#000000',
-          blur: 8,
-          distance: 3,
+          blur: 16,
+          distance: 4,
           angle: Math.PI / 4,
-          alpha: 0.6,
+          alpha: 0.9,
         },
       },
     });
@@ -111,12 +118,34 @@ export default class MenuScene {
         fontSize: TAGLINE_FONT_SIZE,
         fill: TAGLINE_COLOR,
         fontStyle: 'italic',
+        dropShadow: {
+          color: '#000000',
+          blur: 6,
+          distance: 2,
+          angle: Math.PI / 4,
+          alpha: 0.8,
+        },
       },
     });
     tagline.anchor.set(0.5);
     tagline.x = cx;
     tagline.y = cursorY;
     this.ui.addChild(tagline);
+
+    // ── Dark backdrop pill behind title block ──
+    const backdropPadX = 60;
+    const backdropTop = subtitle.y - SUBTITLE_FONT_SIZE / 2 - 20;
+    const backdropBottom = tagline.y + TAGLINE_FONT_SIZE / 2 + 20;
+    const backdropHeight = backdropBottom - backdropTop;
+    const backdropWidth = Math.max(TITLE_FONT_SIZE * 5, 400) + backdropPadX * 2;
+    const backdrop = new Graphics();
+    backdrop.roundRect(
+      cx - backdropWidth / 2, backdropTop,
+      backdropWidth, backdropHeight, 16
+    );
+    backdrop.fill({ color: 0x000000, alpha: 0.45 });
+    // Insert behind the text children
+    this.ui.addChildAt(backdrop, 0);
 
     cursorY += 70;
 
@@ -147,6 +176,12 @@ export default class MenuScene {
     btn.y = cy;
     btn.eventMode = 'static';
     btn.cursor = 'pointer';
+
+    // Button shadow
+    const shadow = new Graphics();
+    shadow.roundRect(-BUTTON_WIDTH / 2 + 3, -BUTTON_HEIGHT / 2 + 4, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_RADIUS);
+    shadow.fill({ color: 0x000000, alpha: 0.5 });
+    btn.addChild(shadow);
 
     const bg = new Graphics();
     bg.roundRect(-BUTTON_WIDTH / 2, -BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_RADIUS);
