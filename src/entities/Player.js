@@ -4,13 +4,16 @@ import {
   PLAYER_SCALE,
   PLAYER_NAME_FONT_SIZE,
   PLAYER_NAME_OFFSET_Y,
-  PLAYER_ANIM_SPEED,
+  WORLD_WIDTH,
+  WORLD_HEIGHT,
+  WORLD_TILE_SIZE,
 } from '../utils/constants.js';
 import {
   loadCharacterAnimations,
   createAnimatedSprite,
   resolveAnimation,
 } from '../systems/animation.js';
+import { isPositionPassable } from '../systems/collision.js';
 
 export default class Player {
   /**
@@ -75,16 +78,19 @@ export default class Player {
   }
 
   /**
-   * Called each frame with directional booleans and delta.
-   * Handles movement + animation switching.
+   * Called each frame with directional booleans, delta, and world map.
+   * Handles movement with collision + animation switching.
+   * @param {{ up: boolean, down: boolean, left: boolean, right: boolean }} dirs
+   * @param {number[][]} worldMap
+   * @param {number} deltaSeconds
    */
-  update(dirs, boundsWidth, boundsHeight, deltaSeconds) {
+  update(dirs, worldMap, deltaSeconds) {
     // Resolve animation
     const { animKey, facing, moving } = resolveAnimation(dirs, this.facing);
     this.facing = facing;
     this._setAnimation(animKey);
 
-    // Move
+    // Move with collision
     if (moving) {
       let dx = 0;
       let dy = 0;
@@ -100,15 +106,27 @@ export default class Player {
         dy *= inv;
       }
 
-      this.x += dx * this.speed * deltaSeconds;
-      this.y += dy * this.speed * deltaSeconds;
+      const moveX = dx * this.speed * deltaSeconds;
+      const moveY = dy * this.speed * deltaSeconds;
+
+      // Collision check at player's feet (bottom center of sprite)
+      const feetOffsetY = 8; // pixels below player origin to check
+      const newX = this.x + moveX;
+      const newY = this.y + moveY;
+
+      // Try X and Y independently for wall sliding
+      if (isPositionPassable(newX, this.y + feetOffsetY, worldMap)) {
+        this.x = newX;
+      }
+      if (isPositionPassable(this.x, newY + feetOffsetY, worldMap)) {
+        this.y = newY;
+      }
     }
 
-    // Clamp to bounds
-    const halfW = (this.sprite.width) / 2;
-    const halfH = (this.sprite.height) / 4; // anchor is at 0.75
-    this.x = Math.max(halfW, Math.min(boundsWidth - halfW, this.x));
-    this.y = Math.max(halfH, Math.min(boundsHeight - halfH, this.y));
+    // Clamp to world bounds
+    const margin = WORLD_TILE_SIZE;
+    this.x = Math.max(margin, Math.min(WORLD_WIDTH - margin, this.x));
+    this.y = Math.max(margin, Math.min(WORLD_HEIGHT - margin, this.y));
   }
 
   get x() { return this.view.x; }

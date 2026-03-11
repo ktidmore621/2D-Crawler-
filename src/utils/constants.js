@@ -158,3 +158,57 @@ export const BUTTON_A = 'attack';   // right — confirm / attack
 export const BUTTON_B = 'roll';     // bottom — cancel / roll
 export const BUTTON_X = 'hotbar';   // left — hotbar
 export const BUTTON_Y = 'map';      // top — map
+
+// ── Overworld Map ───────────────────────────────────
+export const WORLD_TILE_SIZE = 48;
+export const WORLD_COLS = 80;
+export const WORLD_ROWS = 80;
+export const WORLD_WIDTH = WORLD_COLS * WORLD_TILE_SIZE;   // 3840
+export const WORLD_HEIGHT = WORLD_ROWS * WORLD_TILE_SIZE;  // 3840
+export const TILE_BUFFER = 2; // extra tiles rendered beyond viewport
+
+// ── Tile Type IDs ───────────────────────────────────
+export const TILE_GRASS = 0;
+export const TILE_DIRT = 1;
+export const TILE_TREE = 2;
+export const TILE_BUSH = 3;
+export const TILE_RUIN_FLOOR = 4;
+export const TILE_RUIN_WALL = 5;
+export const TILE_RIVER = 6;
+export const TILE_ALIEN = 7;
+export const TILE_BASE_FLOOR = 8;
+
+// ── Tile Colors ─────────────────────────────────────
+export const GRASS_COLORS = [0x2d4a1e, 0x344f22, 0x3a5526];
+export const DIRT_COLORS = [0x7a4f2a, 0x8a5a30];
+export const TREE_TRUNK_COLOR = 0x1a3310;
+export const TREE_CANOPY_COLOR = 0x2d5e18;
+export const BUSH_COLOR = 0x2a4a15;
+export const RUIN_FLOOR_COLOR = 0x4a3f32;
+export const RUIN_WALL_COLOR = 0x5a4a38;
+export const RIVER_COLOR = 0x1a1208;
+export const RIVER_EDGE_COLOR = 0x2a1a0a;
+export const ALIEN_BASE_COLOR = 0x1a2a1a;
+export const ALIEN_GLOW_COLOR = 0x00ff88;
+export const BASE_FLOOR_COLOR = 0x3a3228;
+
+// ── Dungeon Entrance ────────────────────────────────
+export const DUNGEON_STONE_COLOR = 0x2a2520;
+export const DUNGEON_GLOW_COLOR = 0x00ff88;
+
+// ── Prop Colors ─────────────────────────────────────
+export const PROP_CAR_COLOR = 0x2a2520;
+export const PROP_BARREL_COLOR = 0x8a4a1a;
+export const PROP_POLE_COLOR = 0x4a4a4a;
+export const PROP_DEBRIS_COLOR = 0x2a2220;
+
+// ── Tree Variants ───────────────────────────────────
+export const TREE_PINE_COLOR = 0x1a3a10;
+export const TREE_OAK_COLOR = 0x2d5e18;
+export const TREE_DEAD_COLOR = 0x4a4a3a;
+export const TREE_TRUNK_BROWN = 0x3a2a1a;
+
+// ── Campfire (overworld) ────────────────────────────
+export const CAMP_FIRE_COLORS = [0x0a5a1a, 0x1a8a2a, 0x3acc3a, 0x66ff33];
+export const CAMP_GLOW_COLOR = 0x33cc33;
+export const CAMP_GLOW_RADIUS = 80;
