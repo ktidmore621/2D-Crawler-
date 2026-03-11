@@ -159,11 +159,11 @@ export const BUTTON_Y = 'map';      // top — map
 
 // ── Overworld Map ───────────────────────────────────
 export const WORLD_TILE_SIZE = 48;
-export const WORLD_COLS = 80;
-export const WORLD_ROWS = 80;
-export const WORLD_WIDTH = WORLD_COLS * WORLD_TILE_SIZE;   // 3840
-export const WORLD_HEIGHT = WORLD_ROWS * WORLD_TILE_SIZE;  // 3840
-export const TILE_BUFFER = 2; // extra tiles rendered beyond viewport
+export const WORLD_COLS = 160;
+export const WORLD_ROWS = 160;
+export const WORLD_WIDTH = WORLD_COLS * WORLD_TILE_SIZE;   // 7680
+export const WORLD_HEIGHT = WORLD_ROWS * WORLD_TILE_SIZE;  // 7680
+export const TILE_BUFFER = 3; // extra tiles rendered beyond viewport
 
 // ── Tile Type IDs ───────────────────────────────────
 export const TILE_GRASS = 0;
@@ -172,9 +172,34 @@ export const TILE_TREE = 2;
 export const TILE_BUSH = 3;
 export const TILE_RUIN_FLOOR = 4;
 export const TILE_RUIN_WALL = 5;
-export const TILE_RIVER = 6;
+export const TILE_RIVER = 6;       // canyon/cracks (original)
 export const TILE_ALIEN = 7;
 export const TILE_BASE_FLOOR = 8;
+// New tile types
+export const TILE_WATER = 10;       // deep water (impassable)
+export const TILE_SHALLOW_WATER = 11; // shallow water (passable, slow)
+export const TILE_FLOODED_FLOOR = 12; // flooded ruin floor (passable, slow)
+export const TILE_MOUNTAIN_WALL = 13; // impassable mountain
+export const TILE_MOUNTAIN_TOP = 14;  // impassable mountain peak
+export const TILE_PLATEAU_FLOOR = 15; // passable plateau surface
+export const TILE_CLIFF_EDGE = 16;    // impassable cliff edge
+export const TILE_RAMP = 17;          // passable ramp up/down
+export const TILE_DRY_LAKEBED = 18;   // passable dry cracked ground
+export const TILE_FARMLAND = 19;      // passable farmland soil
+export const TILE_CRATER_FLOOR = 20;  // passable scorched crater
+export const TILE_HIGHWAY = 21;       // passable road
+export const TILE_WATERFALL = 22;     // impassable waterfall
+
+// ── Speed Multipliers ──────────────────────────────
+export const SHALLOW_WATER_SPEED_MULTIPLIER = 0.6;
+export const FLOODED_FLOOR_SPEED_MULTIPLIER = 0.7;
+
+// ── Elevation Values ───────────────────────────────
+export const ELEVATION_GROUND = 0;
+export const ELEVATION_PLATEAU = 1;
+export const ELEVATION_MOUNTAIN = 2;
+export const PLATEAU_Y_OFFSET = -16;  // visual offset for plateau tiles
+export const CLIFF_FACE_HEIGHT = 24;  // front face height for plateau cliffs
 
 // ── Tile Colors ─────────────────────────────────────
 export const GRASS_COLORS = [0x6a9a42, 0x729e48, 0x5e8e38];
@@ -189,6 +214,24 @@ export const RIVER_EDGE_COLOR = 0x5a4a32;
 export const ALIEN_BASE_COLOR = 0x1a2a1a;
 export const ALIEN_GLOW_COLOR = 0x00ff88;
 export const BASE_FLOOR_COLOR = 0x8a7a62;
+
+// ── New Tile Colors ─────────────────────────────────
+export const WATER_COLORS = [0x2a5a8a, 0x1e4a7a];
+export const SHALLOW_WATER_COLORS = [0x3a7aaa, 0x4a8aba];
+export const FLOODED_FLOOR_COLOR = 0x2a4a6a;
+export const MOUNTAIN_WALL_COLORS = [0x5a5248, 0x6a6258];
+export const MOUNTAIN_TOP_COLORS = [0x8a8278, 0x9a9288];
+export const MOUNTAIN_SNOW_COLOR = 0xc8c4be;
+export const PLATEAU_FLOOR_COLORS = [0x7a8a5a, 0x6a7a4a];
+export const CLIFF_EDGE_COLOR = 0x4a3a28;
+export const CLIFF_FACE_COLOR = 0x5a6a3a;
+export const RAMP_COLORS = [0x9a8a62, 0x8a7a52];
+export const DRY_LAKEBED_COLOR = 0x8a7a52;
+export const FARMLAND_COLORS = [0x7a5a32, 0x6a4a22];
+export const CRATER_FLOOR_COLOR = 0x2a2218;
+export const HIGHWAY_COLORS = [0x4a4844, 0x3a3834];
+export const WATERFALL_COLOR = 0x4a8aba;
+export const WATERFALL_HIGHLIGHT = 0x8ac8f0;
 
 // ── Dungeon Entrance ────────────────────────────────
 export const DUNGEON_STONE_COLOR = 0x2a2520;
