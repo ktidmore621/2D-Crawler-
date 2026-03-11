@@ -98,6 +98,23 @@ export async function initTextureCache(onProgress) {
     cache[`broof_${name}`] = extractRect(brTex, rect.x, rect.y, rect.w, rect.h);
   }
 
+  // ── Extract terrain tile sub-textures (TopDownFantasy Forest) ──
+  const terrainTex = textures.terrain;
+  if (terrainTex) {
+    const tc = SPRITE_ATLAS.terrain;
+    for (const [name, pos] of Object.entries(tc.tiles)) {
+      cache[`terrain_${name}`] = extractTile(terrainTex, pos.col, pos.row, tc.tileW, tc.tileH);
+    }
+  }
+
+  // ── Extract nature decoration sub-textures ──
+  const natureTex = textures.nature;
+  if (natureTex) {
+    for (const [name, rect] of Object.entries(SPRITE_ATLAS.nature.regions)) {
+      cache[`nature_${name}`] = extractRect(natureTex, rect.x, rect.y, rect.w, rect.h);
+    }
+  }
+
   initialized = true;
 }
 
