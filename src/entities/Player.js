@@ -1,9 +1,7 @@
-import { Container, Text } from 'pixi.js';
+import { Container } from 'pixi.js';
 import {
   PLAYER_SPEED,
   PLAYER_SCALE,
-  PLAYER_NAME_FONT_SIZE,
-  PLAYER_NAME_OFFSET_Y,
   WORLD_WIDTH,
   WORLD_HEIGHT,
   WORLD_TILE_SIZE,
@@ -35,20 +33,6 @@ export default class Player {
 
     /** Root container — position this to move the player */
     this.view = new Container();
-
-    // Name label
-    this.nameLabel = new Text({
-      text: characterName,
-      style: {
-        fontFamily: 'Pirata One, serif',
-        fontSize: PLAYER_NAME_FONT_SIZE,
-        fill: '#e8d5b0',
-        align: 'center',
-      },
-    });
-    this.nameLabel.anchor.set(0.5, 1);
-    this.nameLabel.y = PLAYER_NAME_OFFSET_Y;
-    this.view.addChild(this.nameLabel);
   }
 
   /**
@@ -73,7 +57,7 @@ export default class Player {
 
     this.sprite = createAnimatedSprite(textures);
     this.sprite.scale.set(PLAYER_SCALE);
-    this.view.addChildAt(this.sprite, 0); // behind name label
+    this.view.addChild(this.sprite);
     this.currentAnimKey = key;
   }
 
