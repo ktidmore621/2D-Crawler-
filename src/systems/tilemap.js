@@ -35,12 +35,8 @@ import {
   TILE_CRATER_FLOOR,
   TILE_HIGHWAY,
   TILE_WATERFALL,
-  GRASS_COLORS,
-  RUIN_FLOOR_COLOR,
-  RIVER_COLOR,
   ALIEN_BASE_COLOR,
   ALIEN_GLOW_COLOR,
-  BASE_FLOOR_COLOR,
   FLOODED_FLOOR_COLOR,
   MOUNTAIN_WALL_COLORS,
   MOUNTAIN_TOP_COLORS,
@@ -48,10 +44,6 @@ import {
   CLIFF_EDGE_COLOR,
   CLIFF_FACE_COLOR,
   CLIFF_FACE_HEIGHT,
-  RAMP_COLORS,
-  DRY_LAKEBED_COLOR,
-  CRATER_FLOOR_COLOR,
-  HIGHWAY_COLORS,
   WATERFALL_COLOR,
   WATERFALL_HIGHLIGHT,
   PLATEAU_Y_OFFSET,
@@ -59,38 +51,23 @@ import {
 import { getElevation } from './elevation.js';
 import { getTex } from './textureCache.js';
 
-// Tile scale: 16px source → 48px display
+// Tile scale: 16px source → 48px display (for non-generated sprites)
 const TILE_SCALE = WORLD_TILE_SIZE / 16;
-// Ground tile scale: 1px overlap to eliminate dark gaps between tiles
-const GROUND_SCALE = (WORLD_TILE_SIZE + 1) / 16;
-// Subtle cool-green tint for grass sprites (pulls yellow-green toward natural green)
-const GRASS_TINT = 0xddffdd;
+// Ground tile scale for 16px source sprites: 1px overlap to eliminate dark gaps
+const GROUND_SCALE_16 = (WORLD_TILE_SIZE + 1) / 16;
+// Ground tile scale for 48px generated sprites: 1px overlap to eliminate dark gaps
+const GROUND_SCALE_48 = (WORLD_TILE_SIZE + 1) / 48;
 
 // Pre-compute a random hash for each tile (seeded by position)
 function hashTile(r, c) {
   return ((r * 137 + c * 311) & 0xFFFF);
 }
 
-// Terrain texture names for variation (TopDownFantasy Forest + Pixel Crawler fallbacks)
-// Only use fully opaque grass center tiles — edge/corner tiles cause checkerboard artifacts
-const GRASS_TEX_NAMES = ['terrain_grassFull1', 'terrain_grassFull2', 'terrain_grassFull3'];
-const DIRT_TEX_NAMES = ['terrain_dirtFull1', 'terrain_dirtFull2', 'terrain_dirtFull3'];
-// Water uses fully opaque tiles from cols 6-7 (not the semi-transparent edge tiles)
-const WATER_DEEP_NAMES = ['terrain_waterFull1', 'terrain_waterFull2', 'terrain_waterFull3'];
-const WATER_SHALLOW_NAMES = ['terrain_waterDark1', 'terrain_waterDark2', 'terrain_waterFull3'];
-const STONE_TEX_NAMES = ['terrain_stoneGray', 'terrain_stoneDark'];
-
-// Shore transition texture names for water tiles bordering grass
-const SHORE_TEX = {
-  n: 'terrain_waterEdgeN',
-  s: 'terrain_waterEdgeS',
-  e: 'terrain_waterEdgeE',
-  w: 'terrain_waterEdgeW',
-  nw: 'terrain_waterCornerNW',
-  ne: 'terrain_waterCornerNE',
-  sw: 'terrain_waterCornerSW',
-  se: 'terrain_waterCornerSE',
-};
+// Generated terrain texture names
+const GRASS_TEX_NAMES = ['gen_grass_0', 'gen_grass_1', 'gen_grass_2'];
+const DIRT_TEX_NAMES = ['gen_dirt_0', 'gen_dirt_1'];
+const WATER_TEX_NAMES = ['gen_water_0', 'gen_water_1', 'gen_water_2'];
+const STONE_TEX_NAMES = ['gen_stone_0', 'gen_stone_1'];
 
 // Tile types that count as "grass" for transition checks
 const GRASS_TYPES = new Set([TILE_GRASS, TILE_TREE, TILE_BUSH, TILE_PLATEAU_FLOOR, TILE_CLIFF_EDGE]);
@@ -98,39 +75,50 @@ const DIRT_TYPES = new Set([TILE_DIRT, TILE_HIGHWAY, TILE_DRY_LAKEBED, TILE_FARM
 const WATER_TYPES = new Set([TILE_WATER, TILE_SHALLOW_WATER, TILE_FLOODED_FLOOR, TILE_WATERFALL]);
 
 /**
- * Get transition tile texture name for a tile that borders a different ground type.
- * Checks 4 cardinal neighbors and returns a transition texture if applicable.
+ * Get generated transition tile texture name for grass bordering dirt.
  */
-function getTransitionTex(tileId, r, c, worldMap) {
-  if (!GRASS_TYPES.has(tileId) && !DIRT_TYPES.has(tileId)) return null;
-
+function getGrassDirtTransition(r, c, worldMap) {
   const getTile = (tr, tc) => {
-    if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return tileId;
+    if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return TILE_GRASS;
     return worldMap[tr][tc];
   };
+  const dN = DIRT_TYPES.has(getTile(r - 1, c));
+  const dS = DIRT_TYPES.has(getTile(r + 1, c));
+  const dE = DIRT_TYPES.has(getTile(r, c + 1));
+  const dW = DIRT_TYPES.has(getTile(r, c - 1));
 
-  const n = getTile(r - 1, c);
-  const s = getTile(r + 1, c);
-  const e = getTile(r, c + 1);
-  const w = getTile(r, c - 1);
+  if (dN && dE) return 'gen_trans_grass_NE';
+  if (dN && dW) return 'gen_trans_grass_NW';
+  if (dS && dE) return 'gen_trans_grass_SE';
+  if (dS && dW) return 'gen_trans_grass_SW';
+  if (dN) return 'gen_trans_grass_N';
+  if (dS) return 'gen_trans_grass_S';
+  if (dE) return 'gen_trans_grass_E';
+  if (dW) return 'gen_trans_grass_W';
+  return null;
+}
 
-  // Grass tile bordering dirt
-  if (GRASS_TYPES.has(tileId)) {
-    const dN = DIRT_TYPES.has(n);
-    const dS = DIRT_TYPES.has(s);
-    const dE = DIRT_TYPES.has(e);
-    const dW = DIRT_TYPES.has(w);
+/**
+ * Get shore transition texture name for water bordering grass.
+ */
+function getShoreTransition(r, c, worldMap) {
+  const getTile = (tr, tc) => {
+    if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return TILE_WATER;
+    return worldMap[tr][tc];
+  };
+  const gN = GRASS_TYPES.has(getTile(r - 1, c));
+  const gS = GRASS_TYPES.has(getTile(r + 1, c));
+  const gE = GRASS_TYPES.has(getTile(r, c + 1));
+  const gW = GRASS_TYPES.has(getTile(r, c - 1));
 
-    if (dN && dW) return 'terrain_grassDirtNW';
-    if (dN && dE) return 'terrain_grassDirtNE';
-    if (dS && dW) return 'terrain_grassDirtSW';
-    if (dS && dE) return 'terrain_grassDirtSE';
-    if (dN) return 'terrain_grassDirtN';
-    if (dS) return 'terrain_grassDirtS';
-    if (dE) return 'terrain_grassDirtE';
-    if (dW) return 'terrain_grassDirtW';
-  }
-
+  if (gN && gE) return 'gen_shore_NE';
+  if (gN && gW) return 'gen_shore_NW';
+  if (gS && gE) return 'gen_shore_SE';
+  if (gS && gW) return 'gen_shore_SW';
+  if (gN) return 'gen_shore_N';
+  if (gS) return 'gen_shore_S';
+  if (gE) return 'gen_shore_E';
+  if (gW) return 'gen_shore_W';
   return null;
 }
 
@@ -255,38 +243,32 @@ export function createTilemap() {
 
 function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
   const h = hashTile(r, c);
+  const variant = (c * 3 + r * 7);
   let texName = null;
 
   switch (tileId) {
     case TILE_GRASS: {
-      // Check for transition tile first
-      const trans = worldMap ? getTransitionTex(tileId, r, c, worldMap) : null;
+      // Check for grass-to-dirt transition
+      const trans = worldMap ? getGrassDirtTransition(r, c, worldMap) : null;
       if (trans) {
-        // Two-layer transition: dirt base + grass edge overlay (transparency blends)
-        idx = placeGroundSprite(pool, idx, DIRT_TEX_NAMES[h % DIRT_TEX_NAMES.length], x, y, s);
-        idx = placeGroundSprite(pool, idx, trans, x, y, s, GRASS_TINT);
+        idx = placeGroundSprite(pool, idx, trans, x, y, s);
         return idx;
       }
-      // Plain grass — position-based seed for consistent variation across reloads
-      texName = GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length];
-      idx = placeGroundSprite(pool, idx, texName, x, y, s, GRASS_TINT);
+      texName = GRASS_TEX_NAMES[variant % 3];
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
     }
     case TILE_DIRT:
-      texName = DIRT_TEX_NAMES[h % DIRT_TEX_NAMES.length];
+      texName = DIRT_TEX_NAMES[variant % 2];
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
-      // Worn dirt edge — lighter dirt border where path meets grass
-      if (worldMap) {
-        drawDirtEdge(gfx, x, y, s, r, c, worldMap);
-      }
       return idx;
     case TILE_TREE:
-      texName = GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length]; // grass under tree
-      idx = placeGroundSprite(pool, idx, texName, x, y, s, GRASS_TINT);
+      texName = GRASS_TEX_NAMES[variant % 3]; // grass under tree
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
     case TILE_BUSH:
-      texName = GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length];
-      idx = placeGroundSprite(pool, idx, texName, x, y, s, GRASS_TINT);
+      texName = GRASS_TEX_NAMES[variant % 3];
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
     case TILE_RUIN_FLOOR:
       texName = STONE_TEX_NAMES[h % STONE_TEX_NAMES.length];
@@ -318,23 +300,22 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
       drawFloodedOverlay(gfx, x, y, s, r, c, time);
       return idx;
     case TILE_MOUNTAIN_WALL:
-      texName = 'wall_grayWall';
+      texName = 'gen_mountain';
       break;
     case TILE_MOUNTAIN_TOP:
       texName = 'wall_grayWall';
       break;
     case TILE_PLATEAU_FLOOR:
-      texName = GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length];
-      idx = placeGroundSprite(pool, idx, texName, x, y, s, GRASS_TINT);
+      texName = 'gen_plateau';
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
     case TILE_CLIFF_EDGE: {
-      const trans = worldMap ? getTransitionTex(tileId, r, c, worldMap) : null;
+      const trans = worldMap ? getGrassDirtTransition(r, c, worldMap) : null;
       if (trans) {
-        idx = placeGroundSprite(pool, idx, DIRT_TEX_NAMES[h % DIRT_TEX_NAMES.length], x, y, s);
-        idx = placeGroundSprite(pool, idx, trans, x, y, s, GRASS_TINT);
+        idx = placeGroundSprite(pool, idx, trans, x, y, s);
       } else {
-        texName = GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length];
-        idx = placeGroundSprite(pool, idx, texName, x, y, s, GRASS_TINT);
+        texName = GRASS_TEX_NAMES[variant % 3];
+        idx = placeGroundSprite(pool, idx, texName, x, y, s);
       }
       drawCliffEdgeOverlay(gfx, x, y, s);
       return idx;
@@ -350,19 +331,16 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
       drawDryLakebedOverlay(gfx, x, y, s, r, c);
       return idx;
     case TILE_FARMLAND:
-      texName = 'floor_farmSoil';
+      texName = 'gen_farmland';
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
-      drawFarmlandOverlay(gfx, x, y, s, r, c);
       return idx;
     case TILE_CRATER_FLOOR:
-      texName = STONE_TEX_NAMES[h % STONE_TEX_NAMES.length];
+      texName = 'gen_crater';
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
-      drawCraterOverlay(gfx, x, y, s, r, c);
       return idx;
     case TILE_HIGHWAY:
-      gfx.rect(x, y, s, s);
-      gfx.fill(HIGHWAY_COLORS[h % 2]);
-      drawHighwayOverlay(gfx, x, y, s, r, c);
+      texName = 'gen_highway';
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
     case TILE_WATERFALL:
       drawWaterfallTile(gfx, x, y, s, r, c, time);
@@ -376,21 +354,7 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
 }
 
 function placeGroundSprite(pool, idx, texName, x, y, s, tint) {
-  let tex = getTex(texName);
-  // Fallback: try Pixel Crawler floor tiles if terrain texture not found
-  if (!tex && texName.startsWith('terrain_')) {
-    const fallbacks = {
-      terrain_grassFull1: 'floor_grass', terrain_grassFull2: 'floor_grassDark',
-      terrain_grassFull3: 'floor_grassAlt', terrain_grassDark1: 'floor_grassDark',
-      terrain_dirtFull1: 'floor_dirt', terrain_dirtFull2: 'floor_dirtDark',
-      terrain_dirtFull3: 'floor_dirtBrown', terrain_dirtDark1: 'floor_dirtBrown',
-      terrain_waterFull1: 'water_deep1', terrain_waterFull2: 'water_deep2',
-      terrain_waterFull3: 'water_deep3', terrain_waterDark1: 'water_shallow1',
-      terrain_waterDark2: 'water_shallow2',
-      terrain_stoneGray: 'floor_stone', terrain_stoneDark: 'floor_stoneDark',
-    };
-    tex = getTex(fallbacks[texName]) || null;
-  }
+  const tex = getTex(texName);
   if (!tex || idx >= pool.length) {
     return idx;
   }
@@ -398,8 +362,10 @@ function placeGroundSprite(pool, idx, texName, x, y, s, tint) {
   sprite.texture = tex;
   sprite.x = x;
   sprite.y = y;
-  sprite.scale.set(GROUND_SCALE);  // 1px overlap eliminates dark gaps between tiles
-  sprite.tint = tint || 0xffffff;  // reset tint (sprites are pooled/reused)
+  // Generated tiles are 48px, other sprites are 16px — use appropriate scale
+  const scale = texName.startsWith('gen_') ? GROUND_SCALE_48 : GROUND_SCALE_16;
+  sprite.scale.set(scale);
+  sprite.tint = tint || 0xffffff;
   sprite.visible = true;
   return idx;
 }
@@ -409,45 +375,21 @@ function placeGroundSprite(pool, idx, texName, x, y, s, tint) {
 function drawWaterSpriteTile(pool, idx, gfx, x, y, s, r, c, time, isShallow, worldMap) {
   const h = hashTile(r, c);
 
-  // Check for shore transitions — if water borders grass, use texture-based transition
+  // Check for shore transitions — if water borders grass, use generated shore tile
   if (worldMap) {
-    const getTile = (tr, tc) => {
-      if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return TILE_WATER;
-      return worldMap[tr][tc];
-    };
-    const gN = GRASS_TYPES.has(getTile(r - 1, c));
-    const gS = GRASS_TYPES.has(getTile(r + 1, c));
-    const gE = GRASS_TYPES.has(getTile(r, c + 1));
-    const gW = GRASS_TYPES.has(getTile(r, c - 1));
-    const hasShore = gN || gS || gE || gW;
-
-    if (hasShore) {
-      // Layer 1: grass base (shows through transparent parts of water edge tile)
-      idx = placeGroundSprite(pool, idx, GRASS_TEX_NAMES[(c * 3 + r * 7) % GRASS_TEX_NAMES.length], x, y, s, GRASS_TINT);
-      // Layer 2: water edge tile (semi-transparent edges for smooth shore blending)
-      let shoreTex = null;
-      if (gN && gW) shoreTex = SHORE_TEX.nw;
-      else if (gN && gE) shoreTex = SHORE_TEX.ne;
-      else if (gS && gW) shoreTex = SHORE_TEX.sw;
-      else if (gS && gE) shoreTex = SHORE_TEX.se;
-      else if (gN) shoreTex = SHORE_TEX.n;
-      else if (gS) shoreTex = SHORE_TEX.s;
-      else if (gE) shoreTex = SHORE_TEX.e;
-      else if (gW) shoreTex = SHORE_TEX.w;
-      if (shoreTex) {
-        idx = placeGroundSprite(pool, idx, shoreTex, x, y, s);
-      }
+    const shoreTex = getShoreTransition(r, c, worldMap);
+    if (shoreTex) {
+      idx = placeGroundSprite(pool, idx, shoreTex, x, y, s);
+    } else if (isShallow) {
+      idx = placeGroundSprite(pool, idx, 'gen_shallow_water', x, y, s);
     } else {
-      // No shore — use fully opaque water tile
+      // Animated water — cycle 3 frames
       const frameIdx = Math.floor(time * 1.25 + r * 0.3 + c * 0.2) % 3;
-      const texNames = isShallow ? WATER_SHALLOW_NAMES : WATER_DEEP_NAMES;
-      idx = placeGroundSprite(pool, idx, texNames[frameIdx], x, y, s);
+      idx = placeGroundSprite(pool, idx, WATER_TEX_NAMES[frameIdx], x, y, s);
     }
   } else {
-    // No worldMap — fallback to basic water tile
     const frameIdx = Math.floor(time * 1.25 + r * 0.3 + c * 0.2) % 3;
-    const texNames = isShallow ? WATER_SHALLOW_NAMES : WATER_DEEP_NAMES;
-    idx = placeGroundSprite(pool, idx, texNames[frameIdx], x, y, s);
+    idx = placeGroundSprite(pool, idx, isShallow ? 'gen_shallow_water' : WATER_TEX_NAMES[frameIdx], x, y, s);
   }
 
   // Animated shimmer overlay
@@ -482,37 +424,6 @@ function drawFloodedOverlay(gfx, x, y, s, r, c, time) {
   if (h % 5 < 2) {
     gfx.rect(x, y, s / 3, s);
     gfx.fill({ color: 0x2a5a2a, alpha: 0.12 });
-  }
-}
-
-/* ──────────────── Worn dirt edge overlay ──────────────── */
-
-function drawDirtEdge(gfx, x, y, s, r, c, worldMap) {
-  const edgeW = 6; // worn edge width in px
-  // Check each neighbor — if it's grass/tree/bush, draw a lighter dirt edge on that side
-  const isNonPath = (tr, tc) => {
-    if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return false;
-    const t = worldMap[tr][tc];
-    return t !== TILE_DIRT && t !== TILE_HIGHWAY && t !== TILE_RUIN_FLOOR && t !== TILE_BASE_FLOOR;
-  };
-  // Lighter worn dirt color
-  const edgeColor = 0xc49a66;
-  const edgeAlpha = 0.5;
-  if (isNonPath(r - 1, c)) {
-    gfx.rect(x, y, s, edgeW);
-    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
-  }
-  if (isNonPath(r + 1, c)) {
-    gfx.rect(x, y + s - edgeW, s, edgeW);
-    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
-  }
-  if (isNonPath(r, c - 1)) {
-    gfx.rect(x, y, edgeW, s);
-    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
-  }
-  if (isNonPath(r, c + 1)) {
-    gfx.rect(x + s - edgeW, y, edgeW, s);
-    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
   }
 }
 
@@ -611,62 +522,6 @@ function drawDryLakebedOverlay(gfx, x, y, s, r, c) {
   gfx.moveTo(cx, cy);
   gfx.lineTo(cx + 8 + (h % 6), cy + 10 + (h % 8));
   gfx.stroke({ width: 0.8, color: 0x5a4a32, alpha: 0.35 });
-}
-
-/* ──────────────── Farmland overlay ──────────────── */
-
-function drawFarmlandOverlay(gfx, x, y, s, r, c) {
-  for (let i = 1; i < 6; i++) {
-    const ly = y + (s * i) / 6;
-    gfx.moveTo(x + 2, ly);
-    gfx.lineTo(x + s - 2, ly);
-    gfx.stroke({ width: 0.8, color: 0x5a3a1a, alpha: 0.35 });
-  }
-  const h = hashTile(r, c);
-  if (h % 4 < 2) {
-    const gx = x + 8 + (h % 20);
-    const gy = y + 10 + (h % 18);
-    gfx.circle(gx, gy, 2);
-    gfx.fill({ color: 0x5a8a38, alpha: 0.5 });
-  }
-}
-
-/* ──────────────── Crater overlay ──────────────── */
-
-function drawCraterOverlay(gfx, x, y, s, r, c) {
-  const h = hashTile(r, c);
-  if (h % 3 === 0) {
-    gfx.rect(x + 4 + (h % 12), y + 6 + (h % 10), 12, 8);
-    gfx.fill({ color: 0x1a1810, alpha: 0.4 });
-  }
-  if (h % 5 < 2) {
-    gfx.moveTo(x + 6, y + 12 + (h % 20));
-    gfx.lineTo(x + s - 6, y + 16 + (h % 16));
-    gfx.stroke({ width: 0.6, color: 0x3a3228, alpha: 0.3 });
-  }
-}
-
-/* ──────────────── Highway overlay ──────────────── */
-
-function drawHighwayOverlay(gfx, x, y, s, r, c) {
-  const h = hashTile(r, c);
-  if (h % 3 !== 2) {
-    gfx.rect(x + s / 2 - 1.5, y, 3, s);
-    gfx.fill({ color: 0x8a8a3a, alpha: 0.35 });
-  }
-  gfx.rect(x, y, 2, s);
-  gfx.fill({ color: 0x9a9a92, alpha: 0.2 });
-  gfx.rect(x + s - 2, y, 2, s);
-  gfx.fill({ color: 0x9a9a92, alpha: 0.2 });
-  if (h % 5 === 0) {
-    gfx.moveTo(x + 8 + (h % 12), y);
-    gfx.lineTo(x + 12 + (h % 10), y + s);
-    gfx.stroke({ width: 0.6, color: 0x2a2824, alpha: 0.4 });
-  }
-  if (h % 7 === 0) {
-    gfx.circle(x + 10 + (h % 20), y + 15 + (h % 18), 3);
-    gfx.fill({ color: 0x5a8a38, alpha: 0.35 });
-  }
 }
 
 /* ──────────────── Waterfall tile ──────────────── */
