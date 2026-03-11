@@ -29,41 +29,58 @@ export const SPRITE_ATLAS = {
     rows: 15,
     // Named tile regions (col, row in tile grid)
     tiles: {
-      // Grass variants (rows 0-2)
-      grassFull1:       { col: 0, row: 0 },  // bright lime grass
-      grassFull2:       { col: 1, row: 0 },  // bright lime variant
-      grassFull3:       { col: 1, row: 1 },  // solid grass
-      grassDark1:       { col: 0, row: 1 },  // darker grass edge
-      grassDark2:       { col: 0, row: 2 },  // dark grass variant
-      grassDark3:       { col: 2, row: 2 },  // darker center
-      // Grass-to-dirt transitions
-      grassDirtN:       { col: 3, row: 0 },  // grass with dirt to north
-      grassDirtS:       { col: 4, row: 2 },  // grass with dirt to south
-      grassDirtE:       { col: 5, row: 1 },  // grass with dirt to east
-      grassDirtW:       { col: 3, row: 1 },  // grass with dirt to west
-      grassDirtNE:      { col: 5, row: 0 },  // corner NE
-      grassDirtNW:      { col: 3, row: 0 },  // corner NW
-      grassDirtSE:      { col: 5, row: 2 },  // corner SE
-      grassDirtSW:      { col: 3, row: 2 },  // corner SW
-      // Dirt tiles (rows 0-2, cols 6-7)
+      // Full grass tiles (fully opaque center tiles — no transparency)
+      grassFull1:       { col: 1, row: 1 },  // center grass (a=255)
+      grassFull2:       { col: 0, row: 5 },  // fully opaque variant (a=255)
+      grassFull3:       { col: 2, row: 5 },  // fully opaque variant (a=255)
+      // Darker grass center
+      grassDark1:       { col: 4, row: 1 },  // darker green center (a=255)
+      // Grass outer edge tiles (semi-transparent — used as overlays on dirt)
+      grassEdgeN:       { col: 1, row: 0 },  // N edge — top transparent (a=209)
+      grassEdgeS:       { col: 1, row: 2 },  // S edge — bottom transparent (a=224)
+      grassEdgeE:       { col: 2, row: 1 },  // E edge — right transparent (a=214)
+      grassEdgeW:       { col: 0, row: 1 },  // W edge — left transparent (a=214)
+      grassCornerNW:    { col: 0, row: 0 },  // NW corner — NW transparent (a=140)
+      grassCornerNE:    { col: 2, row: 0 },  // NE corner — NE transparent (a=140)
+      grassCornerSW:    { col: 0, row: 2 },  // SW corner — SW transparent (a=126)
+      grassCornerSE:    { col: 2, row: 2 },  // SE corner — SE transparent (a=126)
+      // Grass-to-dirt transition overlays (outer autotile edges)
+      grassDirtN:       { col: 1, row: 0 },  // grass edge where dirt is to north
+      grassDirtS:       { col: 1, row: 2 },  // grass edge where dirt is to south
+      grassDirtE:       { col: 2, row: 1 },  // grass edge where dirt is to east
+      grassDirtW:       { col: 0, row: 1 },  // grass edge where dirt is to west
+      grassDirtNE:      { col: 2, row: 0 },  // outer corner NE
+      grassDirtNW:      { col: 0, row: 0 },  // outer corner NW
+      grassDirtSE:      { col: 2, row: 2 },  // outer corner SE
+      grassDirtSW:      { col: 0, row: 2 },  // outer corner SW
+      // Dirt tiles (rows 0-2, cols 6-7) — all fully opaque
       dirtFull1:        { col: 6, row: 0 },  // brown dirt
       dirtFull2:        { col: 7, row: 0 },  // brown variant
       dirtFull3:        { col: 7, row: 1 },  // lighter dirt
       dirtDark1:        { col: 6, row: 2 },  // dark brown
-      // Water tiles (rows 11-14)
-      waterFull1:       { col: 0, row: 11 }, // teal water
-      waterFull2:       { col: 1, row: 11 }, // teal variant
-      waterFull3:       { col: 2, row: 11 }, // teal variant 2
-      waterDark1:       { col: 0, row: 12 }, // deeper water
-      waterDark2:       { col: 1, row: 12 }, // deeper variant
-      // Water-grass shoreline transitions
-      shoreN:           { col: 6, row: 10 }, // water with grass to north
-      shoreS:           { col: 7, row: 12 }, // water with grass to south
-      shoreE:           { col: 7, row: 11 }, // water with grass to east
-      shoreW:           { col: 6, row: 11 }, // water with grass to west
+      // Water full tiles (cols 6-7, fully opaque — NOT the edge tiles!)
+      waterFull1:       { col: 6, row: 10 }, // teal water (a=255)
+      waterFull2:       { col: 7, row: 10 }, // teal variant (a=255)
+      waterFull3:       { col: 6, row: 11 }, // teal variant 2 (a=255)
+      waterDark1:       { col: 7, row: 11 }, // deeper water (a=255)
+      waterDark2:       { col: 6, row: 12 }, // deeper variant (a=255)
+      // Water outer edge tiles (semi-transparent — for shore transitions)
+      waterEdgeN:       { col: 1, row: 10 }, // water N edge (a=236)
+      waterEdgeS:       { col: 1, row: 12 }, // water S edge (a=218)
+      waterEdgeE:       { col: 2, row: 11 }, // water E edge (a=240)
+      waterEdgeW:       { col: 0, row: 11 }, // water W edge (a=238)
+      waterCornerNW:    { col: 0, row: 10 }, // NW corner (a=191)
+      waterCornerNE:    { col: 2, row: 10 }, // NE corner (a=203)
+      waterCornerSW:    { col: 0, row: 12 }, // SW corner (a=197)
+      waterCornerSE:    { col: 2, row: 12 }, // SE corner (a=193)
+      // Water-grass shoreline transitions (outer edge tiles)
+      shoreN:           { col: 1, row: 10 }, // shore where grass is to north
+      shoreS:           { col: 1, row: 12 }, // shore where grass is to south
+      shoreE:           { col: 2, row: 11 }, // shore where grass is to east
+      shoreW:           { col: 0, row: 11 }, // shore where grass is to west
       // Stone/rocky ground (row 4-5)
-      stoneGray:        { col: 5, row: 4 },  // gray stone
-      stoneDark:        { col: 2, row: 4 },  // dark stone
+      stoneGray:        { col: 5, row: 4 },  // gray stone (a=242)
+      stoneDark:        { col: 6, row: 4 },  // brown rock (a=247)
       // Grass tuft details (row 13-14)
       grassDetail1:     { col: 7, row: 13 }, // grass detail
       grassDetail2:     { col: 6, row: 14 }, // grass detail 2
