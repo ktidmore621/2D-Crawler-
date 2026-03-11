@@ -75,26 +75,27 @@ const DIRT_TYPES = new Set([TILE_DIRT, TILE_HIGHWAY, TILE_DRY_LAKEBED, TILE_FARM
 const WATER_TYPES = new Set([TILE_WATER, TILE_SHALLOW_WATER, TILE_FLOODED_FLOOR, TILE_WATERFALL]);
 
 /**
- * Get generated transition tile texture name for grass bordering dirt.
+ * Get generated transition tile texture name for a dirt tile bordering grass.
+ * Returns a texture where grass teeth bite into the dirt from the grass side.
  */
 function getGrassDirtTransition(r, c, worldMap) {
   const getTile = (tr, tc) => {
     if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return TILE_GRASS;
     return worldMap[tr][tc];
   };
-  const dN = DIRT_TYPES.has(getTile(r - 1, c));
-  const dS = DIRT_TYPES.has(getTile(r + 1, c));
-  const dE = DIRT_TYPES.has(getTile(r, c + 1));
-  const dW = DIRT_TYPES.has(getTile(r, c - 1));
+  const gN = GRASS_TYPES.has(getTile(r - 1, c));
+  const gS = GRASS_TYPES.has(getTile(r + 1, c));
+  const gE = GRASS_TYPES.has(getTile(r, c + 1));
+  const gW = GRASS_TYPES.has(getTile(r, c - 1));
 
-  if (dN && dE) return 'gen_trans_grass_NE';
-  if (dN && dW) return 'gen_trans_grass_NW';
-  if (dS && dE) return 'gen_trans_grass_SE';
-  if (dS && dW) return 'gen_trans_grass_SW';
-  if (dN) return 'gen_trans_grass_N';
-  if (dS) return 'gen_trans_grass_S';
-  if (dE) return 'gen_trans_grass_E';
-  if (dW) return 'gen_trans_grass_W';
+  if (gN && gE) return 'gen_trans_grass_NE';
+  if (gN && gW) return 'gen_trans_grass_NW';
+  if (gS && gE) return 'gen_trans_grass_SE';
+  if (gS && gW) return 'gen_trans_grass_SW';
+  if (gN) return 'gen_trans_grass_N';
+  if (gS) return 'gen_trans_grass_S';
+  if (gE) return 'gen_trans_grass_E';
+  if (gW) return 'gen_trans_grass_W';
   return null;
 }
 
@@ -247,21 +248,21 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
   let texName = null;
 
   switch (tileId) {
-    case TILE_GRASS: {
-      // Check for grass-to-dirt transition
+    case TILE_GRASS:
+      texName = GRASS_TEX_NAMES[variant % 3];
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
+      return idx;
+    case TILE_DIRT: {
+      // Check if this dirt tile borders grass — show grass teeth biting in
       const trans = worldMap ? getGrassDirtTransition(r, c, worldMap) : null;
       if (trans) {
         idx = placeGroundSprite(pool, idx, trans, x, y, s);
         return idx;
       }
-      texName = GRASS_TEX_NAMES[variant % 3];
-      idx = placeGroundSprite(pool, idx, texName, x, y, s);
-      return idx;
-    }
-    case TILE_DIRT:
       texName = DIRT_TEX_NAMES[variant % 2];
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
+    }
     case TILE_TREE:
       texName = GRASS_TEX_NAMES[variant % 3]; // grass under tree
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
@@ -309,17 +310,11 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
       texName = 'gen_plateau';
       idx = placeGroundSprite(pool, idx, texName, x, y, s);
       return idx;
-    case TILE_CLIFF_EDGE: {
-      const trans = worldMap ? getGrassDirtTransition(r, c, worldMap) : null;
-      if (trans) {
-        idx = placeGroundSprite(pool, idx, trans, x, y, s);
-      } else {
-        texName = GRASS_TEX_NAMES[variant % 3];
-        idx = placeGroundSprite(pool, idx, texName, x, y, s);
-      }
+    case TILE_CLIFF_EDGE:
+      texName = GRASS_TEX_NAMES[variant % 3];
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
       drawCliffEdgeOverlay(gfx, x, y, s);
       return idx;
-    }
     case TILE_RAMP:
       texName = DIRT_TEX_NAMES[0];
       idx = placeGroundSprite(pool, idx, texName, x, y, s);

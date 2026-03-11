@@ -159,42 +159,38 @@ save(img, 'farmland')
 grass_color = (82,130,48)
 dirt_color = (168,120,72)
 
-def make_transition(name, grass_top, grass_right, grass_bottom, grass_left):
+def make_transition(name, grass_from_top, grass_from_right, grass_from_bottom, grass_from_left):
     img = Image.new('RGBA', (TILE, TILE))
     d = ImageDraw.Draw(img)
-    # Start with full grass base
-    d.rectangle([0,0,TILE,TILE], fill=grass_color)
-    # Fill dirt regions with jagged grass edge cutting INTO dirt
-    if grass_bottom:  # dirt is on TOP — grass edge faces upward into dirt
-        d.rectangle([0,0,TILE,26], fill=dirt_color)
-        for x in range(0,TILE,4):
-            h = 20 + (x % 3)*3
-            d.rectangle([x,h,x+4,26], fill=grass_color)
-    if grass_top:  # dirt is on BOTTOM — grass edge faces downward into dirt
-        d.rectangle([0,22,TILE,TILE], fill=dirt_color)
-        for x in range(0,TILE,4):
-            h = 22 + (x % 3)*3
-            d.rectangle([x,22,x+4,h], fill=grass_color)
-    if grass_right:  # dirt is on LEFT — grass edge faces left into dirt
-        d.rectangle([0,0,26,TILE], fill=dirt_color)
-        for y in range(0,TILE,4):
-            w = 20 + (y % 3)*3
-            d.rectangle([w,y,26,y+4], fill=grass_color)
-    if grass_left:  # dirt is on RIGHT — grass edge faces right into dirt
-        d.rectangle([22,0,TILE,TILE], fill=dirt_color)
-        for y in range(0,TILE,4):
-            w = 22 + (y % 3)*3
-            d.rectangle([22,y,w,y+4], fill=grass_color)
+    # Base is dirt
+    d.rectangle([0,0,TILE,TILE], fill=dirt_color)
+    # Grass bites in from the specified edge
+    if grass_from_top:
+        for x in range(0, TILE, 4):
+            h = 14 + (x % 3) * 3
+            d.rectangle([x, 0, x+4, h], fill=grass_color)
+    if grass_from_bottom:
+        for x in range(0, TILE, 4):
+            h = TILE - 14 - (x % 3) * 3
+            d.rectangle([x, h, x+4, TILE], fill=grass_color)
+    if grass_from_left:
+        for y in range(0, TILE, 4):
+            w = 14 + (y % 3) * 3
+            d.rectangle([0, y, w, y+4], fill=grass_color)
+    if grass_from_right:
+        for y in range(0, TILE, 4):
+            w = TILE - 14 - (y % 3) * 3
+            d.rectangle([w, y, TILE, y+4], fill=grass_color)
     save(img, name)
 
-make_transition('trans_grass_N',  True,  False, False, False)
-make_transition('trans_grass_S',  False, False, True,  False)
-make_transition('trans_grass_E',  False, True,  False, False)
-make_transition('trans_grass_W',  False, False, False, True)
-make_transition('trans_grass_NE', True,  True,  False, False)
-make_transition('trans_grass_NW', True,  False, False, True)
-make_transition('trans_grass_SE', False, True,  True,  False)
-make_transition('trans_grass_SW', False, False, True,  True)
+make_transition('trans_grass_N',  True,  False, False, False)  # grass bites from top
+make_transition('trans_grass_S',  False, False, True,  False)  # grass bites from bottom
+make_transition('trans_grass_E',  False, False, False, True)   # grass bites from right
+make_transition('trans_grass_W',  False, True,  False, False)  # grass bites from left
+make_transition('trans_grass_NE', True,  False, False, True)
+make_transition('trans_grass_NW', True,  True,  False, False)
+make_transition('trans_grass_SE', False, False, True,  True)
+make_transition('trans_grass_SW', False, True,  True,  False)
 
 # --- WATER SHORELINE TRANSITIONS ---
 water_color = (48,120,180)
