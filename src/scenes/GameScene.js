@@ -51,6 +51,7 @@ export default class GameScene {
     this.tilemap = createTilemap();
     this.worldContainer.addChild(this.tilemap.gfx);
 
+    // Decoration layer — rendered above tiles but below player
     this.propsRenderer = createPropsRenderer();
     this.worldContainer.addChild(this.propsRenderer.gfx);
 

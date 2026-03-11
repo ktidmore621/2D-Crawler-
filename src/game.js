@@ -71,19 +71,32 @@ async function showLoadingScreen(app) {
 
   // Dark background
   gfx.rect(0, 0, width, height);
-  gfx.fill(0x0a0806);
+  gfx.fill(0x0a0805);
+
+  // "CRAWL CRAFT" title
+  const titleStyle = new TextStyle({
+    fontFamily: '"Pirata One", serif',
+    fontSize: Math.min(48, width * 0.12),
+    fill: '#c07a2a',
+    letterSpacing: 3,
+    dropShadow: { color: '#000000', blur: 4, distance: 2, alpha: 0.6 },
+  });
+  const titleText = new Text({ text: 'CRAWL CRAFT', style: titleStyle });
+  titleText.anchor.set(0.5, 0.5);
+  titleText.x = width / 2;
+  titleText.y = height / 2 - 60;
 
   // "LOADING..." text
   const loadingStyle = new TextStyle({
-    fontFamily: 'monospace',
-    fontSize: 20,
+    fontFamily: '"Rajdhani", sans-serif',
+    fontSize: 18,
     fill: '#c07a2a',
-    letterSpacing: 4,
+    letterSpacing: 6,
   });
-  const loadingText = new Text({ text: 'LOADING...', style: loadingStyle });
+  const loadingText = new Text({ text: 'LOADING\u2026', style: loadingStyle });
   loadingText.anchor.set(0.5, 0.5);
   loadingText.x = width / 2;
-  loadingText.y = height / 2 - 30;
+  loadingText.y = height / 2 - 10;
 
   // Progress bar background
   const barW = Math.min(260, width * 0.6);
@@ -98,6 +111,7 @@ async function showLoadingScreen(app) {
   const progressFill = new Graphics();
 
   app.stage.addChild(gfx);
+  app.stage.addChild(titleText);
   app.stage.addChild(loadingText);
   app.stage.addChild(progressBar);
   app.stage.addChild(progressFill);
@@ -114,10 +128,12 @@ async function showLoadingScreen(app) {
 
   // Remove loading screen elements
   app.stage.removeChild(gfx);
+  app.stage.removeChild(titleText);
   app.stage.removeChild(loadingText);
   app.stage.removeChild(progressBar);
   app.stage.removeChild(progressFill);
   gfx.destroy();
+  titleText.destroy();
   loadingText.destroy();
   progressBar.destroy();
   progressFill.destroy();

@@ -208,6 +208,102 @@ export const PROP_LIST = [
   { type: 'vegetation', col: 35, row: 95 },
   { type: 'vegetation', col: 40, row: 100 },
   { type: 'vegetation', col: 30, row: 98 },
+
+  // ── Grass tuft scatter (every 8-12 grass tiles) ──
+  { type: 'grass_tuft', col: 8, row: 10 },
+  { type: 'grass_tuft', col: 16, row: 15 },
+  { type: 'grass_tuft', col: 24, row: 11 },
+  { type: 'grass_tuft', col: 32, row: 18 },
+  { type: 'grass_tuft', col: 40, row: 12 },
+  { type: 'grass_tuft', col: 48, row: 20 },
+  { type: 'grass_tuft', col: 56, row: 14 },
+  { type: 'grass_tuft', col: 64, row: 22 },
+  { type: 'grass_tuft', col: 72, row: 16 },
+  { type: 'grass_tuft', col: 10, row: 30 },
+  { type: 'grass_tuft', col: 20, row: 35 },
+  { type: 'grass_tuft', col: 30, row: 28 },
+  { type: 'grass_tuft', col: 38, row: 32 },
+  { type: 'grass_tuft', col: 46, row: 38 },
+  { type: 'grass_tuft', col: 54, row: 30 },
+  { type: 'grass_tuft', col: 62, row: 36 },
+  { type: 'grass_tuft', col: 70, row: 32 },
+  { type: 'grass_tuft', col: 12, row: 50 },
+  { type: 'grass_tuft', col: 22, row: 55 },
+  { type: 'grass_tuft', col: 32, row: 48 },
+  { type: 'grass_tuft', col: 42, row: 58 },
+  { type: 'grass_tuft', col: 52, row: 52 },
+  { type: 'grass_tuft', col: 14, row: 65 },
+  { type: 'grass_tuft', col: 28, row: 62 },
+  { type: 'grass_tuft', col: 36, row: 67 },
+
+  // ── Mushroom clusters — near dungeon, crater, alien structures ──
+  { type: 'mushroom', col: 36, row: 8 },
+  { type: 'mushroom', col: 40, row: 10 },
+  { type: 'mushroom', col: 37, row: 12 },
+  { type: 'mushroom', col: 39, row: 7 },
+  // Near crater (alien spores)
+  { type: 'mushroom', col: 124, row: 58 },
+  { type: 'mushroom', col: 136, row: 58 },
+  { type: 'mushroom', col: 128, row: 68 },
+  { type: 'mushroom', col: 132, row: 68 },
+  { type: 'mushroom', col: 126, row: 63 },
+  { type: 'mushroom', col: 134, row: 63 },
+  // Between forest trees
+  { type: 'mushroom', col: 8, row: 5 },
+  { type: 'mushroom', col: 14, row: 12 },
+  { type: 'mushroom', col: 20, row: 8 },
+  { type: 'mushroom', col: 55, row: 10 },
+  { type: 'mushroom', col: 65, row: 7 },
+
+  // ── Fallen logs — near forest edges and ruins ──
+  { type: 'fallen_log', col: 6, row: 18 },
+  { type: 'fallen_log', col: 15, row: 22 },
+  { type: 'fallen_log', col: 50, row: 16 },
+  { type: 'fallen_log', col: 62, row: 20 },
+  { type: 'fallen_log', col: 70, row: 10 },
+  // Near ruins
+  { type: 'fallen_log', col: 92, row: 52 },
+  { type: 'fallen_log', col: 108, row: 48 },
+
+  // ── Cattails/reeds — near river banks ──
+  { type: 'cattail', col: 88, row: 72 },
+  { type: 'cattail', col: 90, row: 74 },
+  { type: 'cattail', col: 92, row: 72 },
+  { type: 'cattail', col: 94, row: 74 },
+  // Near lake
+  { type: 'cattail', col: 112, row: 90 },
+  { type: 'cattail', col: 114, row: 92 },
+  { type: 'cattail', col: 116, row: 90 },
+  { type: 'cattail', col: 118, row: 92 },
+  // Near flooded ruins
+  { type: 'cattail', col: 110, row: 118 },
+  { type: 'cattail', col: 126, row: 120 },
+
+  // ── Nature rock clusters — mountain base ──
+  { type: 'nature_rock', col: 144, row: 30 },
+  { type: 'nature_rock', col: 146, row: 38 },
+  { type: 'nature_rock', col: 145, row: 46 },
+  { type: 'nature_rock', col: 147, row: 54 },
+  { type: 'nature_rock', col: 144, row: 62 },
+  { type: 'nature_rock', col: 146, row: 90 },
+  { type: 'nature_rock', col: 148, row: 98 },
+  // Canyon edges
+  { type: 'nature_rock', col: 58, row: 25 },
+  { type: 'nature_rock', col: 60, row: 32 },
+  { type: 'nature_rock', col: 62, row: 40 },
+  { type: 'nature_rock', col: 56, row: 45 },
+
+  // ── Nature bushes — forest edges ──
+  { type: 'nature_bush', col: 3, row: 20 },
+  { type: 'nature_bush', col: 10, row: 16 },
+  { type: 'nature_bush', col: 18, row: 24 },
+  { type: 'nature_bush', col: 52, row: 20 },
+  { type: 'nature_bush', col: 60, row: 15 },
+  { type: 'nature_bush', col: 68, row: 22 },
+  { type: 'nature_bush', col: 74, row: 30 },
+  { type: 'nature_bush', col: 73, row: 40 },
+  { type: 'nature_bush', col: 75, row: 50 },
+  { type: 'nature_bush', col: 74, row: 60 },
 ];
 
 /**
@@ -225,8 +321,8 @@ export function createPropsRenderer() {
   const spriteLayer = new Container();
   container.addChild(spriteLayer);
 
-  // Sprite pool for prop sprites (bushes, rocks, vegetation)
-  const SPRITE_POOL_SIZE = 80;
+  // Sprite pool for prop sprites (bushes, rocks, vegetation, nature decorations)
+  const SPRITE_POOL_SIZE = 140;
   const spritePool = [];
   for (let i = 0; i < SPRITE_POOL_SIZE; i++) {
     const s = new Sprite();
@@ -286,6 +382,24 @@ export function createPropsRenderer() {
           break;
         case 'vegetation':
           sprIdx = drawVegetationSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'grass_tuft':
+          sprIdx = drawGrassTuftSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'mushroom':
+          sprIdx = drawMushroomSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'fallen_log':
+          sprIdx = drawFallenLogSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'cattail':
+          sprIdx = drawCattailSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'nature_rock':
+          sprIdx = drawNatureRockSprite(spritePool, sprIdx, px, py, prop.col, prop.row);
+          break;
+        case 'nature_bush':
+          sprIdx = drawNatureBushSprite(spritePool, sprIdx, gfx, px, py, prop.col, prop.row);
           break;
         // Graphics-only props
         case 'car': drawCar(gfx, px, py, prop.rotation || 0); break;
@@ -526,6 +640,124 @@ function drawVegetationSprite(pool, idx, x, y, col, row) {
   sprite.y = cy - 32 * scale / 2;
   sprite.visible = true;
 
+  return idx;
+}
+
+/* ──────────────── Grass tuft — nature decoration sprite ──────────────── */
+
+function drawGrassTuftSprite(pool, idx, x, y, col, row) {
+  const h = ((row * 137 + col * 311) & 0xFFFF);
+  const variant = h % 3;
+  const names = ['nature_grassTuft1', 'nature_grassTuft2', 'nature_grassTuft3'];
+  const tex = getTex(names[variant]);
+  if (!tex || idx >= pool.length) return idx;
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 2.5; // 16px source × 2.5 = 40px
+  sprite.scale.set(scale);
+  sprite.x = x + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 10) - 5;
+  sprite.y = y + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 8) - 4;
+  sprite.visible = true;
+  return idx;
+}
+
+/* ──────────────── Mushroom cluster — nature decoration sprite ──────────────── */
+
+function drawMushroomSprite(pool, idx, x, y, col, row) {
+  const h = ((row * 137 + col * 311) & 0xFFFF);
+  const variant = h % 3;
+  const names = ['nature_mushroom1', 'nature_mushroom2', 'nature_mushroom3'];
+  const tex = getTex(names[variant]);
+  if (!tex || idx >= pool.length) return idx;
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 1.5; // 32px source × 1.5 = 48px
+  sprite.scale.set(scale);
+  sprite.x = x + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.visible = true;
+  return idx;
+}
+
+/* ──────────────── Fallen log — nature decoration sprite ──────────────── */
+
+function drawFallenLogSprite(pool, idx, x, y, col, row) {
+  const tex = getTex('nature_log1');
+  if (!tex || idx >= pool.length) return idx;
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 1.2; // 64×32 source × 1.2 = 77×38px
+  sprite.scale.set(scale);
+  sprite.x = x + WORLD_TILE_SIZE / 2 - 64 * scale / 2;
+  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2 + 4;
+  sprite.visible = true;
+  return idx;
+}
+
+/* ──────────────── Cattail/reed — nature decoration sprite ──────────────── */
+
+function drawCattailSprite(pool, idx, x, y, col, row) {
+  const h = ((row * 137 + col * 311) & 0xFFFF);
+  const variant = h % 2;
+  const names = ['nature_cattail1', 'nature_cattail2'];
+  const tex = getTex(names[variant]);
+  if (!tex || idx >= pool.length) return idx;
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 2.5; // 16×32 source × 2.5 = 40×80px
+  sprite.scale.set(scale);
+  sprite.x = x + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 6) - 3;
+  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.visible = true;
+  return idx;
+}
+
+/* ──────────────── Nature rock cluster — decoration sprite ──────────────── */
+
+function drawNatureRockSprite(pool, idx, x, y, col, row) {
+  const h = ((row * 137 + col * 311) & 0xFFFF);
+  const variant = h % 3;
+  const names = ['nature_rockSmall1', 'nature_rockSmall2', 'nature_rockCluster'];
+  const tex = getTex(names[variant]);
+  if (!tex || idx >= pool.length) return idx;
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 1.8; // 32px source × 1.8 = 58px
+  sprite.scale.set(scale);
+  sprite.x = x + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2 + 4;
+  sprite.visible = true;
+  return idx;
+}
+
+/* ──────────────── Nature bush — TopDownFantasy Forest bush ──────────────── */
+
+function drawNatureBushSprite(pool, idx, gfx, x, y, col, row) {
+  const h = ((row * 137 + col * 311) & 0xFFFF);
+  const variant = h % 2;
+  const names = ['nature_bush1', 'nature_bush2'];
+  const tex = getTex(names[variant]);
+  if (!tex || idx >= pool.length) return idx;
+
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Shadow
+  gfx.ellipse(cx + 3, cy + 16, 22, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.18 });
+
+  const sprite = pool[idx++];
+  sprite.texture = tex;
+  const scale = 1.0; // 48px source → 48px display
+  sprite.scale.set(scale);
+  sprite.x = cx - 48 * scale / 2;
+  sprite.y = cy - 48 * scale / 2 - 4;
+  sprite.visible = true;
   return idx;
 }
 

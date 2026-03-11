@@ -3,6 +3,8 @@
  * and named sub-regions. All rendering code imports from here.
  *
  * Tile positions measured from actual sheet dimensions:
+ *   terrain.png       128×240  (8×15 tiles of 16×16) — TopDownFantasy Forest
+ *   nature.png        256×256  — TopDownFantasy Forest decorations
  *   floors_tiles.png  400×416  (25×26 tiles of 16×16)
  *   wall_tiles.png    400×400  (25×25 tiles of 16×16)
  *   water_tiles.png   400×400  (25×25 tiles of 16×16)
@@ -18,6 +20,90 @@
  */
 
 export const SPRITE_ATLAS = {
+  // ── Terrain (TopDownFantasy Forest) ─────────────────
+  terrain: {
+    path: 'assets/tilesets/terrain.png',
+    tileW: 16,
+    tileH: 16,
+    cols: 8,
+    rows: 15,
+    // Named tile regions (col, row in tile grid)
+    tiles: {
+      // Grass variants (rows 0-2)
+      grassFull1:       { col: 0, row: 0 },  // bright lime grass
+      grassFull2:       { col: 1, row: 0 },  // bright lime variant
+      grassFull3:       { col: 1, row: 1 },  // solid grass
+      grassDark1:       { col: 0, row: 1 },  // darker grass edge
+      grassDark2:       { col: 0, row: 2 },  // dark grass variant
+      grassDark3:       { col: 2, row: 2 },  // darker center
+      // Grass-to-dirt transitions
+      grassDirtN:       { col: 3, row: 0 },  // grass with dirt to north
+      grassDirtS:       { col: 4, row: 2 },  // grass with dirt to south
+      grassDirtE:       { col: 5, row: 1 },  // grass with dirt to east
+      grassDirtW:       { col: 3, row: 1 },  // grass with dirt to west
+      grassDirtNE:      { col: 5, row: 0 },  // corner NE
+      grassDirtNW:      { col: 3, row: 0 },  // corner NW
+      grassDirtSE:      { col: 5, row: 2 },  // corner SE
+      grassDirtSW:      { col: 3, row: 2 },  // corner SW
+      // Dirt tiles (rows 0-2, cols 6-7)
+      dirtFull1:        { col: 6, row: 0 },  // brown dirt
+      dirtFull2:        { col: 7, row: 0 },  // brown variant
+      dirtFull3:        { col: 7, row: 1 },  // lighter dirt
+      dirtDark1:        { col: 6, row: 2 },  // dark brown
+      // Water tiles (rows 11-14)
+      waterFull1:       { col: 0, row: 11 }, // teal water
+      waterFull2:       { col: 1, row: 11 }, // teal variant
+      waterFull3:       { col: 2, row: 11 }, // teal variant 2
+      waterDark1:       { col: 0, row: 12 }, // deeper water
+      waterDark2:       { col: 1, row: 12 }, // deeper variant
+      // Water-grass shoreline transitions
+      shoreN:           { col: 6, row: 10 }, // water with grass to north
+      shoreS:           { col: 7, row: 12 }, // water with grass to south
+      shoreE:           { col: 7, row: 11 }, // water with grass to east
+      shoreW:           { col: 6, row: 11 }, // water with grass to west
+      // Stone/rocky ground (row 4-5)
+      stoneGray:        { col: 5, row: 4 },  // gray stone
+      stoneDark:        { col: 2, row: 4 },  // dark stone
+      // Grass tuft details (row 13-14)
+      grassDetail1:     { col: 7, row: 13 }, // grass detail
+      grassDetail2:     { col: 6, row: 14 }, // grass detail 2
+    },
+  },
+
+  // ── Nature Decorations (TopDownFantasy Forest) ──────
+  nature: {
+    path: 'assets/decorations/nature.png',
+    // 256×256 — bushes, logs, mushrooms, grass tufts, rocks, trees
+    regions: {
+      // Bushes (top-left, ~48×48 each)
+      bush1:          { x: 0,   y: 0,   w: 48, h: 48 },
+      bush2:          { x: 48,  y: 0,   w: 48, h: 48 },
+      // Fallen log (top area)
+      log1:           { x: 0,   y: 48,  w: 64, h: 32 },
+      // Grass tufts (small, ~16×16)
+      grassTuft1:     { x: 0,   y: 80,  w: 16, h: 16 },
+      grassTuft2:     { x: 16,  y: 80,  w: 16, h: 16 },
+      grassTuft3:     { x: 32,  y: 80,  w: 16, h: 16 },
+      // Cattails/reeds
+      cattail1:       { x: 64,  y: 64,  w: 16, h: 32 },
+      cattail2:       { x: 80,  y: 64,  w: 16, h: 32 },
+      // Mushroom clusters (right side)
+      mushroom1:      { x: 192, y: 0,   w: 32, h: 32 },
+      mushroom2:      { x: 224, y: 0,   w: 32, h: 32 },
+      mushroom3:      { x: 192, y: 32,  w: 32, h: 32 },
+      mushroomSmall1: { x: 224, y: 32,  w: 16, h: 16 },
+      mushroomSmall2: { x: 224, y: 48,  w: 16, h: 16 },
+      // Rocks (bottom-right ~96-128 area)
+      rockSmall1:     { x: 160, y: 96,  w: 32, h: 32 },
+      rockSmall2:     { x: 192, y: 96,  w: 32, h: 32 },
+      rockCluster:    { x: 224, y: 96,  w: 32, h: 32 },
+      // Trees (large, bottom section ~96px wide)
+      treeForest1:    { x: 0,   y: 160, w: 80, h: 96 },
+      treeForest2:    { x: 80,  y: 160, w: 80, h: 96 },
+      treeForest3:    { x: 160, y: 160, w: 80, h: 96 },
+    },
+  },
+
   // ── Tilesets ──────────────────────────────────────
   floors: {
     path: 'assets/tilesets/floors_tiles.png',
