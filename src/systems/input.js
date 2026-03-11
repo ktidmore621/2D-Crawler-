@@ -1,12 +1,34 @@
 /**
  * Unified input system — handles keyboard, DOM D-pad, and action buttons.
  * Single source of truth for all directional + action input.
+ *
+ * ── Button Convention (Nintendo / Game Boy style) ──────────────
+ *   A  (right)  = CONFIRM / ATTACK   — keyboard: Z
+ *   B  (bottom) = CANCEL  / ROLL     — keyboard: X
+ *   X  (left)   = HOTBAR             — keyboard: C
+ *   Y  (top)    = MAP                — keyboard: M
+ *
+ * Every screen must follow this convention:
+ *   • A = confirm / interact / select
+ *   • B = cancel / back / close
+ * ───────────────────────────────────────────────────────────────
  */
+
+/**
+ * Named button constants — import these instead of hardcoding positions.
+ */
+export const BUTTONS = {
+  A: 'attack',   // right — confirm / attack
+  B: 'roll',     // bottom — cancel / roll
+  X: 'hotbar',   // left — hotbar
+  Y: 'map',      // top — map
+};
 
 const GAME_KEYS = new Set([
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
   'KeyW', 'KeyA', 'KeyS', 'KeyD',
   'KeyZ', 'KeyX', 'KeyC', 'KeyM',
+  'Escape',
 ]);
 
 /**
@@ -18,6 +40,7 @@ export function createInputState() {
     ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
     KeyW: false, KeyA: false, KeyS: false, KeyD: false,
     KeyZ: false, KeyX: false, KeyC: false, KeyM: false,
+    Escape: false,
   };
 
   // Touch directions (set by D-pad)
@@ -26,16 +49,20 @@ export function createInputState() {
   // Merged directional state — read this in game loop
   const dirs = { up: false, down: false, left: false, right: false };
 
+  // Action listeners: map of action name → Set of callbacks
+  const _actionListeners = {};
+
   function onKeyDown(e) {
     if (GAME_KEYS.has(e.code)) {
       e.preventDefault();
       keys[e.code] = true;
 
       // Action keyboard shortcuts
-      if (e.code === 'KeyZ') emitAction('attack');
-      if (e.code === 'KeyX') emitAction('interact');
-      if (e.code === 'KeyC') emitAction('roll');
-      if (e.code === 'KeyM') emitAction('inventory');
+      if (e.code === 'KeyZ') emitAction(BUTTONS.A);      // Z = attack (A / confirm)
+      if (e.code === 'KeyX') emitAction(BUTTONS.B);      // X = roll (B / cancel)
+      if (e.code === 'KeyC') emitAction(BUTTONS.X);      // C = hotbar
+      if (e.code === 'KeyM') emitAction(BUTTONS.Y);      // M = map
+      if (e.code === 'Escape') emitAction(BUTTONS.B);    // Escape = cancel (same as B)
     }
   }
 
@@ -119,9 +146,22 @@ export function createInputState() {
     });
   }
 
-  /** Emit a named action event (placeholder — console.log for now) */
+  /** Emit a named action event — notifies all registered listeners */
   function emitAction(name) {
-    console.log(`[action] ${name}`);
+    const listeners = _actionListeners[name];
+    if (listeners) {
+      for (const fn of listeners) fn(name);
+    }
+  }
+
+  /**
+   * Register a callback for a named action (e.g. BUTTONS.A).
+   * Returns an unsubscribe function.
+   */
+  function onAction(name, callback) {
+    if (!_actionListeners[name]) _actionListeners[name] = new Set();
+    _actionListeners[name].add(callback);
+    return () => _actionListeners[name].delete(callback);
   }
 
   /** Clean up all event listeners */
@@ -130,12 +170,16 @@ export function createInputState() {
     for (const fn of actionCleanups) fn();
     dpadCleanups.length = 0;
     actionCleanups.length = 0;
+    // Clear all action listeners
+    for (const key of Object.keys(_actionListeners)) {
+      _actionListeners[key].clear();
+    }
   }
 
   return {
     dirs, keys, touch,
     onKeyDown, onKeyUp, setTouchDir, updateDirs,
-    isTouchDevice, emitAction, destroy,
+    isTouchDevice, emitAction, onAction, destroy,
   };
 }
 

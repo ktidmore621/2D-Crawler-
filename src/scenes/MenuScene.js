@@ -12,12 +12,14 @@ import {
   VIGNETTE_ALPHA,
   CORNER_LINE_WIDTH,
   CORNER_ALPHA,
+  AMBER_HEX,
 } from '../utils/constants.js';
 import {
   createMenuBackgroundState,
   updateMenuBackground,
   drawMenuBackground,
 } from '../systems/menuBackground.js';
+import { createInputState, BUTTONS } from '../systems/input.js';
 
 export default class MenuScene {
   constructor(app, onPlay) {
@@ -25,6 +27,7 @@ export default class MenuScene {
     this.onPlay = onPlay;
     this.container = new Container();
     this.elapsed = 0;
+    this.inputState = null;
   }
 
   init() {
@@ -151,6 +154,23 @@ export default class MenuScene {
     // ── Play button ──
     this._createPlayButton(cx, cursorY, buttonW, buttonH, buttonFontSize);
 
+    // ── Hint text under PLAY button ──
+    const hintSize = Math.min(11, Math.max(8, vmin * 0.025));
+    const hint = new Text({
+      text: 'or press A to start',
+      style: {
+        fontFamily: 'Rajdhani, sans-serif',
+        fontSize: hintSize,
+        fill: AMBER_HEX,
+        fontWeight: '400',
+      },
+    });
+    hint.anchor.set(0.5);
+    hint.x = cx;
+    hint.y = cursorY + buttonH / 2 + 10;
+    hint.alpha = 0.7;
+    this.ui.addChild(hint);
+
     // ── Version tag ──
     const version = new Text({
       text: 'v0.1.0 — Alpha Build',
@@ -167,6 +187,17 @@ export default class MenuScene {
 
     // Draw initial frame
     drawMenuBackground(this.bgGfx, this.bgState, width, height, 0);
+
+    // ── Input: A button (Z key) or touch A button starts the game ──
+    this.inputState = createInputState();
+    this._onKeyDown = this.inputState.onKeyDown;
+    this._onKeyUp = this.inputState.onKeyUp;
+    window.addEventListener('keydown', this._onKeyDown);
+    window.addEventListener('keyup', this._onKeyUp);
+
+    this._unsubA = this.inputState.onAction(BUTTONS.A, () => {
+      if (this.onPlay) this.onPlay();
+    });
   }
 
   _createPlayButton(cx, cy, btnW, btnH, fontSize) {
@@ -267,6 +298,12 @@ export default class MenuScene {
   }
 
   destroy() {
+    if (this._onKeyDown) {
+      window.removeEventListener('keydown', this._onKeyDown);
+      window.removeEventListener('keyup', this._onKeyUp);
+    }
+    if (this._unsubA) this._unsubA();
+    if (this.inputState) this.inputState.destroy();
     this.container.destroy({ children: true });
   }
 }

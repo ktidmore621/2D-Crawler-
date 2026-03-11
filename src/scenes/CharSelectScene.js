@@ -17,6 +17,7 @@ import {
   PLAYER_ANIM_SPEED,
 } from '../utils/constants.js';
 import { loadAtlas, createAnimatedSprite } from '../systems/animation.js';
+import { createInputState, BUTTONS } from '../systems/input.js';
 
 /**
  * Compute responsive layout values for the game viewport (portrait-first).
@@ -24,7 +25,6 @@ import { loadAtlas, createAnimatedSprite } from '../systems/animation.js';
 function computeLayout(w, h) {
   const vmin = Math.min(w, h);
 
-  // Cards stacked vertically or in a tight horizontal row
   const cardGap = Math.max(6, vmin * 0.015);
   const availableWidth = w * 0.92;
   const totalGapWidth = cardGap * 2;
@@ -69,6 +69,10 @@ export default class CharSelectScene {
     this._resizeHandler = null;
     this._bottomSheet = null;
     this._sheetType = null;
+    this.inputState = null;
+
+    // D-pad navigation focus index (0 = male, 1 = female, 2 = androgynous)
+    this._focusedIndex = 0;
   }
 
   async init() {
@@ -81,6 +85,81 @@ export default class CharSelectScene {
 
     this._resizeHandler = () => this._onResize();
     window.addEventListener('resize', this._resizeHandler);
+
+    // ── Set up input for controller navigation ──
+    this.inputState = createInputState();
+    this._onKeyDown = this.inputState.onKeyDown;
+    this._onKeyUp = this.inputState.onKeyUp;
+    window.addEventListener('keydown', this._onKeyDown);
+    window.addEventListener('keyup', this._onKeyUp);
+
+    // D-pad left/right to navigate cards
+    this._dpadCooldown = false;
+    this._dpadCheckInterval = setInterval(() => this._checkDpadNav(), 150);
+
+    // A button (confirm) — select card / confirm name / begin game
+    this._unsubA = this.inputState.onAction(BUTTONS.A, () => this._handleConfirm());
+
+    // B button (cancel) — close bottom sheet
+    this._unsubB = this.inputState.onAction(BUTTONS.B, () => this._handleCancel());
+
+    // Set initial focus
+    this._updateFocus();
+  }
+
+  _checkDpadNav() {
+    if (!this.inputState) return;
+    this.inputState.updateDirs();
+    const { dirs } = this.inputState;
+
+    if (this._bottomSheet) return; // Don't navigate cards while sheet is open
+
+    if (dirs.left && !this._dpadHeld) {
+      this._dpadHeld = true;
+      this._focusedIndex = (this._focusedIndex - 1 + CHARACTER_TYPES.length) % CHARACTER_TYPES.length;
+      this._updateFocus();
+    } else if (dirs.right && !this._dpadHeld) {
+      this._dpadHeld = true;
+      this._focusedIndex = (this._focusedIndex + 1) % CHARACTER_TYPES.length;
+      this._updateFocus();
+    } else if (!dirs.left && !dirs.right) {
+      this._dpadHeld = false;
+    }
+  }
+
+  _updateFocus() {
+    const focusedType = CHARACTER_TYPES[this._focusedIndex];
+    this.selectedType = focusedType;
+    this._updateSelection();
+    this._updateBeginState();
+  }
+
+  _handleConfirm() {
+    // If bottom sheet is open, confirm the name
+    if (this._bottomSheet && this._bottomSheetInput) {
+      this._confirmSheet(this._bottomSheetInput);
+      return;
+    }
+
+    // If BEGIN is enabled, start the game
+    if (this._beginEnabled) {
+      const name = this.names[this.selectedType];
+      if (this.onBegin) this.onBegin(this.selectedType, name);
+      return;
+    }
+
+    // Otherwise, open the bottom sheet for the focused card
+    const focusedType = CHARACTER_TYPES[this._focusedIndex];
+    this.selectedType = focusedType;
+    this._updateSelection();
+    this._openBottomSheet(focusedType);
+  }
+
+  _handleCancel() {
+    // Close bottom sheet if open
+    if (this._bottomSheet) {
+      this._closeBottomSheet(false);
+    }
   }
 
   async _buildUI() {
@@ -129,6 +208,23 @@ export default class CharSelectScene {
     // ── BEGIN button ──
     this._createBeginButton(width / 2, L.buttonY, L);
     this._updateBeginState();
+
+    // ── Controller hints ──
+    const hintSize = Math.min(9, Math.max(7, Math.min(width, height) * 0.018));
+    this._hintText = new Text({
+      text: '\u25C0\u25B6 Navigate    A Select    Start to Begin',
+      style: {
+        fontFamily: 'Rajdhani, sans-serif',
+        fontSize: hintSize,
+        fill: AMBER_HEX,
+        fontWeight: '400',
+      },
+    });
+    this._hintText.anchor.set(0.5);
+    this._hintText.x = width / 2;
+    this._hintText.y = L.buttonY + L.buttonHeight / 2 + 14;
+    this._hintText.alpha = 0.5;
+    this.container.addChild(this._hintText);
   }
 
   async _createCard(type, cx, top, L) {
@@ -190,6 +286,7 @@ export default class CharSelectScene {
     this.cards[type] = { container: cardContainer, bg, borderGfx, preview, label, nameTag, L };
 
     cardContainer.on('pointerdown', () => {
+      this._focusedIndex = CHARACTER_TYPES.indexOf(type);
       this.selectedType = type;
       this._updateSelection();
       this._updateBeginState();
@@ -319,9 +416,23 @@ export default class CharSelectScene {
     input.addEventListener('keydown', (e) => {
       e.stopPropagation();
       if (e.key === 'Enter') this._confirmSheet(input);
+      if (e.key === 'Escape') this._closeBottomSheet(false);
     });
     input.addEventListener('keyup', (e) => e.stopPropagation());
     sheet.appendChild(input);
+
+    // Sheet hints
+    const sheetHints = document.createElement('div');
+    sheetHints.textContent = 'A Confirm  \u2022  B Cancel';
+    Object.assign(sheetHints.style, {
+      color: AMBER_HEX,
+      fontFamily: 'Rajdhani, sans-serif',
+      fontSize: '9px',
+      textAlign: 'center',
+      marginTop: '8px',
+      opacity: '0.5',
+    });
+    sheet.appendChild(sheetHints);
 
     // Confirm button
     const confirmBtn = document.createElement('button');
@@ -481,6 +592,16 @@ export default class CharSelectScene {
     if (this._resizeHandler) {
       window.removeEventListener('resize', this._resizeHandler);
     }
+    if (this._onKeyDown) {
+      window.removeEventListener('keydown', this._onKeyDown);
+      window.removeEventListener('keyup', this._onKeyUp);
+    }
+    if (this._dpadCheckInterval) {
+      clearInterval(this._dpadCheckInterval);
+    }
+    if (this._unsubA) this._unsubA();
+    if (this._unsubB) this._unsubB();
+    if (this.inputState) this.inputState.destroy();
     this._closeBottomSheet(false);
     this.container.destroy({ children: true });
   }

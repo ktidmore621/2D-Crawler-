@@ -152,3 +152,9 @@ export const DPAD_BG_ALPHA = 0.2;
 
 // ── Action Buttons (Control Panel) ───────────────────
 export const ACTION_BUTTON_SIZE = 52;
+
+// ── Named Button Mapping ────────────────────────────
+export const BUTTON_A = 'attack';   // right — confirm / attack
+export const BUTTON_B = 'roll';     // bottom — cancel / roll
+export const BUTTON_X = 'hotbar';   // left — hotbar
+export const BUTTON_Y = 'map';      // top — map
