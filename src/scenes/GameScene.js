@@ -85,30 +85,23 @@ export default class GameScene {
   _createVignette(w, h) {
     this.vignette = new Graphics();
 
-    // Dark edges, lighter center — radial gradient approximation
-    // Draw concentric semi-transparent rectangles getting darker toward edges
-    const steps = 8;
-    for (let i = steps; i >= 1; i--) {
-      const t = i / steps;
-      const alpha = t * t * 0.35; // quadratic falloff, max 0.35
-      const inset = (1 - t) * Math.min(w, h) * 0.3;
-      this.vignette.rect(0, 0, w, h);
-      this.vignette.fill({ color: 0x000000, alpha: alpha });
-    }
-
-    // Stronger edges
+    // Subtle dark edges only — atmosphere without blocking visibility
     // Top edge
     this.vignette.rect(0, 0, w, 30);
-    this.vignette.fill({ color: 0x000000, alpha: 0.25 });
+    this.vignette.fill({ color: 0x000000, alpha: 0.15 });
     // Bottom edge
     this.vignette.rect(0, h - 30, w, 30);
-    this.vignette.fill({ color: 0x000000, alpha: 0.25 });
+    this.vignette.fill({ color: 0x000000, alpha: 0.15 });
     // Left edge
     this.vignette.rect(0, 0, 20, h);
-    this.vignette.fill({ color: 0x000000, alpha: 0.2 });
+    this.vignette.fill({ color: 0x000000, alpha: 0.12 });
     // Right edge
     this.vignette.rect(w - 20, 0, 20, h);
-    this.vignette.fill({ color: 0x000000, alpha: 0.2 });
+    this.vignette.fill({ color: 0x000000, alpha: 0.12 });
+
+    // Very light full-screen tint for just a hint of vignette — max 0.25
+    this.vignette.rect(0, 0, w, h);
+    this.vignette.fill({ color: 0x000000, alpha: 0.05 });
 
     this.container.addChild(this.vignette);
   }
