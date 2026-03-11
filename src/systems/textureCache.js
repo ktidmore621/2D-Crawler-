@@ -5,7 +5,7 @@
  */
 
 import { Assets, Texture, Rectangle } from 'pixi.js';
-import { SPRITE_ATLAS, getAllAssetPaths } from '../data/spriteAtlas.js';
+import { SPRITE_ATLAS, GENERATED_TILES, getAllAssetPaths, getGeneratedTilePaths } from '../data/spriteAtlas.js';
 
 /** Cached sub-textures keyed by name */
 const cache = {};
@@ -23,8 +23,20 @@ export async function initTextureCache(onProgress) {
 
   // Register all assets as a bundle
   const assets = getAllAssetPaths();
+  const genAssets = getGeneratedTilePaths();
   Assets.addBundle('sprites', assets);
-  const textures = await Assets.loadBundle('sprites', onProgress);
+  Assets.addBundle('generated', genAssets);
+  const textures = await Assets.loadBundle('sprites', (p) => onProgress && onProgress(p * 0.8));
+  const genTextures = await Assets.loadBundle('generated', (p) => onProgress && onProgress(0.8 + p * 0.2));
+
+  // ── Cache generated terrain tiles (already 48×48, no slicing needed) ──
+  for (const val of Object.values(GENERATED_TILES)) {
+    const names = Array.isArray(val) ? val : [val];
+    for (const name of names) {
+      const tex = genTextures[`gen_${name}`];
+      if (tex) cache[`gen_${name}`] = tex;
+    }
+  }
 
   // ── Extract floor tile sub-textures ──
   const floorsTex = textures.floors;
@@ -96,15 +108,6 @@ export async function initTextureCache(onProgress) {
   const brTex = textures.buildingRoofs;
   for (const [name, rect] of Object.entries(SPRITE_ATLAS.buildingRoofs.regions)) {
     cache[`broof_${name}`] = extractRect(brTex, rect.x, rect.y, rect.w, rect.h);
-  }
-
-  // ── Extract terrain tile sub-textures (TopDownFantasy Forest) ──
-  const terrainTex = textures.terrain;
-  if (terrainTex) {
-    const tc = SPRITE_ATLAS.terrain;
-    for (const [name, pos] of Object.entries(tc.tiles)) {
-      cache[`terrain_${name}`] = extractTile(terrainTex, pos.col, pos.row, tc.tileW, tc.tileH);
-    }
   }
 
   // ── Extract nature decoration sub-textures ──

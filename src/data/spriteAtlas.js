@@ -2,8 +2,8 @@
  * Sprite atlas registry — describes every sprite sheet's path, tile/frame sizes,
  * and named sub-regions. All rendering code imports from here.
  *
+ * Generated terrain tiles are 48×48 PNGs in assets/tilesets/generated/
  * Tile positions measured from actual sheet dimensions:
- *   terrain.png       128×240  (8×15 tiles of 16×16) — TopDownFantasy Forest
  *   nature.png        256×256  — TopDownFantasy Forest decorations
  *   floors_tiles.png  400×416  (25×26 tiles of 16×16)
  *   wall_tiles.png    400×400  (25×25 tiles of 16×16)
@@ -19,74 +19,40 @@
  *   roofs.png         400×400
  */
 
-export const SPRITE_ATLAS = {
-  // ── Terrain (TopDownFantasy Forest) ─────────────────
-  terrain: {
-    path: 'assets/tilesets/terrain.png',
-    tileW: 16,
-    tileH: 16,
-    cols: 8,
-    rows: 15,
-    // Named tile regions (col, row in tile grid)
-    tiles: {
-      // Full grass tiles (fully opaque center tiles — no transparency)
-      grassFull1:       { col: 1, row: 1 },  // center grass (a=255)
-      grassFull2:       { col: 0, row: 5 },  // fully opaque variant (a=255)
-      grassFull3:       { col: 2, row: 5 },  // fully opaque variant (a=255)
-      // Darker grass center
-      grassDark1:       { col: 4, row: 1 },  // darker green center (a=255)
-      // Grass outer edge tiles (semi-transparent — used as overlays on dirt)
-      grassEdgeN:       { col: 1, row: 0 },  // N edge — top transparent (a=209)
-      grassEdgeS:       { col: 1, row: 2 },  // S edge — bottom transparent (a=224)
-      grassEdgeE:       { col: 2, row: 1 },  // E edge — right transparent (a=214)
-      grassEdgeW:       { col: 0, row: 1 },  // W edge — left transparent (a=214)
-      grassCornerNW:    { col: 0, row: 0 },  // NW corner — NW transparent (a=140)
-      grassCornerNE:    { col: 2, row: 0 },  // NE corner — NE transparent (a=140)
-      grassCornerSW:    { col: 0, row: 2 },  // SW corner — SW transparent (a=126)
-      grassCornerSE:    { col: 2, row: 2 },  // SE corner — SE transparent (a=126)
-      // Grass-to-dirt transition overlays (outer autotile edges)
-      grassDirtN:       { col: 1, row: 0 },  // grass edge where dirt is to north
-      grassDirtS:       { col: 1, row: 2 },  // grass edge where dirt is to south
-      grassDirtE:       { col: 2, row: 1 },  // grass edge where dirt is to east
-      grassDirtW:       { col: 0, row: 1 },  // grass edge where dirt is to west
-      grassDirtNE:      { col: 2, row: 0 },  // outer corner NE
-      grassDirtNW:      { col: 0, row: 0 },  // outer corner NW
-      grassDirtSE:      { col: 2, row: 2 },  // outer corner SE
-      grassDirtSW:      { col: 0, row: 2 },  // outer corner SW
-      // Dirt tiles (rows 0-2, cols 6-7) — all fully opaque
-      dirtFull1:        { col: 6, row: 0 },  // brown dirt
-      dirtFull2:        { col: 7, row: 0 },  // brown variant
-      dirtFull3:        { col: 7, row: 1 },  // lighter dirt
-      dirtDark1:        { col: 6, row: 2 },  // dark brown
-      // Water full tiles (cols 6-7, fully opaque — NOT the edge tiles!)
-      waterFull1:       { col: 6, row: 10 }, // teal water (a=255)
-      waterFull2:       { col: 7, row: 10 }, // teal variant (a=255)
-      waterFull3:       { col: 6, row: 11 }, // teal variant 2 (a=255)
-      waterDark1:       { col: 7, row: 11 }, // deeper water (a=255)
-      waterDark2:       { col: 6, row: 12 }, // deeper variant (a=255)
-      // Water outer edge tiles (semi-transparent — for shore transitions)
-      waterEdgeN:       { col: 1, row: 10 }, // water N edge (a=236)
-      waterEdgeS:       { col: 1, row: 12 }, // water S edge (a=218)
-      waterEdgeE:       { col: 2, row: 11 }, // water E edge (a=240)
-      waterEdgeW:       { col: 0, row: 11 }, // water W edge (a=238)
-      waterCornerNW:    { col: 0, row: 10 }, // NW corner (a=191)
-      waterCornerNE:    { col: 2, row: 10 }, // NE corner (a=203)
-      waterCornerSW:    { col: 0, row: 12 }, // SW corner (a=197)
-      waterCornerSE:    { col: 2, row: 12 }, // SE corner (a=193)
-      // Water-grass shoreline transitions (outer edge tiles)
-      shoreN:           { col: 1, row: 10 }, // shore where grass is to north
-      shoreS:           { col: 1, row: 12 }, // shore where grass is to south
-      shoreE:           { col: 2, row: 11 }, // shore where grass is to east
-      shoreW:           { col: 0, row: 11 }, // shore where grass is to west
-      // Stone/rocky ground (row 4-5)
-      stoneGray:        { col: 5, row: 4 },  // gray stone (a=242)
-      stoneDark:        { col: 6, row: 4 },  // brown rock (a=247)
-      // Grass tuft details (row 13-14)
-      grassDetail1:     { col: 7, row: 13 }, // grass detail
-      grassDetail2:     { col: 6, row: 14 }, // grass detail 2
-    },
-  },
+/**
+ * Generated terrain tiles — Python/Pillow pixel art tiles (48×48 each).
+ * Loaded as individual PNGs, no sprite sheet slicing needed.
+ */
+export const GENERATED_TILES = {
+  grass:    ['grass_0','grass_1','grass_2'],
+  dirt:     ['dirt_0','dirt_1'],
+  water:    ['water_0','water_1','water_2'],
+  shallowWater: 'shallow_water',
+  stone:    ['stone_0','stone_1'],
+  mountain: 'mountain',
+  plateau:  'plateau',
+  crater:   'crater',
+  highway:  'highway',
+  farmland: 'farmland',
+  transGrassN:  'trans_grass_N',
+  transGrassS:  'trans_grass_S',
+  transGrassE:  'trans_grass_E',
+  transGrassW:  'trans_grass_W',
+  transGrassNE: 'trans_grass_NE',
+  transGrassNW: 'trans_grass_NW',
+  transGrassSE: 'trans_grass_SE',
+  transGrassSW: 'trans_grass_SW',
+  shoreN:  'shore_N',
+  shoreS:  'shore_S',
+  shoreE:  'shore_E',
+  shoreW:  'shore_W',
+  shoreNE: 'shore_NE',
+  shoreNW: 'shore_NW',
+  shoreSE: 'shore_SE',
+  shoreSW: 'shore_SW',
+};
 
+export const SPRITE_ATLAS = {
   // ── Nature Decorations (TopDownFantasy Forest) ──────
   nature: {
     path: 'assets/decorations/nature.png',
@@ -318,6 +284,24 @@ export function getAllAssetPaths() {
     const entry = SPRITE_ATLAS[key];
     if (entry.path) {
       paths.push({ alias: key, src: entry.path });
+    }
+  }
+  return paths;
+}
+
+/**
+ * Collect generated terrain tile paths for preloading.
+ */
+export function getGeneratedTilePaths() {
+  const paths = [];
+  const seen = new Set();
+  for (const val of Object.values(GENERATED_TILES)) {
+    const names = Array.isArray(val) ? val : [val];
+    for (const name of names) {
+      if (!seen.has(name)) {
+        seen.add(name);
+        paths.push({ alias: `gen_${name}`, src: `assets/tilesets/generated/${name}.png` });
+      }
     }
   }
   return paths;
