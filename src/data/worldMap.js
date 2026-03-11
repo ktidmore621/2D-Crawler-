@@ -139,14 +139,16 @@ setTile(77, 6, 0);
 for (let c = 10; c <= 40; c++) {
   setTile(72, c, 1);
   setTile(73, c, 1);
-  if (c % 7 === 0) setTile(71, c, 1);
-  if (c % 11 === 0) setTile(74, c, 1);
+  // Occasional footprint tiles veering off the path
+  if (c % 9 === 0) setTile(71, c, 1);
+  if (c % 13 === 0) setTile(74, c, 1);
 }
 
 for (let r = 50; r <= 68; r++) {
   setTile(r, 5, 1);
   setTile(r, 6, 1);
-  if (r % 8 === 0) setTile(r, 7, 1);
+  // Occasional footprint veering off
+  if (r % 11 === 0) setTile(r, 7, 1);
 }
 
 for (let c = 6; c <= 10; c++) {
@@ -157,7 +159,8 @@ for (let c = 6; c <= 10; c++) {
 for (let r = 15; r <= 50; r++) {
   setTile(r, 5, 1);
   setTile(r, 6, 1);
-  if (r % 6 === 0) setTile(r, 4, 1);
+  // Occasional footprint veering off
+  if (r % 9 === 0) setTile(r, 4, 1);
 }
 
 for (let i = 0; i <= 20; i++) {
@@ -165,7 +168,6 @@ for (let i = 0; i <= 20; i++) {
   const c = 6 + Math.floor(i * 1.6);
   setTile(r, c, 1);
   setTile(r, c + 1, 1);
-  setTile(r + 1, c, 1);
 }
 
 for (let c = 40; c <= 55; c++) {
@@ -191,26 +193,32 @@ for (let r = 46; r <= 72; r++) {
 
 fillBorder(37, 42, 42, 46, 5);
 fillRect(38, 43, 41, 45, 4);
+setTile(42, 43, 4); // doorway (2 wide)
 setTile(42, 44, 4);
 
 fillBorder(37, 51, 41, 55, 5);
 fillRect(38, 52, 40, 54, 4);
+setTile(41, 52, 4); // doorway (2 wide)
 setTile(41, 53, 4);
 
 fillBorder(44, 42, 48, 45, 5);
 fillRect(45, 43, 47, 44, 4);
-setTile(44, 43, 4);
+setTile(44, 43, 4); // doorway (2 wide)
+setTile(44, 44, 4);
 
 fillBorder(50, 43, 54, 47, 5);
 fillRect(51, 44, 53, 46, 4);
-setTile(50, 45, 4);
+setTile(50, 45, 4); // doorway (2 wide)
+setTile(50, 46, 4);
 
 fillBorder(44, 51, 49, 54, 5);
 fillRect(45, 52, 48, 53, 4);
-setTile(49, 52, 4);
+setTile(49, 52, 4); // doorway (2 wide)
+setTile(49, 53, 4);
 
 fillBorder(51, 51, 55, 56, 5);
 fillRect(52, 52, 54, 55, 4);
+setTile(51, 53, 4); // doorway (2 wide)
 setTile(51, 54, 4);
 
 // ── Cracked earth canyon — diagonal east (col 58-62, row 20-50) ──
@@ -225,7 +233,6 @@ for (let i = 0; i <= 30; i++) {
 // ── Dungeon entrance — north-center (col 36-42, row 8-14) ──
 fillRect(8, 34, 14, 44, 0);
 for (let r = 8; r <= 14; r++) {
-  setTile(r, 38, 1);
   setTile(r, 39, 1);
   setTile(r, 40, 1);
 }
@@ -391,9 +398,10 @@ for (let r = 39; r <= 45; r++) {
 
 // Military outpost ruins on plateau
 // Main building
-fillBorder(24, 95, 30, 105, 5);
-fillRect(25, 96, 29, 104, 4);
-setTile(30, 100, 4); // doorway
+fillBorder(24, 96, 30, 104, 5);
+fillRect(25, 97, 29, 103, 4);
+setTile(30, 99, 4); // doorway
+setTile(30, 100, 4); // doorway (2 wide)
 
 // Watchtower base (smaller structure)
 fillBorder(26, 108, 29, 111, 5);
@@ -559,7 +567,8 @@ setTile(93, 116, 11);
 // Flooded building on east shore
 fillBorder(84, 123, 88, 127, 5);
 fillRect(85, 124, 87, 126, 12);
-setTile(88, 125, 4); // doorway
+setTile(88, 125, 4); // doorway (2 wide)
+setTile(88, 126, 4);
 
 
 // ── Zone 5: Overgrown Highway (diagonal NW to SE across center) ──
@@ -616,15 +625,15 @@ for (let r = 86; r <= 110; r++) {
 for (let c = 21; c <= 49; c++) {
   setTile(97, c, 1);
   setTile(98, c, 1);
-  setTile(99, c, 1);
   setTile(87, c, 1);
   setTile(109, c, 1);
 }
 
 // Collapsed barn footprint (large ruin)
-fillBorder(90, 26, 95, 32, 5);
-fillRect(91, 27, 94, 31, 4);
-setTile(95, 29, 4); // doorway
+fillBorder(90, 27, 95, 31, 5);
+fillRect(91, 28, 94, 30, 4);
+setTile(95, 28, 4); // doorway (2 wide)
+setTile(95, 29, 4);
 
 // Connect farmland to main path network
 for (let r = 76; r <= 87; r++) {
@@ -674,43 +683,50 @@ setTile(55, 101, 7);
 // Building T1
 fillBorder(49, 92, 53, 97, 5);
 fillRect(50, 93, 52, 96, 4);
+setTile(53, 94, 4); // doorway (2 wide)
 setTile(53, 95, 4);
 
 // Building T2
 fillBorder(49, 103, 53, 108, 5);
 fillRect(50, 104, 52, 107, 4);
-setTile(53, 105, 4);
+setTile(53, 105, 4); // doorway (2 wide)
+setTile(53, 106, 4);
 
 // Building T3
 fillBorder(58, 92, 61, 97, 5);
 fillRect(59, 93, 60, 96, 4);
-setTile(58, 94, 4);
+setTile(58, 94, 4); // doorway (2 wide)
+setTile(58, 95, 4);
 
 // Building T4
 fillBorder(58, 103, 61, 108, 5);
 fillRect(59, 104, 60, 107, 4);
+setTile(58, 105, 4); // doorway (2 wide)
 setTile(58, 106, 4);
 
 // Building T5 (town hall — larger)
-fillBorder(46, 95, 48, 106, 5);
-fillRect(47, 96, 47, 105, 4);
+fillBorder(46, 96, 48, 105, 5);
+fillRect(47, 97, 47, 104, 4);
 setTile(48, 100, 4);
 setTile(48, 101, 4);
 
 // Building T6
 fillBorder(63, 93, 65, 98, 5);
 fillRect(64, 94, 64, 97, 4);
+setTile(63, 95, 4); // doorway (2 wide)
 setTile(63, 96, 4);
 
 // Building T7
 fillBorder(63, 102, 65, 107, 5);
 fillRect(64, 103, 64, 106, 4);
-setTile(63, 104, 4);
+setTile(63, 104, 4); // doorway (2 wide)
+setTile(63, 105, 4);
 
 // Building T8
 fillBorder(49, 111, 53, 114, 5);
 fillRect(50, 112, 52, 113, 4);
-setTile(53, 112, 4);
+setTile(53, 112, 4); // doorway (2 wide)
+setTile(53, 113, 4);
 
 // Park area — small section of grass with benches
 fillRect(58, 112, 61, 115, 0);
@@ -800,17 +816,20 @@ for (let c = 49; c <= 78; c++) {
 // Building F1 — flooded interior
 fillBorder(112, 112, 117, 117, 5);
 fillRect(113, 113, 116, 116, 12);
-setTile(117, 114, 4);
+setTile(117, 114, 4); // doorway (2 wide)
+setTile(117, 115, 4);
 
 // Building F2 — flooded
 fillBorder(112, 120, 116, 125, 5);
 fillRect(113, 121, 115, 124, 12);
-setTile(116, 122, 4);
+setTile(116, 122, 4); // doorway (2 wide)
+setTile(116, 123, 4);
 
 // Building F3 — partially collapsed, flooded
 fillBorder(119, 114, 123, 119, 5);
 fillRect(120, 115, 122, 118, 12);
-setTile(119, 116, 4);
+setTile(119, 116, 4); // doorway (2 wide)
+setTile(119, 117, 4);
 // Missing wall section (collapsed)
 setTile(123, 116, 4);
 setTile(123, 117, 4);
@@ -818,11 +837,13 @@ setTile(123, 117, 4);
 // Building F4 — flooded with rowboat inside
 fillBorder(119, 122, 124, 127, 5);
 fillRect(120, 123, 123, 126, 12);
-setTile(124, 124, 4);
+setTile(124, 124, 4); // doorway (2 wide)
+setTile(124, 125, 4);
 
 // Building F5
 fillBorder(113, 129, 117, 133, 5);
 fillRect(114, 130, 116, 132, 12);
+setTile(117, 130, 4); // doorway (2 wide)
 setTile(117, 131, 4);
 
 // Surrounding water
@@ -849,6 +870,138 @@ for (let r = 110; r <= 126; r++) {
 for (let r = 105; r <= 112; r++) {
   setTile(r, 115, 1);
   setTile(r, 116, 1);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// ── WATER DIVERSITY — ponds, wider river, streams, puddles ─
+// ══════════════════════════════════════════════════════════
+
+// ── Pond 1: Near farmland (south-west of farmland fields) ──
+fillRect(84, 30, 86, 33, 10);  // deep water core 4×3
+// Shallow water border
+for (let r = 83; r <= 87; r++) {
+  for (let c = 29; c <= 34; c++) {
+    if (map[r][c] !== 10) setTile(r, c, 11);
+  }
+}
+
+// ── Pond 2: Near ruined town (east of the old ruined town) ──
+fillRect(42, 60, 44, 63, 10);  // deep water core 4×3
+for (let r = 41; r <= 45; r++) {
+  for (let c = 59; c <= 64; c++) {
+    if (map[r][c] !== 10 && map[r][c] === 0) setTile(r, c, 11);
+  }
+}
+
+// ── Pond 3: Near base camp south path ──
+fillRect(78, 12, 80, 15, 10);  // deep water core 4×3
+for (let r = 77; r <= 81; r++) {
+  for (let c = 11; c <= 16; c++) {
+    if (map[r][c] !== 10 && map[r][c] === 0) setTile(r, c, 11);
+  }
+}
+
+// ── Widen river by 1 tile on each bank (add shallow water borders) ──
+for (let r = 0; r < WORLD_ROWS; r++) {
+  for (let c = 0; c < WORLD_COLS; c++) {
+    if (map[r][c] !== 10) continue; // only process deep water
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < WORLD_ROWS && nc >= 0 && nc < WORLD_COLS) {
+          if (map[nr][nc] === 0) {
+            map[nr][nc] = 11; // shallow water border
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── Second smaller stream branching off main river toward flooded ruins ──
+// Branches from around row 80, col 98 and winds southeast to flooded ruins at ~row 110, col 115
+const streamPoints = [
+  [80, 98], [83, 100], [86, 102], [89, 104], [92, 106],
+  [95, 108], [98, 110], [101, 112], [104, 113], [107, 114], [110, 115],
+];
+for (let i = 0; i < streamPoints.length - 1; i++) {
+  const [pr, pc] = streamPoints[i];
+  const [nr, nc] = streamPoints[i + 1];
+  const steps = Math.max(Math.abs(nr - pr), Math.abs(nc - pc));
+  for (let s = 0; s <= steps; s++) {
+    const t = s / Math.max(1, steps);
+    const ir = Math.round(pr + (nr - pr) * t);
+    const ic = Math.round(pc + (nc - pc) * t);
+    // Narrow stream — 2 tiles wide
+    setTile(ir, ic, 10);
+    setTile(ir, ic + 1, 10);
+    // Shallow borders
+    if (map[ir][ic - 1] === 0) setTile(ir, ic - 1, 11);
+    if (map[ir][ic + 2] === 0) setTile(ir, ic + 2, 11);
+  }
+}
+
+// ── Additional flooded ruin footprints near existing flooded ruins zone ──
+// Flooded ruin F6
+fillBorder(126, 116, 130, 121, 5);
+fillRect(127, 117, 129, 120, 12);
+setTile(126, 118, 4); // doorway (2 wide)
+setTile(126, 119, 4);
+
+// Flooded ruin F7
+fillBorder(125, 126, 129, 130, 5);
+fillRect(126, 127, 128, 129, 12);
+setTile(129, 127, 4); // doorway (2 wide)
+setTile(129, 128, 4);
+
+// Flooded ruin F8 — small collapsed
+fillBorder(131, 120, 134, 124, 5);
+fillRect(132, 121, 133, 123, 12);
+setTile(131, 122, 4); // doorway (2 wide)
+setTile(131, 123, 4);
+
+// Shallow water around new flooded ruins
+for (let r = 124; r <= 136; r++) {
+  for (let c = 114; c <= 132; c++) {
+    if (map[r][c] === 0) {
+      let nearBuilding = false;
+      for (let dr = -2; dr <= 2; dr++) {
+        for (let dc = -2; dc <= 2; dc++) {
+          const nr = r + dr;
+          const nc = c + dc;
+          if (nr >= 0 && nr < WORLD_ROWS && nc >= 0 && nc < WORLD_COLS) {
+            if (map[nr][nc] === 5 || map[nr][nc] === 12) nearBuilding = true;
+          }
+        }
+      }
+      if (nearBuilding) setTile(r, c, 11);
+    }
+  }
+}
+
+// ── Water puddles in crater floor (rain collected in crater) ──
+// Scatter individual water puddles (1×1 deep, surrounded by shallow)
+const craterPuddles = [
+  [61, 129], [63, 131], [60, 132], [64, 128], [62, 133],
+];
+for (const [pr, pc] of craterPuddles) {
+  if (map[pr][pc] === 20) {
+    setTile(pr, pc, 10); // deep water puddle
+    // Shallow water ring around puddle
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = pr + dr;
+        const nc = pc + dc;
+        if (nr >= 0 && nr < WORLD_ROWS && nc >= 0 && nc < WORLD_COLS && map[nr][nc] === 20) {
+          setTile(nr, nc, 11);
+        }
+      }
+    }
+  }
 }
 
 

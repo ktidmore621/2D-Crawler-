@@ -150,7 +150,7 @@ export function createTilemap() {
         }
 
         const yOff = elev === 1 ? PLATEAU_Y_OFFSET : 0;
-        groundIdx = drawGroundTile(groundPool, groundIdx, gfx, tileId, x, y + yOff, s, r, c, time);
+        groundIdx = drawGroundTile(groundPool, groundIdx, gfx, tileId, x, y + yOff, s, r, c, time, worldMap);
       }
     }
 
@@ -192,7 +192,7 @@ export function createTilemap() {
 
 /* ──────────────── Ground tile rendering with sprites ──────────────── */
 
-function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time) {
+function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time, worldMap) {
   const h = hashTile(r, c);
   let texName = null;
 
@@ -202,7 +202,12 @@ function drawGroundTile(pool, idx, gfx, tileId, x, y, s, r, c, time) {
       break;
     case TILE_DIRT:
       texName = DIRT_TEX_NAMES[h % 3];
-      break;
+      idx = placeGroundSprite(pool, idx, texName, x, y, s);
+      // Worn dirt edge — lighter dirt border where path meets grass
+      if (worldMap) {
+        drawDirtEdge(gfx, x, y, s, r, c, worldMap);
+      }
+      return idx;
     case TILE_TREE:
       texName = 'floor_grass'; // grass under tree
       break;
@@ -344,6 +349,37 @@ function drawFloodedOverlay(gfx, x, y, s, r, c, time) {
   if (h % 5 < 2) {
     gfx.rect(x, y, s / 3, s);
     gfx.fill({ color: 0x2a5a2a, alpha: 0.12 });
+  }
+}
+
+/* ──────────────── Worn dirt edge overlay ──────────────── */
+
+function drawDirtEdge(gfx, x, y, s, r, c, worldMap) {
+  const edgeW = 6; // worn edge width in px
+  // Check each neighbor — if it's grass/tree/bush, draw a lighter dirt edge on that side
+  const isNonPath = (tr, tc) => {
+    if (tr < 0 || tr >= WORLD_ROWS || tc < 0 || tc >= WORLD_COLS) return false;
+    const t = worldMap[tr][tc];
+    return t !== TILE_DIRT && t !== TILE_HIGHWAY && t !== TILE_RUIN_FLOOR && t !== TILE_BASE_FLOOR;
+  };
+  // Lighter worn dirt color
+  const edgeColor = 0xc49a66;
+  const edgeAlpha = 0.5;
+  if (isNonPath(r - 1, c)) {
+    gfx.rect(x, y, s, edgeW);
+    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
+  }
+  if (isNonPath(r + 1, c)) {
+    gfx.rect(x, y + s - edgeW, s, edgeW);
+    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
+  }
+  if (isNonPath(r, c - 1)) {
+    gfx.rect(x, y, edgeW, s);
+    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
+  }
+  if (isNonPath(r, c + 1)) {
+    gfx.rect(x + s - edgeW, y, edgeW, s);
+    gfx.fill({ color: edgeColor, alpha: edgeAlpha });
   }
 }
 
@@ -634,12 +670,28 @@ function drawRuinWallSprite(pool, idx, gfx, x, y, s, r, c) {
   if (h % 4 === 0) {
     gfx.moveTo(x + 8, y + 14);
     gfx.lineTo(x + 16, y + 30);
-    gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.4 });
+    gfx.stroke({ width: 0.8, color: 0x2a1a0a, alpha: 0.4 });
   }
   if (h % 3 === 0) {
     gfx.moveTo(x + s - 18, y + 16);
     gfx.lineTo(x + s - 22, y + 34);
-    gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.35 });
+    gfx.stroke({ width: 0.8, color: 0x2a1a0a, alpha: 0.35 });
+  }
+  // Subtle mortar lines (0.5px instead of chunky)
+  gfx.moveTo(x, y + 10);
+  gfx.lineTo(x + s, y + 10);
+  gfx.stroke({ width: 0.5, color: 0x5a4a32, alpha: 0.2 });
+  // Rounded corners — cut 2px from each corner
+  gfx.rect(x, y, 2, 2);
+  gfx.fill({ color: 0x8a7a62, alpha: 0.6 });
+  gfx.rect(x + s - 2, y, 2, 2);
+  gfx.fill({ color: 0x8a7a62, alpha: 0.6 });
+  // Vertical crack line for walls in long sections (age/damage)
+  if (h % 5 === 0) {
+    const crackX = x + s / 2 + (h % 4) - 2;
+    gfx.moveTo(crackX, y + 4);
+    gfx.lineTo(crackX + 1, y + s - 4);
+    gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.3 });
   }
 
   return idx;
@@ -648,14 +700,28 @@ function drawRuinWallSprite(pool, idx, gfx, x, y, s, r, c) {
 /* Fallback ruin wall in graphics (kept for safety) */
 function drawRuinWallGraphics(gfx, x, y, s, r, c) {
   const h = hashTile(r, c);
-  gfx.rect(x, y, s, 12);
+  // Thinner top face (6px instead of 12)
+  gfx.rect(x, y, s, 6);
   gfx.fill(0xc4b49a);
-  gfx.rect(x, y + 12, s, 28);
+  // Thinner front face (20px instead of 28)
+  gfx.rect(x, y + 6, s, 20);
   gfx.fill(0x9a8a72);
-  gfx.rect(x, y + 40, s, s - 40);
+  gfx.rect(x, y + 26, s, s - 26);
   gfx.fill(0x8a7a62);
-  gfx.rect(x + s - 8, y + 12, 8, s - 12);
+  gfx.rect(x + s - 6, y + 6, 6, s - 6);
   gfx.fill(0x4a3a28);
+  // Rounded corners — cut 2px from each corner with bg color
+  gfx.rect(x, y, 2, 2);
+  gfx.fill(0x8a7a62);
+  gfx.rect(x + s - 2, y, 2, 2);
+  gfx.fill(0x8a7a62);
+  // Subtle mortar lines (0.5px)
+  gfx.moveTo(x, y + 10);
+  gfx.lineTo(x + s, y + 10);
+  gfx.stroke({ width: 0.5, color: 0x5a4a32, alpha: 0.25 });
+  gfx.moveTo(x, y + 18);
+  gfx.lineTo(x + s, y + 18);
+  gfx.stroke({ width: 0.5, color: 0x5a4a32, alpha: 0.25 });
 }
 
 /* ──────────────── Mountain wall overlay — 3/4 stacked blocks ──────────────── */

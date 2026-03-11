@@ -11,6 +11,7 @@ import { updateCamera } from '../systems/camera.js';
 import { createTilemap } from '../systems/tilemap.js';
 import { createPropsRenderer } from '../systems/props.js';
 import { isPositionPassable } from '../systems/collision.js';
+import { createMiniMap } from '../systems/minimap.js';
 import {
   worldMap,
   PLAYER_START_COL,
@@ -33,6 +34,7 @@ export default class GameScene {
     this.tilemap = null;
     this.propsRenderer = null;
     this.vignette = null;
+    this.miniMap = null;
     this.elapsedTime = 0;
     this._dungeonLogged = false;
     this._caveLogged = {};
@@ -60,6 +62,10 @@ export default class GameScene {
     this.worldContainer.addChild(this.player.view);
 
     this._createVignette(width, height);
+
+    // Mini map overlay (added to container so it stays on top of vignette)
+    this.miniMap = createMiniMap(worldMap);
+    this.container.addChild(this.miniMap.container);
 
     this.inputState = createInputState();
     this._onKeyDown = this.inputState.onKeyDown;
@@ -96,6 +102,12 @@ export default class GameScene {
 
     this._checkTriggers();
     this._updateWorld(deltaSeconds);
+
+    // Update mini map with player position
+    if (this.miniMap) {
+      const { width } = this.app.screen;
+      this.miniMap.update(this.player.x, this.player.y, width);
+    }
   }
 
   _updateWorld(deltaSeconds) {
@@ -152,6 +164,9 @@ export default class GameScene {
     }
     if (this.inputState && this.inputState.destroy) {
       this.inputState.destroy();
+    }
+    if (this.miniMap) {
+      this.miniMap.destroy();
     }
     this.container.destroy({ children: true });
   }
