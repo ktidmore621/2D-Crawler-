@@ -1,15 +1,12 @@
 /**
  * Props system — decorative non-tile overlays rendered on the world.
- * Broken cars, streetlights, telephone poles, debris, barrels, and campfire.
+ * Full 3/4 perspective: every object has top face (lightest), front face (mid),
+ * shadow side (darkest), shadow to south-east, depth lines on corners.
  */
 
 import { Graphics } from 'pixi.js';
 import {
   WORLD_TILE_SIZE,
-  PROP_CAR_COLOR,
-  PROP_BARREL_COLOR,
-  PROP_POLE_COLOR,
-  PROP_DEBRIS_COLOR,
   CAMP_FIRE_COLORS,
   CAMP_GLOW_COLOR,
   CAMP_GLOW_RADIUS,
@@ -19,14 +16,15 @@ import {
 
 /**
  * Prop definition: { type, col, row, rotation? }
- * Types: 'car', 'streetlight', 'telephone_pole', 'debris', 'barrel',
- *        'campfire', 'dungeon_arch'
  */
 
 // Hand-placed props
 export const PROP_LIST = [
   // Base camp — campfire
   { type: 'campfire', col: 6, row: 74 },
+
+  // Base building — condemned structure
+  { type: 'base_building', col: 3, row: 72 },
 
   // Broken cars along the dirt path
   { type: 'car', col: 15, row: 71, rotation: 0.1 },
@@ -75,19 +73,14 @@ export function createPropsRenderer() {
 
   /**
    * Render props visible in viewport.
-   * @param {number} camX
-   * @param {number} camY
-   * @param {number} vpWidth
-   * @param {number} vpHeight
-   * @param {number} time - elapsed seconds for animations
    */
   function render(camX, camY, vpWidth, vpHeight, time) {
     gfx.clear();
 
-    const viewLeft = -camX - WORLD_TILE_SIZE * 2;
-    const viewRight = -camX + vpWidth + WORLD_TILE_SIZE * 2;
-    const viewTop = -camY - WORLD_TILE_SIZE * 2;
-    const viewBottom = -camY + vpHeight + WORLD_TILE_SIZE * 2;
+    const viewLeft = -camX - WORLD_TILE_SIZE * 3;
+    const viewRight = -camX + vpWidth + WORLD_TILE_SIZE * 3;
+    const viewTop = -camY - WORLD_TILE_SIZE * 3;
+    const viewBottom = -camY + vpHeight + WORLD_TILE_SIZE * 3;
 
     for (const prop of PROP_LIST) {
       const px = prop.col * WORLD_TILE_SIZE;
@@ -118,6 +111,9 @@ export function createPropsRenderer() {
         case 'dungeon_arch':
           drawDungeonArch(gfx, px, py, time);
           break;
+        case 'base_building':
+          drawBaseBuilding(gfx, px, py);
+          break;
       }
     }
 
@@ -128,170 +124,340 @@ export function createPropsRenderer() {
   return { gfx, render };
 }
 
+/* ──────────────── Broken Car — 3/4 ──────────────── */
+
 function drawCar(gfx, x, y, rotation) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
-
-  // Ground shadow
-  gfx.ellipse(cx, cy + 6, 22, 8);
-  gfx.fill({ color: 0x000000, alpha: 0.2 });
-
-  // Car body — dark rectangle
-  // Apply rotation by drawing at offset
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);
 
-  // Simple rotated rectangle approximation
-  const hw = 20;
-  const hh = 10;
-
-  const corners = [
-    [-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh],
-  ].map(([dx, dy]) => [
+  // Helper: rotate point around center
+  const rot = (dx, dy) => [
     cx + dx * cos - dy * sin,
     cy + dx * sin + dy * cos,
-  ]);
+  ];
 
-  gfx.moveTo(corners[0][0], corners[0][1]);
-  for (let i = 1; i < 4; i++) {
-    gfx.lineTo(corners[i][0], corners[i][1]);
-  }
+  // Shadow underneath — elongated dark ellipse
+  gfx.ellipse(cx + 4, cy + 10, 24, 8);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+
+  // ── Car body (main) ──
+  const hw = 22; // half width
+  const hh = 11; // half height
+  const bodyCorners = [
+    rot(-hw, -hh), rot(hw, -hh), rot(hw, hh), rot(-hw, hh),
+  ];
+
+  // Main body fill
+  gfx.moveTo(bodyCorners[0][0], bodyCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(bodyCorners[i][0], bodyCorners[i][1]);
   gfx.closePath();
-  gfx.fill(PROP_CAR_COLOR);
+  gfx.fill(0x3a3530);
+
+  // ── Shadow side (right/bottom strip) — darker ──
+  const shadowCorners = [
+    rot(hw - 4, -hh), rot(hw, -hh), rot(hw, hh), rot(hw - 4, hh),
+  ];
+  gfx.moveTo(shadowCorners[0][0], shadowCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(shadowCorners[i][0], shadowCorners[i][1]);
+  gfx.closePath();
+  gfx.fill(0x252220);
+
+  // Bottom shadow strip (south-facing depth)
+  const btmCorners = [
+    rot(-hw, hh - 3), rot(hw, hh - 3), rot(hw, hh), rot(-hw, hh),
+  ];
+  gfx.moveTo(btmCorners[0][0], btmCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(btmCorners[i][0], btmCorners[i][1]);
+  gfx.closePath();
+  gfx.fill(0x252220);
+
+  // ── Hood (north-facing end — slightly lighter) ──
+  const hoodCorners = [
+    rot(-hw, -hh), rot(hw, -hh), rot(hw, -hh + 6), rot(-hw, -hh + 6),
+  ];
+  gfx.moveTo(hoodCorners[0][0], hoodCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(hoodCorners[i][0], hoodCorners[i][1]);
+  gfx.closePath();
+  gfx.fill(0x424038);
+
+  // ── Roof — lighter smaller rectangle centered on body ──
+  const rw = 12;
+  const rh = 7;
+  const roofCorners = [
+    rot(-rw, -rh), rot(rw, -rh), rot(rw, rh), rot(-rw, rh),
+  ];
+  gfx.moveTo(roofCorners[0][0], roofCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(roofCorners[i][0], roofCorners[i][1]);
+  gfx.closePath();
+  gfx.fill(0x4a4540);
+
+  // ── Windshield — dark blue-grey on front face, with crack ──
+  const wsCorners = [
+    rot(-10, -hh + 6), rot(10, -hh + 6), rot(10, -hh + 10), rot(-10, -hh + 10),
+  ];
+  gfx.moveTo(wsCorners[0][0], wsCorners[0][1]);
+  for (let i = 1; i < 4; i++) gfx.lineTo(wsCorners[i][0], wsCorners[i][1]);
+  gfx.closePath();
+  gfx.fill(0x1a2028);
 
   // Windshield crack line
-  const windshieldX = cx + 8 * cos;
-  const windshieldY = cy + 8 * sin;
-  gfx.moveTo(windshieldX - 6, windshieldY - 5);
-  gfx.lineTo(windshieldX + 4, windshieldY + 5);
-  gfx.stroke({ width: 1, color: 0x4a4a4a, alpha: 0.6 });
+  const crk1 = rot(-4, -hh + 7);
+  const crk2 = rot(5, -hh + 9);
+  gfx.moveTo(crk1[0], crk1[1]);
+  gfx.lineTo(crk2[0], crk2[1]);
+  gfx.stroke({ width: 1, color: 0x5a5a6a, alpha: 0.7 });
 
-  // Flat tires — small dark circles at corners
-  gfx.circle(corners[0][0], corners[0][1], 3);
-  gfx.fill(0x1a1a1a);
-  gfx.circle(corners[1][0], corners[1][1], 3);
-  gfx.fill(0x1a1a1a);
-  gfx.circle(corners[2][0], corners[2][1], 3);
-  gfx.fill(0x1a1a1a);
-  gfx.circle(corners[3][0], corners[3][1], 3);
-  gfx.fill(0x1a1a1a);
+  // ── Wheels — small dark ellipses at corners (3/4 squashed) ──
+  const wheelPositions = [
+    [-hw + 3, -hh + 2], [hw - 3, -hh + 2],
+    [-hw + 3, hh - 2], [hw - 3, hh - 2],
+  ];
+  for (const [dx, dy] of wheelPositions) {
+    const [wx, wy] = rot(dx, dy);
+    // Squashed ellipse for 3/4 view
+    gfx.ellipse(wx, wy, 3.5, 2);
+    gfx.fill(0x1a1a1a);
+  }
 }
+
+/* ──────────────── Streetlight — 3/4 cylindrical ──────────────── */
 
 function drawStreetlight(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
-  // Pole — vertical, bent/snapped
-  gfx.moveTo(bx, by);
-  gfx.lineTo(bx, by - 35);
-  gfx.lineTo(bx - 8, by - 40); // bent top
-  gfx.stroke({ width: 2, color: PROP_POLE_COLOR });
+  // Shadow on ground
+  gfx.ellipse(bx + 4, by + 2, 6, 2);
+  gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // No light — just the fixture shape
-  gfx.circle(bx - 8, by - 40, 3);
-  gfx.fill({ color: 0x3a3a3a, alpha: 0.5 });
+  // Pole — narrow rounded rectangle with left/right face for cylindrical depth
+  // Left face (lit)
+  gfx.rect(bx - 2, by - 38, 2, 38);
+  gfx.fill(0x7a6a4a);
+  // Right face (shadow)
+  gfx.rect(bx, by - 38, 2, 38);
+  gfx.fill(0x4a3a2a);
+
+  // Bent top section
+  gfx.moveTo(bx - 1, by - 38);
+  gfx.lineTo(bx - 10, by - 42);
+  gfx.stroke({ width: 2.5, color: 0x4a3a2a });
+  gfx.moveTo(bx - 1, by - 39);
+  gfx.lineTo(bx - 10, by - 43);
+  gfx.stroke({ width: 1.5, color: 0x7a6a4a });
+
+  // Lamp head — small rectangle with darker underside
+  gfx.rect(bx - 14, by - 45, 8, 3);
+  gfx.fill(0x5a5040); // top face
+  gfx.rect(bx - 14, by - 42, 8, 2);
+  gfx.fill(0x3a3020); // underside darker
+
+  // Broken wire — bezier drooping down (2 lines for shadow depth)
+  gfx.moveTo(bx - 10, by - 42);
+  gfx.quadraticCurveTo(bx - 6, by - 30, bx - 2, by - 34);
+  gfx.stroke({ width: 1, color: 0x3a3a3a, alpha: 0.5 });
+  gfx.moveTo(bx - 10, by - 41);
+  gfx.quadraticCurveTo(bx - 6, by - 29, bx - 2, by - 33);
+  gfx.stroke({ width: 0.8, color: 0x5a5a5a, alpha: 0.3 });
 }
+
+/* ──────────────── Telephone Pole — 3/4 cylindrical ──────────────── */
 
 function drawTelephonePole(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
-  // Vertical pole
-  gfx.moveTo(bx, by);
-  gfx.lineTo(bx, by - 42);
-  gfx.stroke({ width: 3, color: 0x3a2a1a });
+  // Shadow on ground
+  gfx.ellipse(bx + 4, by + 2, 5, 2);
+  gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Crossbar
-  gfx.moveTo(bx - 12, by - 38);
-  gfx.lineTo(bx + 12, by - 38);
-  gfx.stroke({ width: 2, color: 0x3a2a1a });
+  // Pole — cylindrical with left/right face
+  gfx.rect(bx - 3, by - 44, 3, 44);
+  gfx.fill(0x5a4a30); // left face (lit)
+  gfx.rect(bx, by - 44, 3, 44);
+  gfx.fill(0x3a2a1a); // right face (shadow)
+
+  // Crossbar — wider rectangle with top/front/underside
+  // Top face (lightest)
+  gfx.rect(bx - 14, by - 42, 28, 2);
+  gfx.fill(0x6a5a40);
+  // Front face (mid)
+  gfx.rect(bx - 14, by - 40, 28, 3);
+  gfx.fill(0x4a3a28);
+  // Underside (darkest)
+  gfx.rect(bx - 14, by - 37, 28, 2);
+  gfx.fill(0x2a1a10);
 }
 
+/* ──────────────── Wires between telephone poles — 3/4 ──────────────── */
+
 function drawWires(gfx) {
-  // Draw sagging wires between telephone poles
   const poles = PROP_LIST.filter(p => p.type === 'telephone_pole');
   for (let i = 0; i < poles.length - 1; i++) {
     const p1 = poles[i];
     const p2 = poles[i + 1];
 
-    const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 + 12;
-    const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 38;
-    const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 12;
-    const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 38;
+    const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 + 14;
+    const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 40;
+    const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 14;
+    const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 40;
 
-    // Sagging wire as bezier curve
     const midX = (x1 + x2) / 2;
-    const midY = Math.max(y1, y2) + 20; // sag
+    const midY = Math.max(y1, y2) + 22;
 
+    // Top wire — lighter
     gfx.moveTo(x1, y1);
     gfx.quadraticCurveTo(midX, midY, x2, y2);
-    gfx.stroke({ width: 1, color: 0x3a3a3a, alpha: 0.5 });
+    gfx.stroke({ width: 1, color: 0x5a5a5a, alpha: 0.4 });
+
+    // Bottom wire — darker shadow
+    gfx.moveTo(x1, y1 + 1.5);
+    gfx.quadraticCurveTo(midX, midY + 1.5, x2, y2 + 1.5);
+    gfx.stroke({ width: 1, color: 0x2a2a2a, alpha: 0.35 });
   }
 }
+
+/* ──────────────── Debris — 3/4 overlapping pieces ──────────────── */
 
 function drawDebris(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Cluster of small dark rectangles
-  gfx.rect(cx - 8, cy - 4, 7, 5);
-  gfx.fill(PROP_DEBRIS_COLOR);
-  gfx.rect(cx + 2, cy - 2, 5, 8);
-  gfx.fill(0x2a2018);
-  gfx.rect(cx - 4, cy + 3, 9, 4);
-  gfx.fill(0x1a1810);
-  gfx.rect(cx + 5, cy + 5, 4, 3);
-  gfx.fill(PROP_DEBRIS_COLOR);
+  // Shadow underneath
+  gfx.ellipse(cx + 2, cy + 8, 14, 4);
+  gfx.fill({ color: 0x000000, alpha: 0.15 });
+
+  // Back pieces — smaller, higher (further away in 3/4)
+  // Piece 1 — concrete grey
+  gfx.rect(cx - 6, cy - 8, 8, 4); // top face
+  gfx.fill(0x7a7068);
+  gfx.rect(cx - 6, cy - 4, 8, 5); // front face
+  gfx.fill(0x6a6058);
+
+  // Piece 2 — rust colored (back)
+  gfx.rect(cx + 4, cy - 6, 6, 3); // top face
+  gfx.fill(0x8a5a3a);
+  gfx.rect(cx + 4, cy - 3, 6, 5); // front face
+  gfx.fill(0x7a4a2a);
+
+  // Front pieces — larger, lower (closer to camera)
+  // Piece 3 — dark wood
+  gfx.rect(cx - 8, cy + 1, 10, 3); // top face
+  gfx.fill(0x5a4028);
+  gfx.rect(cx - 8, cy + 4, 10, 6); // front face
+  gfx.fill(0x4a3018);
+
+  // Piece 4 — concrete
+  gfx.rect(cx + 3, cy + 2, 7, 3); // top face
+  gfx.fill(0x7a7068);
+  gfx.rect(cx + 3, cy + 5, 7, 4); // front face
+  gfx.fill(0x5a5848);
+
+  // Piece 5 — small rust piece in front
+  gfx.rect(cx - 2, cy + 6, 5, 2); // top face
+  gfx.fill(0x8a5a3a);
+  gfx.rect(cx - 2, cy + 8, 5, 3); // front face
+  gfx.fill(0x6a3a1a);
 }
+
+/* ──────────────── Barrel — 3/4 ──────────────── */
 
 function drawBarrel(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Shadow
-  gfx.ellipse(cx, cy + 6, 8, 3);
-  gfx.fill({ color: 0x000000, alpha: 0.2 });
+  // Small shadow ellipse underneath
+  gfx.ellipse(cx + 3, cy + 10, 9, 3);
+  gfx.fill({ color: 0x000000, alpha: 0.18 });
 
-  // Barrel body
-  gfx.circle(cx, cy, 7);
-  gfx.fill(PROP_BARREL_COLOR);
+  // Front face — rectangle (mid tone)
+  gfx.rect(cx - 7, cy - 4, 14, 14);
+  gfx.fill(0x7a4a2a);
 
-  // Rust ring
-  gfx.circle(cx, cy, 7);
-  gfx.stroke({ width: 1.5, color: 0x6a3a0a, alpha: 0.6 });
+  // Bottom darker strip
+  gfx.rect(cx - 7, cy + 7, 14, 3);
+  gfx.fill(0x4a2a10);
 
-  // Top highlight
-  gfx.circle(cx, cy - 2, 3);
-  gfx.fill({ color: 0x9a5a2a, alpha: 0.4 });
+  // Horizontal hoop lines on front face
+  gfx.moveTo(cx - 7, cy);
+  gfx.lineTo(cx + 7, cy);
+  gfx.stroke({ width: 1.5, color: 0x5a3218, alpha: 0.7 });
+
+  gfx.moveTo(cx - 7, cy + 5);
+  gfx.lineTo(cx + 7, cy + 5);
+  gfx.stroke({ width: 1.5, color: 0x5a3218, alpha: 0.6 });
+
+  gfx.moveTo(cx - 7, cy - 2);
+  gfx.lineTo(cx + 7, cy - 2);
+  gfx.stroke({ width: 1, color: 0x5a3218, alpha: 0.5 });
+
+  // Top ellipse — lighter rusty orange (top face)
+  gfx.ellipse(cx, cy - 4, 7, 3);
+  gfx.fill(0x8a5a2a);
+
+  // Top face inner ring
+  gfx.ellipse(cx, cy - 4, 4, 2);
+  gfx.fill({ color: 0x6a3a1a, alpha: 0.5 });
+
+  // Bottom ellipse shadow (implied curve)
+  gfx.ellipse(cx, cy + 10, 7, 2);
+  gfx.fill({ color: 0x3a1a08, alpha: 0.3 });
 }
+
+/* ──────────────── Campfire — 3/4 ──────────────── */
 
 function drawCampfire(gfx, x, y, time) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Glow circle beneath (pulsing)
+  // Glow pool on ground — ellipse (wider than tall, flat ground plane)
   const glowAlpha = 0.15 + 0.1 * Math.sin(time * 2.5);
-  gfx.circle(cx, cy, CAMP_GLOW_RADIUS);
+  gfx.ellipse(cx, cy + 2, CAMP_GLOW_RADIUS * 1.1, CAMP_GLOW_RADIUS * 0.7);
   gfx.fill({ color: CAMP_GLOW_COLOR, alpha: glowAlpha });
 
-  // Orange warm light layer
-  gfx.circle(cx, cy, CAMP_GLOW_RADIUS * 0.6);
+  // Orange warm light layer (also elliptical)
+  gfx.ellipse(cx, cy + 2, CAMP_GLOW_RADIUS * 0.7, CAMP_GLOW_RADIUS * 0.45);
   gfx.fill({ color: 0x885511, alpha: glowAlpha * 0.5 });
 
-  // Fire ring (stones)
+  // Stone ring — each stone as a 3/4 block
   for (let i = 0; i < 8; i++) {
     const angle = (Math.PI * 2 * i) / 8;
-    const sx = cx + Math.cos(angle) * 10;
-    const sy = cy + Math.sin(angle) * 8;
-    gfx.circle(sx, sy, 3);
-    gfx.fill(0x4a4040);
+    const sx = cx + Math.cos(angle) * 11;
+    const sy = cy + Math.sin(angle) * 9; // elliptical ring (3/4)
+
+    // Top face (light grey)
+    gfx.rect(sx - 3, sy - 3, 6, 3);
+    gfx.fill(0x6a6058);
+    // Front face (dark grey)
+    gfx.rect(sx - 3, sy, 6, 3);
+    gfx.fill(0x3a3830);
   }
 
-  // Animated flames
+  // Log pile — 2 crossed rectangles with lighter top face
+  // Log 1
+  gfx.rect(cx - 7, cy - 1, 14, 2); // top face
+  gfx.fill(0x5a3a1a);
+  gfx.rect(cx - 7, cy + 1, 14, 2); // front face
+  gfx.fill(0x3a2210);
+  // Log end
+  gfx.ellipse(cx - 7, cy + 1, 2, 2);
+  gfx.fill(0x4a2a10);
+  gfx.ellipse(cx + 7, cy + 1, 2, 2);
+  gfx.fill(0x3a1a08);
+
+  // Log 2 (crossed)
+  gfx.rect(cx - 2, cy - 5, 2, 10); // top face
+  gfx.fill(0x5a3a1a);
+  gfx.rect(cx, cy - 5, 2, 10); // front face
+  gfx.fill(0x3a2210);
+
+  // Animated flames — base wider than top (perspective)
   const pulseScale = 1 + 0.15 * Math.sin(time * 3.5);
   for (let i = 0; i < CAMP_FIRE_COLORS.length; i++) {
     const h = (12 - i * 1.5) * pulseScale;
-    const w = (8 - i) * pulseScale;
+    const w = (9 - i * 1.2) * pulseScale; // wider base
     const yOff = i * 1.5;
     const xWobble = Math.sin(time * 4 + i * 0.8) * 2;
     gfx.ellipse(cx + xWobble, cy - yOff - h / 2, w, h);
@@ -309,45 +475,244 @@ function drawCampfire(gfx, x, y, time) {
   }
 }
 
+/* ──────────────── Dungeon Entrance Archway — 3/4 ──────────────── */
+
 function drawDungeonArch(gfx, x, y, time) {
-  const cx = x + WORLD_TILE_SIZE * 1.5; // center of 3-tile wide arch
+  const cx = x + WORLD_TILE_SIZE * 1.5;
   const top = y;
+  const archWidth = WORLD_TILE_SIZE * 3;
+  const archHeight = WORLD_TILE_SIZE * 2.5;
 
-  // Left pillar
-  gfx.rect(x - 4, top, 12, WORLD_TILE_SIZE * 2.5);
+  // ── Steps leading down — 3 steps going into the arch ──
+  const stepWidth = archWidth - 24;
+  for (let i = 0; i < 3; i++) {
+    const stepY = top + archHeight - 6 + i * 8;
+    const darken = i * 0.15;
+    // Top face of step (lighter)
+    gfx.rect(x + 12 + i * 4, stepY, stepWidth - i * 8, 3);
+    gfx.fill({ color: 0x4a4038, alpha: 1 - darken });
+    // Front face of step (darker)
+    gfx.rect(x + 12 + i * 4, stepY + 3, stepWidth - i * 8, 5);
+    gfx.fill({ color: 0x2a2018, alpha: 1 - darken });
+  }
+
+  // ── Inside of arch — very dark, suggesting depth going down ──
+  gfx.rect(x + 10, top + 12, archWidth - 20, archHeight - 12);
+  gfx.fill(0x050302);
+
+  // ── Left pillar — 3/4 stone blocks ──
+  const pillarW = 14;
+  // Front face
+  gfx.rect(x - 4, top, pillarW, archHeight);
   gfx.fill(DUNGEON_STONE_COLOR);
+  // Top face
+  gfx.rect(x - 4, top - 4, pillarW, 4);
+  gfx.fill(0x3a3530);
+  // Shadow side (right edge)
+  gfx.rect(x - 4 + pillarW - 3, top, 3, archHeight);
+  gfx.fill(0x1a1510);
 
-  // Right pillar
-  gfx.rect(x + WORLD_TILE_SIZE * 3 - 8, top, 12, WORLD_TILE_SIZE * 2.5);
+  // Stone block lines on left pillar
+  for (let i = 0; i < 6; i++) {
+    const ly = top + 6 + i * 18;
+    const blockOffset = (i % 2 === 0) ? 0 : 4;
+    // Horizontal mortar
+    gfx.moveTo(x - 4, ly);
+    gfx.lineTo(x - 4 + pillarW, ly);
+    gfx.stroke({ width: 0.8, color: 0x1a1510, alpha: 0.5 });
+    // Vertical mortar (offset for brick pattern)
+    gfx.moveTo(x - 4 + blockOffset + 6, ly);
+    gfx.lineTo(x - 4 + blockOffset + 6, ly + 18);
+    gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.3 });
+  }
+
+  // ── Right pillar — 3/4 stone blocks ──
+  const rpx = x + archWidth - 10;
+  // Front face
+  gfx.rect(rpx, top, pillarW, archHeight);
   gfx.fill(DUNGEON_STONE_COLOR);
+  // Top face
+  gfx.rect(rpx, top - 4, pillarW, 4);
+  gfx.fill(0x3a3530);
+  // Shadow side (right edge)
+  gfx.rect(rpx + pillarW - 3, top, 3, archHeight);
+  gfx.fill(0x1a1510);
 
-  // Arch top — curved
-  gfx.moveTo(x - 4, top + 6);
-  gfx.lineTo(x - 4, top - 8);
-  gfx.quadraticCurveTo(cx, top - 25, x + WORLD_TILE_SIZE * 3 + 4, top - 8);
-  gfx.lineTo(x + WORLD_TILE_SIZE * 3 + 4, top + 6);
-  gfx.quadraticCurveTo(cx, top - 15, x - 4, top + 6);
+  // Stone block lines on right pillar
+  for (let i = 0; i < 6; i++) {
+    const ly = top + 6 + i * 18;
+    const blockOffset = (i % 2 === 0) ? 0 : 4;
+    gfx.moveTo(rpx, ly);
+    gfx.lineTo(rpx + pillarW, ly);
+    gfx.stroke({ width: 0.8, color: 0x1a1510, alpha: 0.5 });
+    gfx.moveTo(rpx + blockOffset + 6, ly);
+    gfx.lineTo(rpx + blockOffset + 6, ly + 18);
+    gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.3 });
+  }
+
+  // ── Arch top — curved, with 3/4 treatment ──
+  // Top face of arch (lightest)
+  gfx.moveTo(x - 4, top - 4);
+  gfx.quadraticCurveTo(cx, top - 30, x + archWidth + 4, top - 4);
+  gfx.lineTo(x + archWidth + 4, top);
+  gfx.quadraticCurveTo(cx, top - 22, x - 4, top);
+  gfx.closePath();
+  gfx.fill(0x3a3530);
+
+  // Front face of arch (mid)
+  gfx.moveTo(x - 4, top);
+  gfx.quadraticCurveTo(cx, top - 22, x + archWidth + 4, top);
+  gfx.lineTo(x + archWidth + 4, top + 8);
+  gfx.quadraticCurveTo(cx, top - 14, x - 4, top + 8);
   gfx.closePath();
   gfx.fill(DUNGEON_STONE_COLOR);
 
-  // Stone block lines on pillars
+  // Block lines on arch curve
   for (let i = 0; i < 5; i++) {
-    const ly = top + 10 + i * 20;
-    gfx.moveTo(x - 4, ly);
-    gfx.lineTo(x + 8, ly);
-    gfx.stroke({ width: 0.5, color: 0x1a1510, alpha: 0.5 });
-
-    gfx.moveTo(x + WORLD_TILE_SIZE * 3 - 8, ly);
-    gfx.lineTo(x + WORLD_TILE_SIZE * 3 + 4, ly);
-    gfx.stroke({ width: 0.5, color: 0x1a1510, alpha: 0.5 });
+    const t = (i + 1) / 6;
+    const ax = x - 4 + (archWidth + 8) * t;
+    const ay = top - 22 + 22 * (1 - Math.sin(t * Math.PI)) * 0.4;
+    gfx.moveTo(ax, ay - 4);
+    gfx.lineTo(ax, ay + 8);
+    gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.4 });
   }
 
-  // Green glowing threshold — pulsing
+  // ── Green threshold glow — ellipse on ground, pulsing ──
   const glowAlpha = 0.3 + 0.25 * Math.sin(time * 2.5);
-  gfx.rect(x + 10, top + WORLD_TILE_SIZE * 2, WORLD_TILE_SIZE * 3 - 20, 6);
+  gfx.ellipse(cx, top + archHeight + 4, archWidth * 0.35, 8);
   gfx.fill({ color: DUNGEON_GLOW_COLOR, alpha: glowAlpha });
 
-  // Glow around entrance
-  gfx.rect(x + 12, top + 10, WORLD_TILE_SIZE * 3 - 24, WORLD_TILE_SIZE * 2 - 10);
-  gfx.fill({ color: DUNGEON_GLOW_COLOR, alpha: glowAlpha * 0.15 });
+  // Glow inside entrance
+  gfx.ellipse(cx, top + archHeight * 0.6, archWidth * 0.25, archHeight * 0.2);
+  gfx.fill({ color: DUNGEON_GLOW_COLOR, alpha: glowAlpha * 0.12 });
+}
+
+/* ──────────────── Base Building — condemned 3/4 ──────────────── */
+
+function drawBaseBuilding(gfx, x, y) {
+  const bw = WORLD_TILE_SIZE * 3; // building width (3 tiles)
+  const bh = WORLD_TILE_SIZE * 2; // building height (2 tiles)
+
+  // ── Foundation — slightly lighter strip at base ──
+  gfx.rect(x - 2, y + bh - 4, bw + 4, 6);
+  gfx.fill(0x6a5a48);
+
+  // ── Walls — full 3/4 stone block treatment ──
+  // Front face (main wall, south-facing)
+  gfx.rect(x, y + 12, bw, bh - 12);
+  gfx.fill(0x5a4a38);
+
+  // Top face — 12px strip
+  gfx.rect(x, y, bw, 12);
+  gfx.fill(0x7a6a58);
+
+  // Right face — shadow side
+  gfx.rect(x + bw - 8, y + 12, 8, bh - 12);
+  gfx.fill(0x3a2a18);
+
+  // Stone block lines on front wall (brick pattern)
+  for (let row = 0; row < 6; row++) {
+    const ly = y + 14 + row * 12;
+    if (ly > y + bh - 4) break;
+    // Horizontal mortar
+    gfx.moveTo(x + 2, ly);
+    gfx.lineTo(x + bw - 10, ly);
+    gfx.stroke({ width: 1, color: 0x3a2a1a, alpha: 0.5 });
+
+    // Vertical mortar — offset every other row
+    const offset = (row % 2 === 0) ? 0 : 8;
+    for (let vx = offset + 16; vx < bw - 10; vx += 16) {
+      gfx.moveTo(x + vx, ly);
+      gfx.lineTo(x + vx, ly + 12);
+      gfx.stroke({ width: 0.8, color: 0x3a2a1a, alpha: 0.35 });
+    }
+  }
+
+  // ── Windows — recessed look ──
+  // Window 1
+  const w1x = x + 16;
+  const w1y = y + 26;
+  gfx.rect(w1x, w1y, 18, 22);
+  gfx.fill(0x0a0806); // dark interior
+  gfx.moveTo(w1x, w1y);
+  gfx.lineTo(w1x + 18, w1y);
+  gfx.stroke({ width: 1.5, color: 0x9a8a78 }); // top sill highlight
+
+  // Window 2
+  const w2x = x + bw - 38;
+  gfx.rect(w2x, w1y, 18, 22);
+  gfx.fill(0x0a0806);
+  gfx.moveTo(w2x, w1y);
+  gfx.lineTo(w2x + 18, w1y);
+  gfx.stroke({ width: 1.5, color: 0x9a8a78 });
+
+  // ── Boarded door — X pattern of planks ──
+  const dx = x + bw / 2 - 12;
+  const dy = y + 30;
+  const dw = 24;
+  const dh = bh - 34;
+  gfx.rect(dx, dy, dw, dh);
+  gfx.fill(0x3a2510); // door background
+
+  // Board X pattern
+  gfx.moveTo(dx + 2, dy + 2);
+  gfx.lineTo(dx + dw - 2, dy + dh - 2);
+  gfx.stroke({ width: 3, color: 0x5a3518 });
+  gfx.moveTo(dx + dw - 2, dy + 2);
+  gfx.lineTo(dx + 2, dy + dh - 2);
+  gfx.stroke({ width: 3, color: 0x5a3518 });
+
+  // Board top edge highlights
+  gfx.moveTo(dx + 2, dy + 1);
+  gfx.lineTo(dx + dw - 2, dy + dh - 3);
+  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
+  gfx.moveTo(dx + dw - 2, dy + 1);
+  gfx.lineTo(dx + 2, dy + dh - 3);
+  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
+
+  // Horizontal board
+  gfx.rect(dx, dy + dh / 2 - 2, dw, 4);
+  gfx.fill(0x5a3518);
+  gfx.moveTo(dx, dy + dh / 2 - 2);
+  gfx.lineTo(dx + dw, dy + dh / 2 - 2);
+  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
+
+  // ── Roof — dark grey-brown slanted covering ──
+  gfx.moveTo(x - 6, y - 2);
+  gfx.lineTo(x + bw + 6, y - 2);
+  gfx.lineTo(x + bw + 4, y - 16);
+  gfx.lineTo(x - 4, y - 12);
+  gfx.closePath();
+  gfx.fill(0x3a2a18);
+
+  // Roof front edge (lighter — top face)
+  gfx.moveTo(x - 6, y - 2);
+  gfx.lineTo(x + bw + 6, y - 2);
+  gfx.lineTo(x + bw + 6, y);
+  gfx.lineTo(x - 6, y);
+  gfx.closePath();
+  gfx.fill(0x4a3a28);
+
+  // ── Collapsed section — one corner of roof missing ──
+  // Remove top-right portion — show exposed rafters
+  gfx.rect(x + bw - 30, y - 16, 34, 14);
+  gfx.fill(0x0a0805); // sky through collapsed roof
+
+  // Exposed rafters — 3-4 diagonal dark lines
+  for (let i = 0; i < 4; i++) {
+    const rx = x + bw - 28 + i * 8;
+    gfx.moveTo(rx, y - 14);
+    gfx.lineTo(rx + 4, y - 2);
+    gfx.stroke({ width: 1.5, color: 0x2a1a08 });
+  }
+
+  // Wall cracks
+  gfx.moveTo(x + 10, y + 20);
+  gfx.lineTo(x + 18, y + 44);
+  gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.4 });
+
+  gfx.moveTo(x + bw - 20, y + 30);
+  gfx.lineTo(x + bw - 16, y + 52);
+  gfx.lineTo(x + bw - 22, y + 60);
+  gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.35 });
 }
