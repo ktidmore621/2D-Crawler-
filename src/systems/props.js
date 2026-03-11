@@ -573,10 +573,11 @@ function drawBushPropSprite(pool, idx, gfx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center — bush grows upward from base
   const scale = (WORLD_TILE_SIZE * 0.85) / 48;
   sprite.scale.set(scale);
-  sprite.x = cx - (48 * scale) / 2;
-  sprite.y = cy - (48 * scale) / 2 - 4;
+  sprite.x = cx;
+  sprite.y = y + WORLD_TILE_SIZE; // base of sprite sits at bottom of tile
   sprite.visible = true;
 
   return idx;
@@ -753,10 +754,11 @@ function drawNatureBushSprite(pool, idx, gfx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center — bush grows upward from base
   const scale = 1.0; // 48px source → 48px display
   sprite.scale.set(scale);
-  sprite.x = cx - 48 * scale / 2;
-  sprite.y = cy - 48 * scale / 2 - 4;
+  sprite.x = cx;
+  sprite.y = y + WORLD_TILE_SIZE; // base of sprite sits at bottom of tile
   sprite.visible = true;
   return idx;
 }

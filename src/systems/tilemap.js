@@ -591,12 +591,12 @@ function drawTreeSprite(pool, idx, gfx, x, y, s, r, c) {
   // Scale tree to be clearly larger than a tile (~1.8× tile width)
   const targetW = s * 1.8;
   const scale = targetW / treeW;
-  const targetH = treeH * scale;
 
   const sprite = pool[idx++];
   sprite.texture = tex;
-  sprite.x = cx - targetW / 2;
-  sprite.y = baseY - targetH + 8; // anchor at base
+  sprite.anchor.set(0.5, 1.0); // bottom-center — tree grows upward from base
+  sprite.x = cx;
+  sprite.y = baseY + 8; // base of sprite sits at tree base
   sprite.scale.set(scale);
   sprite.visible = true;
 
@@ -623,12 +623,12 @@ function drawBushSprite(pool, idx, gfx, x, y, s, r, c) {
   // Scale bush to roughly tile size
   const targetW = s * 0.9;
   const scale = targetW / 48; // vegetation bush sprites are ~48px
-  const targetH = 48 * scale;
 
   const sprite = pool[idx++];
   sprite.texture = tex;
-  sprite.x = cx - targetW / 2;
-  sprite.y = cy - targetH / 2 - 4;
+  sprite.anchor.set(0.5, 1.0); // bottom-center — bush grows upward from base
+  sprite.x = cx;
+  sprite.y = y + s; // base of sprite sits at bottom of tile
   sprite.scale.set(scale);
   sprite.visible = true;
 
@@ -651,6 +651,7 @@ function drawRuinWallSprite(pool, idx, gfx, x, y, s, r, c) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0, 0); // reset anchor for wall tiles (pool shared with trees/bushes)
   sprite.x = x;
   sprite.y = y;
   sprite.scale.set(TILE_SCALE);
