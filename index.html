@@ -279,21 +279,21 @@
         opacity: 0.7;
       }
 
-      /* Roll (top) — grey-green */
-      .btn-roll {
-        border-color: rgba(122,184,110,0.6);
-        color: #7ab86e;
+      /* Map (top) — slate blue */
+      .btn-map {
+        border-color: rgba(100,120,180,0.6);
+        color: #6478b4;
       }
-      .btn-roll:active, .btn-roll.pressed {
-        background: rgba(122,184,110,0.2);
+      .btn-map:active, .btn-map.pressed {
+        background: rgba(100,120,180,0.2);
       }
 
-      /* Interact (left) — amber */
-      .btn-interact {
+      /* Hotbar (left) — amber */
+      .btn-hotbar {
         border-color: rgba(192,122,42,0.6);
         color: #c07a2a;
       }
-      .btn-interact:active, .btn-interact.pressed {
+      .btn-hotbar:active, .btn-hotbar.pressed {
         background: rgba(192,122,42,0.2);
       }
 
@@ -306,13 +306,13 @@
         background: rgba(192,74,42,0.2);
       }
 
-      /* Map/Inventory (bottom) — slate blue */
-      .btn-inventory {
-        border-color: rgba(100,120,180,0.6);
-        color: #6478b4;
+      /* Roll (bottom) — grey-green */
+      .btn-roll {
+        border-color: rgba(122,184,110,0.6);
+        color: #7ab86e;
       }
-      .btn-inventory:active, .btn-inventory.pressed {
-        background: rgba(100,120,180,0.2);
+      .btn-roll:active, .btn-roll.pressed {
+        background: rgba(122,184,110,0.2);
       }
 
       /* ── Responsive: Desktop/Tablet letterboxing ── */
@@ -387,15 +387,15 @@
         <!-- Action Buttons (right, diamond layout) -->
         <div class="action-container">
           <div class="dpad-spacer"></div>
-          <button class="action-btn btn-roll" data-action="roll">
-            <span class="icon">⟳</span>
-            <span class="label">ROLL</span>
+          <button class="action-btn btn-map" data-action="map">
+            <span class="icon">▤</span>
+            <span class="label">MAP</span>
           </button>
           <div class="dpad-spacer"></div>
 
-          <button class="action-btn btn-interact" data-action="interact">
-            <span class="icon">!</span>
-            <span class="label">ACT</span>
+          <button class="action-btn btn-hotbar" data-action="hotbar">
+            <span class="icon">★</span>
+            <span class="label">HOTBAR</span>
           </button>
           <div class="dpad-spacer"></div>
           <button class="action-btn btn-attack" data-action="attack">
@@ -404,9 +404,9 @@
           </button>
 
           <div class="dpad-spacer"></div>
-          <button class="action-btn btn-inventory" data-action="inventory">
-            <span class="icon">▤</span>
-            <span class="label">MAP</span>
+          <button class="action-btn btn-roll" data-action="roll">
+            <span class="icon">⟳</span>
+            <span class="label">ROLL</span>
           </button>
           <div class="dpad-spacer"></div>
         </div>
