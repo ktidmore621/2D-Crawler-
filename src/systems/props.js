@@ -14,57 +14,36 @@ import {
   DUNGEON_GLOW_COLOR,
 } from '../utils/constants.js';
 
-/**
- * Prop definition: { type, col, row, rotation? }
- */
-
 // Hand-placed props
 export const PROP_LIST = [
-  // Base camp — campfire
+  // ── Original props (base camp area) ──
   { type: 'campfire', col: 6, row: 74 },
-
-  // Base building — condemned structure
   { type: 'base_building', col: 3, row: 72 },
-
-  // Broken cars along the dirt path
   { type: 'car', col: 15, row: 71, rotation: 0.1 },
   { type: 'car', col: 25, row: 73, rotation: -0.15 },
   { type: 'car', col: 33, row: 72, rotation: 0.3 },
-
-  // Cars in the ruined town
   { type: 'car', col: 47, row: 44, rotation: 0.05 },
   { type: 'car', col: 50, row: 46, rotation: -0.2 },
   { type: 'car', col: 46, row: 52, rotation: 1.5 },
-
-  // Streetlights along paths
   { type: 'streetlight', col: 12, row: 72 },
   { type: 'streetlight', col: 20, row: 73 },
   { type: 'streetlight', col: 30, row: 72 },
   { type: 'streetlight', col: 48, row: 40 },
   { type: 'streetlight', col: 49, row: 50 },
-
-  // Telephone poles with wires
   { type: 'telephone_pole', col: 18, row: 71 },
   { type: 'telephone_pole', col: 28, row: 71 },
   { type: 'telephone_pole', col: 38, row: 71 },
-
-  // Debris piles
   { type: 'debris', col: 22, row: 72 },
   { type: 'debris', col: 45, row: 43 },
   { type: 'debris', col: 53, row: 50 },
   { type: 'debris', col: 35, row: 73 },
-
-  // Rusted barrels
   { type: 'barrel', col: 8, row: 75 },
   { type: 'barrel', col: 43, row: 39 },
   { type: 'barrel', col: 55, row: 53 },
   { type: 'barrel', col: 14, row: 73 },
-
-  // Dungeon arch
   { type: 'dungeon_arch', col: 38, row: 9 },
 
-  // Dense forest bushes — fill gaps between trees at forest edges
-  // Top forest edge (rows 0-4)
+  // Original bush props
   { type: 'bush', col: 5, row: 1 },
   { type: 'bush', col: 10, row: 2 },
   { type: 'bush', col: 16, row: 1 },
@@ -77,7 +56,6 @@ export const PROP_LIST = [
   { type: 'bush', col: 60, row: 3 },
   { type: 'bush', col: 66, row: 2 },
   { type: 'bush', col: 72, row: 1 },
-  // North forest section (rows 4-20)
   { type: 'bush', col: 4, row: 6 },
   { type: 'bush', col: 8, row: 8 },
   { type: 'bush', col: 12, row: 5 },
@@ -94,12 +72,104 @@ export const PROP_LIST = [
   { type: 'bush', col: 58, row: 18 },
   { type: 'bush', col: 64, row: 12 },
   { type: 'bush', col: 70, row: 16 },
-  // Right forest edge
   { type: 'bush', col: 75, row: 25 },
   { type: 'bush', col: 74, row: 35 },
   { type: 'bush', col: 75, row: 45 },
   { type: 'bush', col: 74, row: 55 },
   { type: 'bush', col: 75, row: 65 },
+
+  // ── Zone 1: River — bridge posts and dock ──
+  { type: 'bridge_post', col: 93, row: 70 },
+  { type: 'bridge_post', col: 98, row: 70 },
+
+  // ── Zone 2: Central Lake — dock posts, dead tree island ──
+  { type: 'dock_post', col: 114, row: 92 },
+  { type: 'dock_post', col: 116, row: 92 },
+  { type: 'dock_post', col: 118, row: 92 },
+
+  // ── Zone 3: Mountains — cave entrances ──
+  { type: 'cave_entrance', col: 148, row: 39 },
+  { type: 'cave_entrance', col: 100, row: 12 },
+  { type: 'cave_entrance', col: 148, row: 99 },
+
+  // ── Zone 4: Plateau — watchtower, antenna ──
+  { type: 'watchtower', col: 109, row: 26 },
+  { type: 'debris', col: 92, row: 23 },
+  { type: 'barrel', col: 96, row: 25 },
+  { type: 'barrel', col: 104, row: 29 },
+
+  // ── Zone 5: Highway — wrecked vehicles, guardrails ──
+  { type: 'car', col: 65, row: 44, rotation: 0.8 },
+  { type: 'car', col: 72, row: 51, rotation: -0.3 },
+  { type: 'bus', col: 80, row: 59 },
+  { type: 'truck', col: 88, row: 67, rotation: 0.7 },
+  { type: 'car', col: 95, row: 74, rotation: 1.2 },
+  { type: 'car', col: 100, row: 79, rotation: -0.5 },
+  { type: 'car', col: 108, row: 87, rotation: 0.2 },
+  { type: 'car', col: 115, row: 94, rotation: -0.8 },
+  { type: 'guardrail', col: 63, row: 42 },
+  { type: 'guardrail', col: 75, row: 54 },
+  { type: 'guardrail', col: 90, row: 69 },
+  { type: 'guardrail', col: 105, row: 84 },
+  // Overpass pillars over river
+  { type: 'overpass_pillar', col: 95, row: 75 },
+  { type: 'overpass_pillar', col: 97, row: 77 },
+
+  // ── Zone 6: Farmland — barn, silo, tractor, scarecrow, fences ──
+  { type: 'grain_silo', col: 33, row: 90 },
+  { type: 'tractor', col: 40, row: 93 },
+  { type: 'scarecrow', col: 28, row: 92 },
+  { type: 'scarecrow', col: 44, row: 104 },
+  { type: 'fence_post', col: 22, row: 88 },
+  { type: 'fence_post', col: 27, row: 88 },
+  { type: 'fence_post', col: 32, row: 88 },
+  { type: 'fence_post', col: 37, row: 88 },
+  { type: 'fence_post', col: 42, row: 88 },
+  { type: 'fence_post', col: 47, row: 88 },
+  { type: 'fence_post', col: 22, row: 108 },
+  { type: 'fence_post', col: 27, row: 108 },
+  { type: 'fence_post', col: 32, row: 108 },
+  { type: 'fence_post', col: 37, row: 108 },
+  { type: 'fence_post', col: 42, row: 108 },
+  { type: 'fence_post', col: 47, row: 108 },
+
+  // ── Zone 7: Dried Town — streetlights, benches, fountain, burnt cars ──
+  { type: 'dry_fountain', col: 100, row: 55 },
+  { type: 'streetlight', col: 90, row: 48 },
+  { type: 'streetlight', col: 94, row: 55 },
+  { type: 'streetlight', col: 100, row: 48 },
+  { type: 'streetlight', col: 106, row: 55 },
+  { type: 'streetlight', col: 110, row: 48 },
+  { type: 'streetlight', col: 100, row: 62 },
+  { type: 'streetlight', col: 90, row: 62 },
+  { type: 'streetlight', col: 110, row: 62 },
+  { type: 'burnt_car', col: 92, row: 50 },
+  { type: 'burnt_car', col: 104, row: 50 },
+  { type: 'burnt_car', col: 95, row: 60 },
+  { type: 'bench', col: 113, row: 59 },
+  { type: 'bench', col: 113, row: 60 },
+  { type: 'bench', col: 114, row: 59 },
+
+  // ── Zone 8: Impact Crater — debris around rim ──
+  { type: 'debris', col: 122, row: 56 },
+  { type: 'debris', col: 138, row: 56 },
+  { type: 'debris', col: 120, row: 63 },
+  { type: 'debris', col: 140, row: 63 },
+  { type: 'debris', col: 125, row: 70 },
+  { type: 'debris', col: 135, row: 70 },
+  { type: 'barrel', col: 126, row: 57 },
+  { type: 'barrel', col: 134, row: 69 },
+
+  // ── Zone 9: Tunnel Entrance ──
+  { type: 'concrete_stairs', col: 78, row: 123 },
+  { type: 'debris', col: 76, row: 121 },
+  { type: 'debris', col: 81, row: 125 },
+  { type: 'barrel', col: 82, row: 121 },
+
+  // ── Zone 10: Flooded Ruins — rowboat, dock posts ──
+  { type: 'rowboat', col: 124, row: 121 },
+  { type: 'dock_post', col: 112, row: 117 },
+  { type: 'dock_post', col: 117, row: 119 },
 ];
 
 /**
@@ -109,57 +179,52 @@ export const PROP_LIST = [
 export function createPropsRenderer() {
   const gfx = new Graphics();
 
-  /**
-   * Render props visible in viewport.
-   */
   function render(camX, camY, vpWidth, vpHeight, time) {
     gfx.clear();
 
-    const viewLeft = -camX - WORLD_TILE_SIZE * 3;
-    const viewRight = -camX + vpWidth + WORLD_TILE_SIZE * 3;
-    const viewTop = -camY - WORLD_TILE_SIZE * 3;
-    const viewBottom = -camY + vpHeight + WORLD_TILE_SIZE * 3;
+    const viewLeft = -camX - WORLD_TILE_SIZE * 4;
+    const viewRight = -camX + vpWidth + WORLD_TILE_SIZE * 4;
+    const viewTop = -camY - WORLD_TILE_SIZE * 4;
+    const viewBottom = -camY + vpHeight + WORLD_TILE_SIZE * 4;
 
     for (const prop of PROP_LIST) {
       const px = prop.col * WORLD_TILE_SIZE;
       const py = prop.row * WORLD_TILE_SIZE;
 
-      // Cull off-screen props
       if (px < viewLeft || px > viewRight || py < viewTop || py > viewBottom) continue;
 
       switch (prop.type) {
-        case 'car':
-          drawCar(gfx, px, py, prop.rotation || 0);
-          break;
-        case 'streetlight':
-          drawStreetlight(gfx, px, py);
-          break;
-        case 'telephone_pole':
-          drawTelephonePole(gfx, px, py);
-          break;
-        case 'debris':
-          drawDebris(gfx, px, py);
-          break;
-        case 'barrel':
-          drawBarrel(gfx, px, py);
-          break;
-        case 'campfire':
-          drawCampfire(gfx, px, py, time);
-          break;
-        case 'dungeon_arch':
-          drawDungeonArch(gfx, px, py, time);
-          break;
-        case 'base_building':
-          drawBaseBuilding(gfx, px, py);
-          break;
-        case 'bush':
-          drawBushProp(gfx, px, py);
-          break;
+        case 'car': drawCar(gfx, px, py, prop.rotation || 0); break;
+        case 'streetlight': drawStreetlight(gfx, px, py); break;
+        case 'telephone_pole': drawTelephonePole(gfx, px, py); break;
+        case 'debris': drawDebris(gfx, px, py); break;
+        case 'barrel': drawBarrel(gfx, px, py); break;
+        case 'campfire': drawCampfire(gfx, px, py, time); break;
+        case 'dungeon_arch': drawDungeonArch(gfx, px, py, time); break;
+        case 'base_building': drawBaseBuilding(gfx, px, py); break;
+        case 'bush': drawBushProp(gfx, px, py); break;
+        case 'bridge_post': drawBridgePost(gfx, px, py); break;
+        case 'dock_post': drawDockPost(gfx, px, py); break;
+        case 'cave_entrance': drawCaveEntrance(gfx, px, py); break;
+        case 'watchtower': drawWatchtower(gfx, px, py); break;
+        case 'bus': drawBus(gfx, px, py); break;
+        case 'truck': drawTruck(gfx, px, py, prop.rotation || 0); break;
+        case 'guardrail': drawGuardrail(gfx, px, py); break;
+        case 'overpass_pillar': drawOverpassPillar(gfx, px, py); break;
+        case 'grain_silo': drawGrainSilo(gfx, px, py); break;
+        case 'tractor': drawTractor(gfx, px, py); break;
+        case 'scarecrow': drawScarecrow(gfx, px, py); break;
+        case 'fence_post': drawFencePost(gfx, px, py); break;
+        case 'dry_fountain': drawDryFountain(gfx, px, py, time); break;
+        case 'burnt_car': drawBurntCar(gfx, px, py); break;
+        case 'bench': drawBench(gfx, px, py); break;
+        case 'concrete_stairs': drawConcreteStairs(gfx, px, py, time); break;
+        case 'rowboat': drawRowboat(gfx, px, py); break;
       }
     }
 
-    // Draw wires between telephone poles
     drawWires(gfx);
+    drawFenceWires(gfx);
   }
 
   return { gfx, render };
@@ -172,93 +237,86 @@ function drawCar(gfx, x, y, rotation) {
   const cy = y + WORLD_TILE_SIZE / 2;
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);
+  const rot = (dx, dy) => [cx + dx * cos - dy * sin, cy + dx * sin + dy * cos];
+  const hw = 36, hh = 22;
 
-  // Helper: rotate point around center
-  const rot = (dx, dy) => [
-    cx + dx * cos - dy * sin,
-    cy + dx * sin + dy * cos,
-  ];
-
-  // Car: 72px wide × 44px tall
-  const hw = 36; // half width (72/2)
-  const hh = 22; // half height (44/2)
-
-  // Shadow underneath — elongated dark ellipse
   gfx.ellipse(cx + 4, cy + hh + 4, hw + 2, 10);
   gfx.fill({ color: 0x000000, alpha: 0.2 });
 
-  // ── Car body (main) ──
-  const bodyCorners = [
-    rot(-hw, -hh), rot(hw, -hh), rot(hw, hh), rot(-hw, hh),
-  ];
+  const bodyCorners = [rot(-hw, -hh), rot(hw, -hh), rot(hw, hh), rot(-hw, hh)];
   gfx.moveTo(bodyCorners[0][0], bodyCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(bodyCorners[i][0], bodyCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x5a5248);
 
-  // ── Shadow side (right/bottom strip) — darker ──
-  const shadowCorners = [
-    rot(hw - 6, -hh), rot(hw, -hh), rot(hw, hh), rot(hw - 6, hh),
-  ];
+  const shadowCorners = [rot(hw - 6, -hh), rot(hw, -hh), rot(hw, hh), rot(hw - 6, hh)];
   gfx.moveTo(shadowCorners[0][0], shadowCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(shadowCorners[i][0], shadowCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x4a4438);
 
-  // Bottom shadow strip (south-facing depth)
-  const btmCorners = [
-    rot(-hw, hh - 5), rot(hw, hh - 5), rot(hw, hh), rot(-hw, hh),
-  ];
+  const btmCorners = [rot(-hw, hh - 5), rot(hw, hh - 5), rot(hw, hh), rot(-hw, hh)];
   gfx.moveTo(btmCorners[0][0], btmCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(btmCorners[i][0], btmCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x4a4438);
 
-  // ── Hood (north-facing end — slightly lighter) ──
-  const hoodCorners = [
-    rot(-hw, -hh), rot(hw, -hh), rot(hw, -hh + 10), rot(-hw, -hh + 10),
-  ];
+  const hoodCorners = [rot(-hw, -hh), rot(hw, -hh), rot(hw, -hh + 10), rot(-hw, -hh + 10)];
   gfx.moveTo(hoodCorners[0][0], hoodCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(hoodCorners[i][0], hoodCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x646058);
 
-  // ── Roof — lighter smaller rectangle centered on body ──
-  const rw = 20;
-  const rh = 12;
-  const roofCorners = [
-    rot(-rw, -rh), rot(rw, -rh), rot(rw, rh), rot(-rw, rh),
-  ];
+  const rw = 20, rh = 12;
+  const roofCorners = [rot(-rw, -rh), rot(rw, -rh), rot(rw, rh), rot(-rw, rh)];
   gfx.moveTo(roofCorners[0][0], roofCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(roofCorners[i][0], roofCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x6a6460);
 
-  // ── Windshield — dark blue-grey on front face, with crack ──
-  const wsCorners = [
-    rot(-16, -hh + 10), rot(16, -hh + 10), rot(16, -hh + 16), rot(-16, -hh + 16),
-  ];
+  const wsCorners = [rot(-16, -hh + 10), rot(16, -hh + 10), rot(16, -hh + 16), rot(-16, -hh + 16)];
   gfx.moveTo(wsCorners[0][0], wsCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(wsCorners[i][0], wsCorners[i][1]);
   gfx.closePath();
   gfx.fill(0x1a2028);
 
-  // Windshield crack line
   const crk1 = rot(-6, -hh + 11);
   const crk2 = rot(8, -hh + 14);
   gfx.moveTo(crk1[0], crk1[1]);
   gfx.lineTo(crk2[0], crk2[1]);
   gfx.stroke({ width: 1, color: 0x5a5a6a, alpha: 0.7 });
 
-  // ── Wheels — dark ellipses at corners (3/4 squashed) ──
-  const wheelPositions = [
-    [-hw + 6, -hh + 4], [hw - 6, -hh + 4],
-    [-hw + 6, hh - 4], [hw - 6, hh - 4],
-  ];
+  const wheelPositions = [[-hw + 6, -hh + 4], [hw - 6, -hh + 4], [-hw + 6, hh - 4], [hw - 6, hh - 4]];
   for (const [dx, dy] of wheelPositions) {
     const [wx, wy] = rot(dx, dy);
     gfx.ellipse(wx, wy, 5, 3);
     gfx.fill(0x1a1a1a);
+  }
+}
+
+/* ──────────────── Burnt Car — darker ──────────────── */
+
+function drawBurntCar(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+  const hw = 34, hh = 20;
+
+  gfx.ellipse(cx + 3, cy + hh + 3, hw, 8);
+  gfx.fill({ color: 0x000000, alpha: 0.25 });
+
+  gfx.rect(cx - hw, cy - hh, hw * 2, hh * 2);
+  gfx.fill(0x2a2520);
+
+  gfx.rect(cx - hw, cy - hh, hw * 2, 8);
+  gfx.fill(0x3a3530);
+
+  gfx.rect(cx - 16, cy - hh + 8, 32, 10);
+  gfx.fill(0x1a1a1a);
+
+  const wheelPositions = [[-hw + 6, -hh + 4], [hw - 6, -hh + 4], [-hw + 6, hh - 4], [hw - 6, hh - 4]];
+  for (const [dx, dy] of wheelPositions) {
+    gfx.ellipse(cx + dx, cy + dy, 5, 3);
+    gfx.fill(0x0a0a0a);
   }
 }
 
@@ -268,20 +326,14 @@ function drawStreetlight(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
-  // Streetlight: 6px wide × 80px tall
-  // Shadow on ground
   gfx.ellipse(bx + 4, by + 2, 8, 3);
   gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Pole — 6px wide × 80px tall
-  // Left face (lit)
   gfx.rect(bx - 3, by - 80, 3, 80);
   gfx.fill(0x8a7a5a);
-  // Right face (shadow)
   gfx.rect(bx, by - 80, 3, 80);
   gfx.fill(0x5a4a32);
 
-  // Bent top section
   gfx.moveTo(bx - 1, by - 80);
   gfx.lineTo(bx - 14, by - 86);
   gfx.stroke({ width: 3, color: 0x5a4a32 });
@@ -289,19 +341,14 @@ function drawStreetlight(gfx, x, y) {
   gfx.lineTo(bx - 14, by - 87);
   gfx.stroke({ width: 2, color: 0x8a7a5a });
 
-  // Lamp head — small rectangle with darker underside
   gfx.rect(bx - 18, by - 89, 10, 4);
-  gfx.fill(0x6a6050); // top face
+  gfx.fill(0x6a6050);
   gfx.rect(bx - 18, by - 85, 10, 3);
-  gfx.fill(0x4a4030); // underside darker
+  gfx.fill(0x4a4030);
 
-  // Broken wire — bezier drooping down
   gfx.moveTo(bx - 14, by - 85);
   gfx.quadraticCurveTo(bx - 8, by - 60, bx - 2, by - 66);
   gfx.stroke({ width: 1, color: 0x4a4a4a, alpha: 0.5 });
-  gfx.moveTo(bx - 14, by - 84);
-  gfx.quadraticCurveTo(bx - 8, by - 59, bx - 2, by - 65);
-  gfx.stroke({ width: 0.8, color: 0x6a6a6a, alpha: 0.3 });
 }
 
 /* ──────────────── Telephone Pole — 3/4 cylindrical ──────────────── */
@@ -310,77 +357,90 @@ function drawTelephonePole(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
-  // Telephone pole: 8px wide × 96px tall, crossbar 40px wide
-  // Shadow on ground
   gfx.ellipse(bx + 4, by + 2, 8, 3);
   gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Pole — 8px wide × 96px tall
   gfx.rect(bx - 4, by - 96, 4, 96);
-  gfx.fill(0x8a7248); // left face (lit)
+  gfx.fill(0x8a7248);
   gfx.rect(bx, by - 96, 4, 96);
-  gfx.fill(0x6a5232); // right face (shadow)
+  gfx.fill(0x6a5232);
 
-  // Crossbar — 40px wide
-  // Top face (lightest)
   gfx.rect(bx - 20, by - 92, 40, 3);
   gfx.fill(0x8a7248);
-  // Front face (mid)
   gfx.rect(bx - 20, by - 89, 40, 4);
   gfx.fill(0x6a5232);
-  // Underside (darkest)
   gfx.rect(bx - 20, by - 85, 40, 3);
   gfx.fill(0x4a3a20);
 }
 
-/* ──────────────── Bush prop — dense forest filler ──────────────── */
+/* ──────────────── Bush prop ──────────────── */
 
 function drawBushProp(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Shadow
   gfx.ellipse(cx + 3, cy + 14, 20, 6);
   gfx.fill({ color: 0x000000, alpha: 0.18 });
-
-  // Front-bottom ellipse: darker
   gfx.ellipse(cx, cy + 4, 18, 12);
   gfx.fill(0x389018);
-
-  // Back-top ellipse: lighter
   gfx.ellipse(cx - 2, cy - 4, 16, 10);
   gfx.fill(0x489228);
-
-  // Top highlight
   gfx.ellipse(cx - 3, cy - 8, 10, 6);
   gfx.fill({ color: 0x58a232, alpha: 0.5 });
 }
 
-/* ──────────────── Wires between telephone poles — 3/4 ──────────────── */
+/* ──────────────── Wires between telephone poles ──────────────── */
 
 function drawWires(gfx) {
   const poles = PROP_LIST.filter(p => p.type === 'telephone_pole');
   for (let i = 0; i < poles.length - 1; i++) {
     const p1 = poles[i];
     const p2 = poles[i + 1];
-
     const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 + 20;
     const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 90;
     const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 20;
     const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 90;
-
     const midX = (x1 + x2) / 2;
     const midY = Math.max(y1, y2) + 22;
 
-    // Top wire — lighter
     gfx.moveTo(x1, y1);
     gfx.quadraticCurveTo(midX, midY, x2, y2);
     gfx.stroke({ width: 1, color: 0x5a5a5a, alpha: 0.4 });
-
-    // Bottom wire — darker shadow
     gfx.moveTo(x1, y1 + 1.5);
     gfx.quadraticCurveTo(midX, midY + 1.5, x2, y2 + 1.5);
     gfx.stroke({ width: 1, color: 0x2a2a2a, alpha: 0.35 });
+  }
+}
+
+/* ──────────────── Fence wires between fence posts ──────────────── */
+
+function drawFenceWires(gfx) {
+  const posts = PROP_LIST.filter(p => p.type === 'fence_post');
+  // Group by row for horizontal wires
+  const byRow = {};
+  for (const p of posts) {
+    const key = p.row;
+    if (!byRow[key]) byRow[key] = [];
+    byRow[key].push(p);
+  }
+  for (const row of Object.keys(byRow)) {
+    const rowPosts = byRow[row].sort((a, b) => a.col - b.col);
+    for (let i = 0; i < rowPosts.length - 1; i++) {
+      const p1 = rowPosts[i];
+      const p2 = rowPosts[i + 1];
+      const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
+      const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 20;
+      const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
+      const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 20;
+      const midX = (x1 + x2) / 2;
+      // Two wire lines with sag
+      gfx.moveTo(x1, y1);
+      gfx.quadraticCurveTo(midX, y1 + 8, x2, y2);
+      gfx.stroke({ width: 0.8, color: 0x6a6a62, alpha: 0.4 });
+      gfx.moveTo(x1, y1 + 10);
+      gfx.quadraticCurveTo(midX, y1 + 18, x2, y2 + 10);
+      gfx.stroke({ width: 0.8, color: 0x6a6a62, alpha: 0.35 });
+    }
   }
 }
 
@@ -390,40 +450,28 @@ function drawDebris(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Shadow underneath
   gfx.ellipse(cx + 2, cy + 8, 14, 4);
   gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Back pieces — smaller, higher (further away in 3/4)
-  // Piece 1 — concrete grey
-  gfx.rect(cx - 6, cy - 8, 8, 4); // top face
+  gfx.rect(cx - 6, cy - 8, 8, 4);
   gfx.fill(0x7a6a58);
-  gfx.rect(cx - 6, cy - 4, 8, 5); // front face
+  gfx.rect(cx - 6, cy - 4, 8, 5);
   gfx.fill(0x6a5a48);
-
-  // Piece 2 — rust colored (back)
-  gfx.rect(cx + 4, cy - 6, 6, 3); // top face
+  gfx.rect(cx + 4, cy - 6, 6, 3);
   gfx.fill(0x9a6a4a);
-  gfx.rect(cx + 4, cy - 3, 6, 5); // front face
+  gfx.rect(cx + 4, cy - 3, 6, 5);
   gfx.fill(0x8a5a3a);
-
-  // Front pieces — larger, lower (closer to camera)
-  // Piece 3 — dark wood
-  gfx.rect(cx - 8, cy + 1, 10, 3); // top face
+  gfx.rect(cx - 8, cy + 1, 10, 3);
   gfx.fill(0x7a6a58);
-  gfx.rect(cx - 8, cy + 4, 10, 6); // front face
+  gfx.rect(cx - 8, cy + 4, 10, 6);
   gfx.fill(0x6a5a48);
-
-  // Piece 4 — concrete
-  gfx.rect(cx + 3, cy + 2, 7, 3); // top face
+  gfx.rect(cx + 3, cy + 2, 7, 3);
   gfx.fill(0x8a7a68);
-  gfx.rect(cx + 3, cy + 5, 7, 4); // front face
+  gfx.rect(cx + 3, cy + 5, 7, 4);
   gfx.fill(0x6a6058);
-
-  // Piece 5 — small rust piece in front
-  gfx.rect(cx - 2, cy + 6, 5, 2); // top face
+  gfx.rect(cx - 2, cy + 6, 5, 2);
   gfx.fill(0x9a6a4a);
-  gfx.rect(cx - 2, cy + 8, 5, 3); // front face
+  gfx.rect(cx - 2, cy + 8, 5, 3);
   gfx.fill(0x7a4a2a);
 }
 
@@ -432,47 +480,27 @@ function drawDebris(gfx, x, y) {
 function drawBarrel(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
+  const hw = 10, hh = 13;
 
-  // Barrel: 20px wide × 26px tall
-  const hw = 10; // half width
-  const hh = 13; // half height
-
-  // Small shadow ellipse underneath
   gfx.ellipse(cx + 3, cy + hh + 3, hw + 2, 4);
   gfx.fill({ color: 0x000000, alpha: 0.18 });
 
-  // Front face — rectangle (mid tone)
   gfx.rect(cx - hw, cy - hh + 4, hw * 2, hh * 2 - 4);
   gfx.fill(0x9a6232);
-
-  // Bottom darker strip
   gfx.rect(cx - hw, cy + hh - 4, hw * 2, 4);
   gfx.fill(0x6a4218);
 
-  // Horizontal hoop lines on front face
   gfx.moveTo(cx - hw, cy - 2);
   gfx.lineTo(cx + hw, cy - 2);
   gfx.stroke({ width: 1.5, color: 0x7a4a28, alpha: 0.7 });
-
   gfx.moveTo(cx - hw, cy + 6);
   gfx.lineTo(cx + hw, cy + 6);
   gfx.stroke({ width: 1.5, color: 0x7a4a28, alpha: 0.6 });
 
-  gfx.moveTo(cx - hw, cy - 6);
-  gfx.lineTo(cx + hw, cy - 6);
-  gfx.stroke({ width: 1, color: 0x7a4a28, alpha: 0.5 });
-
-  // Top ellipse — lighter rusty orange (top face)
   gfx.ellipse(cx, cy - hh + 4, hw, 4);
   gfx.fill(0x8a5228);
-
-  // Top face inner ring
   gfx.ellipse(cx, cy - hh + 4, 6, 3);
   gfx.fill({ color: 0x7a4218, alpha: 0.5 });
-
-  // Bottom ellipse shadow (implied curve)
-  gfx.ellipse(cx, cy + hh, hw, 3);
-  gfx.fill({ color: 0x4a2a10, alpha: 0.3 });
 }
 
 /* ──────────────── Campfire — 3/4 ──────────────── */
@@ -481,59 +509,45 @@ function drawCampfire(gfx, x, y, time) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
-  // Glow pool on ground — ellipse (wider than tall, flat ground plane)
   const glowAlpha = 0.15 + 0.1 * Math.sin(time * 2.5);
   gfx.ellipse(cx, cy + 2, CAMP_GLOW_RADIUS * 1.1, CAMP_GLOW_RADIUS * 0.7);
   gfx.fill({ color: CAMP_GLOW_COLOR, alpha: glowAlpha });
-
-  // Orange warm light layer (also elliptical)
   gfx.ellipse(cx, cy + 2, CAMP_GLOW_RADIUS * 0.7, CAMP_GLOW_RADIUS * 0.45);
   gfx.fill({ color: 0x885511, alpha: glowAlpha * 0.5 });
 
-  // Stone ring — 44px diameter, each stone as a 3/4 block
   for (let i = 0; i < 8; i++) {
     const angle = (Math.PI * 2 * i) / 8;
     const sx = cx + Math.cos(angle) * 22;
-    const sy = cy + Math.sin(angle) * 18; // elliptical ring (3/4)
-
-    // Top face (light grey)
+    const sy = cy + Math.sin(angle) * 18;
     gfx.rect(sx - 3, sy - 3, 6, 3);
     gfx.fill(0x6a6058);
-    // Front face (dark grey)
     gfx.rect(sx - 3, sy, 6, 3);
     gfx.fill(0x3a3830);
   }
 
-  // Log pile — 2 crossed rectangles with lighter top face
-  // Log 1
-  gfx.rect(cx - 7, cy - 1, 14, 2); // top face
+  gfx.rect(cx - 7, cy - 1, 14, 2);
   gfx.fill(0x5a3a1a);
-  gfx.rect(cx - 7, cy + 1, 14, 2); // front face
+  gfx.rect(cx - 7, cy + 1, 14, 2);
   gfx.fill(0x3a2210);
-  // Log end
   gfx.ellipse(cx - 7, cy + 1, 2, 2);
   gfx.fill(0x4a2a10);
   gfx.ellipse(cx + 7, cy + 1, 2, 2);
   gfx.fill(0x3a1a08);
-
-  // Log 2 (crossed)
-  gfx.rect(cx - 2, cy - 5, 2, 10); // top face
+  gfx.rect(cx - 2, cy - 5, 2, 10);
   gfx.fill(0x5a3a1a);
-  gfx.rect(cx, cy - 5, 2, 10); // front face
+  gfx.rect(cx, cy - 5, 2, 10);
   gfx.fill(0x3a2210);
 
-  // Animated flames — base wider than top (perspective)
   const pulseScale = 1 + 0.15 * Math.sin(time * 3.5);
   for (let i = 0; i < CAMP_FIRE_COLORS.length; i++) {
     const h = (12 - i * 1.5) * pulseScale;
-    const w = (9 - i * 1.2) * pulseScale; // wider base
+    const w = (9 - i * 1.2) * pulseScale;
     const yOff = i * 1.5;
     const xWobble = Math.sin(time * 4 + i * 0.8) * 2;
     gfx.ellipse(cx + xWobble, cy - yOff - h / 2, w, h);
     gfx.fill({ color: CAMP_FIRE_COLORS[i], alpha: 0.8 - i * 0.08 });
   }
 
-  // Embers — small dots floating up
   for (let i = 0; i < 5; i++) {
     const emberT = (time * 1.2 + i * 1.3) % 3;
     const ex = cx + Math.sin(time * 2 + i * 2) * 8;
@@ -547,68 +561,51 @@ function drawCampfire(gfx, x, y, time) {
 /* ──────────────── Dungeon Entrance Archway — 3/4 ──────────────── */
 
 function drawDungeonArch(gfx, x, y, time) {
-  // Dungeon archway: 80px wide × 90px tall
   const archWidth = 80;
   const archHeight = 90;
   const cx = x + archWidth / 2;
   const top = y;
 
-  // ── Steps leading down — 3 steps going into the arch ──
   const stepWidth = archWidth - 24;
   for (let i = 0; i < 3; i++) {
     const stepY = top + archHeight - 6 + i * 8;
     const darken = i * 0.15;
-    // Top face of step (lighter)
     gfx.rect(x + 12 + i * 4, stepY, stepWidth - i * 8, 3);
     gfx.fill({ color: 0x4a4038, alpha: 1 - darken });
-    // Front face of step (darker)
     gfx.rect(x + 12 + i * 4, stepY + 3, stepWidth - i * 8, 5);
     gfx.fill({ color: 0x2a2018, alpha: 1 - darken });
   }
 
-  // ── Inside of arch — very dark, suggesting depth going down ──
   gfx.rect(x + 10, top + 12, archWidth - 20, archHeight - 12);
   gfx.fill(0x050302);
 
-  // ── Left pillar — 3/4 stone blocks ──
   const pillarW = 14;
-  // Front face
   gfx.rect(x - 4, top, pillarW, archHeight);
   gfx.fill(DUNGEON_STONE_COLOR);
-  // Top face
   gfx.rect(x - 4, top - 4, pillarW, 4);
   gfx.fill(0x3a3530);
-  // Shadow side (right edge)
   gfx.rect(x - 4 + pillarW - 3, top, 3, archHeight);
   gfx.fill(0x1a1510);
 
-  // Stone block lines on left pillar
   for (let i = 0; i < 6; i++) {
     const ly = top + 6 + i * 18;
     const blockOffset = (i % 2 === 0) ? 0 : 4;
-    // Horizontal mortar
     gfx.moveTo(x - 4, ly);
     gfx.lineTo(x - 4 + pillarW, ly);
     gfx.stroke({ width: 0.8, color: 0x1a1510, alpha: 0.5 });
-    // Vertical mortar (offset for brick pattern)
     gfx.moveTo(x - 4 + blockOffset + 6, ly);
     gfx.lineTo(x - 4 + blockOffset + 6, ly + 18);
     gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.3 });
   }
 
-  // ── Right pillar — 3/4 stone blocks ──
   const rpx = x + archWidth - 10;
-  // Front face
   gfx.rect(rpx, top, pillarW, archHeight);
   gfx.fill(DUNGEON_STONE_COLOR);
-  // Top face
   gfx.rect(rpx, top - 4, pillarW, 4);
   gfx.fill(0x3a3530);
-  // Shadow side (right edge)
   gfx.rect(rpx + pillarW - 3, top, 3, archHeight);
   gfx.fill(0x1a1510);
 
-  // Stone block lines on right pillar
   for (let i = 0; i < 6; i++) {
     const ly = top + 6 + i * 18;
     const blockOffset = (i % 2 === 0) ? 0 : 4;
@@ -620,8 +617,6 @@ function drawDungeonArch(gfx, x, y, time) {
     gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.3 });
   }
 
-  // ── Arch top — curved, with 3/4 treatment ──
-  // Top face of arch (lightest)
   gfx.moveTo(x - 4, top - 4);
   gfx.quadraticCurveTo(cx, top - 30, x + archWidth + 4, top - 4);
   gfx.lineTo(x + archWidth + 4, top);
@@ -629,7 +624,6 @@ function drawDungeonArch(gfx, x, y, time) {
   gfx.closePath();
   gfx.fill(0x3a3530);
 
-  // Front face of arch (mid)
   gfx.moveTo(x - 4, top);
   gfx.quadraticCurveTo(cx, top - 22, x + archWidth + 4, top);
   gfx.lineTo(x + archWidth + 4, top + 8);
@@ -637,7 +631,6 @@ function drawDungeonArch(gfx, x, y, time) {
   gfx.closePath();
   gfx.fill(DUNGEON_STONE_COLOR);
 
-  // Block lines on arch curve
   for (let i = 0; i < 5; i++) {
     const t = (i + 1) / 6;
     const ax = x - 4 + (archWidth + 8) * t;
@@ -647,12 +640,9 @@ function drawDungeonArch(gfx, x, y, time) {
     gfx.stroke({ width: 0.6, color: 0x1a1510, alpha: 0.4 });
   }
 
-  // ── Green threshold glow — ellipse on ground, pulsing ──
   const glowAlpha = 0.3 + 0.25 * Math.sin(time * 2.5);
   gfx.ellipse(cx, top + archHeight + 4, archWidth * 0.35, 8);
   gfx.fill({ color: DUNGEON_GLOW_COLOR, alpha: glowAlpha });
-
-  // Glow inside entrance
   gfx.ellipse(cx, top + archHeight * 0.6, archWidth * 0.25, archHeight * 0.2);
   gfx.fill({ color: DUNGEON_GLOW_COLOR, alpha: glowAlpha * 0.12 });
 }
@@ -660,36 +650,25 @@ function drawDungeonArch(gfx, x, y, time) {
 /* ──────────────── Base Building — condemned 3/4 ──────────────── */
 
 function drawBaseBuilding(gfx, x, y) {
-  const bw = WORLD_TILE_SIZE * 3; // building width (3 tiles)
-  const bh = WORLD_TILE_SIZE * 2; // building height (2 tiles)
+  const bw = WORLD_TILE_SIZE * 3;
+  const bh = WORLD_TILE_SIZE * 2;
 
-  // ── Foundation — slightly lighter strip at base ──
   gfx.rect(x - 2, y + bh - 4, bw + 4, 6);
   gfx.fill(0x6a5a48);
 
-  // ── Walls — full 3/4 stone block treatment ──
-  // Front face (main wall, south-facing)
   gfx.rect(x, y + 12, bw, bh - 12);
   gfx.fill(0x5a4a38);
-
-  // Top face — 12px strip
   gfx.rect(x, y, bw, 12);
   gfx.fill(0x7a6a58);
-
-  // Right face — shadow side
   gfx.rect(x + bw - 8, y + 12, 8, bh - 12);
   gfx.fill(0x3a2a18);
 
-  // Stone block lines on front wall (brick pattern)
   for (let row = 0; row < 6; row++) {
     const ly = y + 14 + row * 12;
     if (ly > y + bh - 4) break;
-    // Horizontal mortar
     gfx.moveTo(x + 2, ly);
     gfx.lineTo(x + bw - 10, ly);
     gfx.stroke({ width: 1, color: 0x3a2a1a, alpha: 0.5 });
-
-    // Vertical mortar — offset every other row
     const offset = (row % 2 === 0) ? 0 : 8;
     for (let vx = offset + 16; vx < bw - 10; vx += 16) {
       gfx.moveTo(x + vx, ly);
@@ -698,17 +677,13 @@ function drawBaseBuilding(gfx, x, y) {
     }
   }
 
-  // ── Windows — recessed look ──
-  // Window 1
-  const w1x = x + 16;
-  const w1y = y + 26;
+  const w1x = x + 16, w1y = y + 26;
   gfx.rect(w1x, w1y, 18, 22);
-  gfx.fill(0x0a0806); // dark interior
+  gfx.fill(0x0a0806);
   gfx.moveTo(w1x, w1y);
   gfx.lineTo(w1x + 18, w1y);
-  gfx.stroke({ width: 1.5, color: 0x9a8a78 }); // top sill highlight
+  gfx.stroke({ width: 1.5, color: 0x9a8a78 });
 
-  // Window 2
   const w2x = x + bw - 38;
   gfx.rect(w2x, w1y, 18, 22);
   gfx.fill(0x0a0806);
@@ -716,38 +691,18 @@ function drawBaseBuilding(gfx, x, y) {
   gfx.lineTo(w2x + 18, w1y);
   gfx.stroke({ width: 1.5, color: 0x9a8a78 });
 
-  // ── Boarded door — X pattern of planks ──
-  const dx = x + bw / 2 - 12;
-  const dy = y + 30;
-  const dw = 24;
-  const dh = bh - 34;
+  const dx = x + bw / 2 - 12, dy = y + 30, dw = 24, dh = bh - 34;
   gfx.rect(dx, dy, dw, dh);
-  gfx.fill(0x3a2510); // door background
-
-  // Board X pattern
+  gfx.fill(0x3a2510);
   gfx.moveTo(dx + 2, dy + 2);
   gfx.lineTo(dx + dw - 2, dy + dh - 2);
   gfx.stroke({ width: 3, color: 0x5a3518 });
   gfx.moveTo(dx + dw - 2, dy + 2);
   gfx.lineTo(dx + 2, dy + dh - 2);
   gfx.stroke({ width: 3, color: 0x5a3518 });
-
-  // Board top edge highlights
-  gfx.moveTo(dx + 2, dy + 1);
-  gfx.lineTo(dx + dw - 2, dy + dh - 3);
-  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
-  gfx.moveTo(dx + dw - 2, dy + 1);
-  gfx.lineTo(dx + 2, dy + dh - 3);
-  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
-
-  // Horizontal board
   gfx.rect(dx, dy + dh / 2 - 2, dw, 4);
   gfx.fill(0x5a3518);
-  gfx.moveTo(dx, dy + dh / 2 - 2);
-  gfx.lineTo(dx + dw, dy + dh / 2 - 2);
-  gfx.stroke({ width: 1, color: 0x7a5530, alpha: 0.5 });
 
-  // ── Roof — dark grey-brown slanted covering ──
   gfx.moveTo(x - 6, y - 2);
   gfx.lineTo(x + bw + 6, y - 2);
   gfx.lineTo(x + bw + 4, y - 16);
@@ -755,7 +710,6 @@ function drawBaseBuilding(gfx, x, y) {
   gfx.closePath();
   gfx.fill(0x3a2a18);
 
-  // Roof front edge (lighter — top face)
   gfx.moveTo(x - 6, y - 2);
   gfx.lineTo(x + bw + 6, y - 2);
   gfx.lineTo(x + bw + 6, y);
@@ -763,12 +717,8 @@ function drawBaseBuilding(gfx, x, y) {
   gfx.closePath();
   gfx.fill(0x4a3a28);
 
-  // ── Collapsed section — one corner of roof missing ──
-  // Remove top-right portion — show exposed rafters
   gfx.rect(x + bw - 30, y - 16, 34, 14);
-  gfx.fill(0x0a0805); // sky through collapsed roof
-
-  // Exposed rafters — 3-4 diagonal dark lines
+  gfx.fill(0x0a0805);
   for (let i = 0; i < 4; i++) {
     const rx = x + bw - 28 + i * 8;
     gfx.moveTo(rx, y - 14);
@@ -776,13 +726,566 @@ function drawBaseBuilding(gfx, x, y) {
     gfx.stroke({ width: 1.5, color: 0x2a1a08 });
   }
 
-  // Wall cracks
   gfx.moveTo(x + 10, y + 20);
   gfx.lineTo(x + 18, y + 44);
   gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.4 });
-
   gfx.moveTo(x + bw - 20, y + 30);
   gfx.lineTo(x + bw - 16, y + 52);
   gfx.lineTo(x + bw - 22, y + 60);
   gfx.stroke({ width: 1, color: 0x2a1a0a, alpha: 0.35 });
+}
+
+/* ──────────────── NEW PROP TYPES ──────────────── */
+
+/* ──────────────── Bridge Post ──────────────── */
+
+function drawBridgePost(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Dark brown vertical post
+  gfx.rect(cx - 4, cy - 30, 4, 40);
+  gfx.fill(0x4a3218);
+  gfx.rect(cx, cy - 30, 4, 40);
+  gfx.fill(0x3a2210);
+
+  // Cross brace
+  gfx.moveTo(cx - 8, cy - 10);
+  gfx.lineTo(cx + 8, cy - 20);
+  gfx.stroke({ width: 2, color: 0x4a3218 });
+
+  // Top cap
+  gfx.rect(cx - 5, cy - 32, 10, 4);
+  gfx.fill(0x5a4228);
+}
+
+/* ──────────────── Dock Post ──────────────── */
+
+function drawDockPost(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Weathered pole — top above water
+  gfx.rect(cx - 3, cy - 20, 3, 30);
+  gfx.fill(0x6a5a3a);
+  gfx.rect(cx, cy - 20, 3, 30);
+  gfx.fill(0x4a3a1a);
+
+  // Top cap
+  gfx.ellipse(cx, cy - 20, 4, 2);
+  gfx.fill(0x7a6a4a);
+
+  // Water line suggestion
+  gfx.rect(cx - 4, cy + 4, 8, 2);
+  gfx.fill({ color: 0x2a5a8a, alpha: 0.5 });
+}
+
+/* ──────────────── Cave Entrance ──────────────── */
+
+function drawCaveEntrance(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const top = y;
+  const w = 56;
+  const h = 48;
+
+  // Dark interior
+  gfx.ellipse(cx, top + h / 2 + 6, w / 2 - 4, h / 2 - 4);
+  gfx.fill(0x0a0806);
+
+  // Rough rock arch — irregular shape
+  // Left rock face
+  gfx.moveTo(cx - w / 2, top + h);
+  gfx.lineTo(cx - w / 2 - 4, top + h / 3);
+  gfx.lineTo(cx - w / 4, top);
+  gfx.lineTo(cx - w / 2 + 8, top + h / 2);
+  gfx.closePath();
+  gfx.fill(0x5a5248);
+
+  // Right rock face
+  gfx.moveTo(cx + w / 2, top + h);
+  gfx.lineTo(cx + w / 2 + 4, top + h / 3);
+  gfx.lineTo(cx + w / 4, top - 2);
+  gfx.lineTo(cx + w / 2 - 8, top + h / 2);
+  gfx.closePath();
+  gfx.fill(0x4a4238);
+
+  // Top arch rock
+  gfx.moveTo(cx - w / 4, top);
+  gfx.quadraticCurveTo(cx, top - 14, cx + w / 4, top - 2);
+  gfx.lineTo(cx + w / 4 - 4, top + 6);
+  gfx.quadraticCurveTo(cx, top - 4, cx - w / 4 + 4, top + 6);
+  gfx.closePath();
+  gfx.fill(0x6a6258);
+
+  // Rocky path leading in
+  gfx.rect(cx - 8, top + h, 16, 8);
+  gfx.fill(0x7a6a52);
+}
+
+/* ──────────────── Watchtower Base ──────────────── */
+
+function drawWatchtower(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const baseY = y + WORLD_TILE_SIZE;
+
+  // Shadow
+  gfx.ellipse(cx + 4, baseY + 4, 18, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+
+  // Tower body — tall rectangle
+  gfx.rect(cx - 14, baseY - 96, 14, 96);
+  gfx.fill(0x5a4a38);
+  gfx.rect(cx, baseY - 96, 14, 96);
+  gfx.fill(0x4a3a28);
+
+  // Top face
+  gfx.rect(cx - 16, baseY - 98, 32, 4);
+  gfx.fill(0x7a6a58);
+
+  // Floor line halfway up
+  gfx.moveTo(cx - 14, baseY - 48);
+  gfx.lineTo(cx + 14, baseY - 48);
+  gfx.stroke({ width: 2, color: 0x3a2a18 });
+
+  // Ladder lines on one side
+  for (let i = 0; i < 6; i++) {
+    const ly = baseY - 12 - i * 14;
+    gfx.moveTo(cx + 4, ly);
+    gfx.lineTo(cx + 12, ly);
+    gfx.stroke({ width: 1, color: 0x6a5a42, alpha: 0.6 });
+  }
+
+  // Vertical ladder rails
+  gfx.moveTo(cx + 4, baseY - 4);
+  gfx.lineTo(cx + 4, baseY - 86);
+  gfx.stroke({ width: 1, color: 0x6a5a42, alpha: 0.5 });
+  gfx.moveTo(cx + 12, baseY - 4);
+  gfx.lineTo(cx + 12, baseY - 86);
+  gfx.stroke({ width: 1, color: 0x6a5a42, alpha: 0.5 });
+
+  // Window openings
+  gfx.rect(cx - 10, baseY - 90, 8, 12);
+  gfx.fill(0x0a0806);
+  gfx.rect(cx - 10, baseY - 44, 8, 10);
+  gfx.fill(0x0a0806);
+}
+
+/* ──────────────── Bus ──────────────── */
+
+function drawBus(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+  const bw = 56, bh = 26;
+
+  // Shadow
+  gfx.ellipse(cx + 4, cy + bh + 4, bw + 4, 10);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+
+  // Body
+  gfx.rect(cx - bw, cy - bh, bw * 2, bh * 2);
+  gfx.fill(0x5a5248);
+
+  // Top face
+  gfx.rect(cx - bw, cy - bh, bw * 2, 8);
+  gfx.fill(0x6a6258);
+
+  // Shadow side
+  gfx.rect(cx + bw - 6, cy - bh + 8, 6, bh * 2 - 8);
+  gfx.fill(0x4a4238);
+
+  // Bottom darker strip
+  gfx.rect(cx - bw, cy + bh - 5, bw * 2, 5);
+  gfx.fill(0x3a3228);
+
+  // Windows along side
+  for (let i = 0; i < 8; i++) {
+    const wx = cx - bw + 8 + i * 13;
+    gfx.rect(wx, cy - bh + 12, 10, 14);
+    gfx.fill(0x1a2028);
+  }
+
+  // Front grille
+  gfx.rect(cx - bw, cy - bh + 10, 6, bh * 2 - 15);
+  gfx.fill(0x3a3228);
+
+  // Wheels
+  const wheelY = [cy - bh + 4, cy + bh - 4];
+  const wheelX = [cx - bw + 10, cx + bw - 10];
+  for (const wy of wheelY) {
+    for (const wx of wheelX) {
+      gfx.ellipse(wx, wy, 6, 4);
+      gfx.fill(0x1a1a1a);
+    }
+  }
+}
+
+/* ──────────────── Truck ──────────────── */
+
+function drawTruck(gfx, x, y, rotation) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Shadow
+  gfx.ellipse(cx + 4, cy + 30, 40, 10);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+
+  // Cab
+  gfx.rect(cx - 18, cy - 28, 36, 24);
+  gfx.fill(0x5a5248);
+  gfx.rect(cx - 18, cy - 28, 36, 6);
+  gfx.fill(0x6a6258);
+
+  // Windshield
+  gfx.rect(cx - 12, cy - 22, 24, 10);
+  gfx.fill(0x1a2028);
+
+  // Trailer — larger separate rectangle
+  gfx.rect(cx - 22, cy, 44, 48);
+  gfx.fill(0x5a5a52);
+  gfx.rect(cx - 22, cy, 44, 6);
+  gfx.fill(0x6a6a62);
+  gfx.rect(cx + 22 - 6, cy + 6, 6, 42);
+  gfx.fill(0x4a4a42);
+
+  // Wheels
+  gfx.ellipse(cx - 14, cy - 4, 5, 3);
+  gfx.fill(0x1a1a1a);
+  gfx.ellipse(cx + 14, cy - 4, 5, 3);
+  gfx.fill(0x1a1a1a);
+  gfx.ellipse(cx - 16, cy + 46, 6, 4);
+  gfx.fill(0x1a1a1a);
+  gfx.ellipse(cx + 16, cy + 46, 6, 4);
+  gfx.fill(0x1a1a1a);
+}
+
+/* ──────────────── Guardrail ──────────────── */
+
+function drawGuardrail(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Thin horizontal rectangle — silver grey
+  gfx.rect(cx - 30, cy - 2, 60, 3);
+  gfx.fill(0x8a8a82);
+  gfx.rect(cx - 30, cy + 1, 60, 2);
+  gfx.fill(0x6a6a62);
+
+  // Support posts
+  gfx.rect(cx - 28, cy - 6, 3, 12);
+  gfx.fill(0x7a7a72);
+  gfx.rect(cx, cy - 6, 3, 12);
+  gfx.fill(0x7a7a72);
+  gfx.rect(cx + 26, cy - 6, 3, 12);
+  gfx.fill(0x7a7a72);
+
+  // Broken section — gap in middle
+  gfx.rect(cx - 6, cy - 2, 12, 5);
+  gfx.fill(0x4a4844); // match highway color to "erase" rail section
+}
+
+/* ──────────────── Overpass Pillar ──────────────── */
+
+function drawOverpassPillar(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Thick rectangle pillar
+  gfx.rect(cx - 10, cy - 40, 10, 60);
+  gfx.fill(0x6a6a62);
+  gfx.rect(cx, cy - 40, 10, 60);
+  gfx.fill(0x5a5a52);
+
+  // Top cap
+  gfx.rect(cx - 12, cy - 42, 24, 4);
+  gfx.fill(0x7a7a72);
+
+  // Crumbling top edge
+  gfx.moveTo(cx - 8, cy - 42);
+  gfx.lineTo(cx - 4, cy - 46);
+  gfx.lineTo(cx + 2, cy - 43);
+  gfx.lineTo(cx + 8, cy - 45);
+  gfx.stroke({ width: 1.5, color: 0x5a5a52, alpha: 0.6 });
+
+  // Shadow on south face
+  gfx.rect(cx - 10, cy + 14, 20, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+}
+
+/* ──────────────── Grain Silo ──────────────── */
+
+function drawGrainSilo(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const baseY = y + WORLD_TILE_SIZE;
+
+  // Shadow
+  gfx.ellipse(cx + 5, baseY + 4, 18, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.2 });
+
+  // Body — tapered rectangle
+  gfx.moveTo(cx - 14, baseY);
+  gfx.lineTo(cx - 12, baseY - 72);
+  gfx.lineTo(cx + 12, baseY - 72);
+  gfx.lineTo(cx + 14, baseY);
+  gfx.closePath();
+  gfx.fill(0x7a5a3a);
+
+  // Shadow side
+  gfx.moveTo(cx + 4, baseY);
+  gfx.lineTo(cx + 4, baseY - 72);
+  gfx.lineTo(cx + 12, baseY - 72);
+  gfx.lineTo(cx + 14, baseY);
+  gfx.closePath();
+  gfx.fill(0x5a3a1a);
+
+  // Top circle cap
+  gfx.ellipse(cx, baseY - 72, 14, 5);
+  gfx.fill(0x6a5a3a);
+
+  // Seam line
+  gfx.moveTo(cx, baseY);
+  gfx.lineTo(cx, baseY - 72);
+  gfx.stroke({ width: 0.8, color: 0x4a3a1a, alpha: 0.4 });
+
+  // Hoop bands
+  gfx.moveTo(cx - 13, baseY - 20);
+  gfx.lineTo(cx + 13, baseY - 20);
+  gfx.stroke({ width: 1.2, color: 0x5a4a2a, alpha: 0.5 });
+  gfx.moveTo(cx - 13, baseY - 50);
+  gfx.lineTo(cx + 13, baseY - 50);
+  gfx.stroke({ width: 1.2, color: 0x5a4a2a, alpha: 0.5 });
+}
+
+/* ──────────────── Tractor ──────────────── */
+
+function drawTractor(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Shadow
+  gfx.ellipse(cx + 3, cy + 16, 24, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.18 });
+
+  // Body — squat rectangle
+  gfx.rect(cx - 16, cy - 10, 32, 20);
+  gfx.fill(0x6a4a2a);
+  gfx.rect(cx - 16, cy - 10, 32, 5);
+  gfx.fill(0x7a5a3a);
+
+  // Large rear wheels (ellipses)
+  gfx.ellipse(cx - 14, cy + 8, 10, 12);
+  gfx.fill(0x2a2a2a);
+  gfx.ellipse(cx - 14, cy + 8, 6, 8);
+  gfx.fill(0x3a3a3a);
+
+  gfx.ellipse(cx + 14, cy + 8, 10, 12);
+  gfx.fill(0x2a2a2a);
+  gfx.ellipse(cx + 14, cy + 8, 6, 8);
+  gfx.fill(0x3a3a3a);
+
+  // Small front wheels
+  gfx.ellipse(cx - 16, cy - 8, 5, 6);
+  gfx.fill(0x2a2a2a);
+  gfx.ellipse(cx + 16, cy - 8, 5, 6);
+  gfx.fill(0x2a2a2a);
+
+  // Exhaust pipe
+  gfx.rect(cx - 4, cy - 20, 3, 12);
+  gfx.fill(0x4a4a4a);
+  gfx.rect(cx - 1, cy - 20, 3, 12);
+  gfx.fill(0x3a3a3a);
+}
+
+/* ──────────────── Scarecrow ──────────────── */
+
+function drawScarecrow(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const baseY = y + WORLD_TILE_SIZE;
+
+  // Shadow
+  gfx.ellipse(cx + 2, baseY + 2, 10, 3);
+  gfx.fill({ color: 0x000000, alpha: 0.15 });
+
+  // Vertical post
+  gfx.rect(cx - 2, baseY - 60, 2, 60);
+  gfx.fill(0x6a5232);
+  gfx.rect(cx, baseY - 60, 2, 60);
+  gfx.fill(0x5a4222);
+
+  // Horizontal crossbar (T-shape)
+  gfx.rect(cx - 18, baseY - 48, 36, 3);
+  gfx.fill(0x6a5232);
+
+  // Cloth strips hanging down (thin diagonal lines)
+  gfx.moveTo(cx - 16, baseY - 45);
+  gfx.lineTo(cx - 20, baseY - 30);
+  gfx.stroke({ width: 1.5, color: 0x8a7a5a, alpha: 0.6 });
+
+  gfx.moveTo(cx + 16, baseY - 45);
+  gfx.lineTo(cx + 20, baseY - 30);
+  gfx.stroke({ width: 1.5, color: 0x8a7a5a, alpha: 0.6 });
+
+  gfx.moveTo(cx - 12, baseY - 45);
+  gfx.lineTo(cx - 14, baseY - 28);
+  gfx.stroke({ width: 1, color: 0x7a6a4a, alpha: 0.5 });
+
+  gfx.moveTo(cx + 12, baseY - 45);
+  gfx.lineTo(cx + 14, baseY - 28);
+  gfx.stroke({ width: 1, color: 0x7a6a4a, alpha: 0.5 });
+
+  // Head (small circle)
+  gfx.circle(cx, baseY - 54, 5);
+  gfx.fill(0x8a7a52);
+}
+
+/* ──────────────── Fence Post ──────────────── */
+
+function drawFencePost(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  gfx.rect(cx - 2, cy - 24, 2, 32);
+  gfx.fill(0x6a5a3a);
+  gfx.rect(cx, cy - 24, 2, 32);
+  gfx.fill(0x5a4a2a);
+
+  // Top point
+  gfx.moveTo(cx - 2, cy - 24);
+  gfx.lineTo(cx, cy - 28);
+  gfx.lineTo(cx + 2, cy - 24);
+  gfx.closePath();
+  gfx.fill(0x6a5a3a);
+}
+
+/* ──────────────── Dry Fountain ──────────────── */
+
+function drawDryFountain(gfx, x, y, time) {
+  const cx = x + WORLD_TILE_SIZE;
+  const cy = y + WORLD_TILE_SIZE;
+
+  // Outer stone ring
+  for (let i = 0; i < 12; i++) {
+    const angle = (Math.PI * 2 * i) / 12;
+    const bx = cx + Math.cos(angle) * 28;
+    const by = cy + Math.sin(angle) * 22;
+    gfx.rect(bx - 4, by - 3, 8, 3);
+    gfx.fill(0x7a7a6a);
+    gfx.rect(bx - 4, by, 8, 3);
+    gfx.fill(0x5a5a4a);
+  }
+
+  // Inner basin
+  gfx.ellipse(cx, cy, 22, 16);
+  gfx.fill(0x6a6a5a);
+
+  // Cracked dry floor
+  gfx.ellipse(cx, cy, 18, 12);
+  gfx.fill(0x8a7a52);
+
+  // Crack lines
+  gfx.moveTo(cx - 8, cy - 4);
+  gfx.lineTo(cx + 6, cy + 4);
+  gfx.stroke({ width: 0.8, color: 0x5a4a32, alpha: 0.5 });
+  gfx.moveTo(cx + 2, cy - 6);
+  gfx.lineTo(cx - 4, cy + 6);
+  gfx.stroke({ width: 0.8, color: 0x5a4a32, alpha: 0.4 });
+
+  // Alien structure at center — glowing
+  const glowAlpha = 0.3 + 0.2 * Math.sin(time * 2);
+  gfx.ellipse(cx, cy, 6, 4);
+  gfx.fill({ color: 0x00ff88, alpha: glowAlpha });
+  gfx.circle(cx, cy - 2, 3);
+  gfx.fill(0x1a2a1a);
+  gfx.circle(cx, cy - 2, 3);
+  gfx.stroke({ width: 1, color: 0x00ff88, alpha: glowAlpha * 0.8 });
+}
+
+/* ──────────────── Bench ──────────────── */
+
+function drawBench(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Seat — small rectangle
+  gfx.rect(cx - 12, cy - 2, 24, 4);
+  gfx.fill(0x6a5232);
+  gfx.rect(cx - 12, cy + 2, 24, 2);
+  gfx.fill(0x5a4222);
+
+  // 4 legs
+  gfx.rect(cx - 10, cy + 4, 2, 6);
+  gfx.fill(0x4a3a18);
+  gfx.rect(cx + 8, cy + 4, 2, 6);
+  gfx.fill(0x4a3a18);
+  gfx.rect(cx - 10, cy - 4, 2, 6);
+  gfx.fill(0x5a4a28);
+  gfx.rect(cx + 8, cy - 4, 2, 6);
+  gfx.fill(0x5a4a28);
+}
+
+/* ──────────────── Concrete Stairs ──────────────── */
+
+function drawConcreteStairs(gfx, x, y, time) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const top = y;
+  const w = 40;
+
+  // 5 progressively recessed rectangles going down
+  for (let i = 0; i < 5; i++) {
+    const stepW = w - i * 4;
+    const stepY = top + i * 10;
+    const darken = i * 0.12;
+    // Top face
+    gfx.rect(cx - stepW / 2, stepY, stepW, 4);
+    gfx.fill({ color: 0x7a7a6a, alpha: 1 - darken });
+    // Front face
+    gfx.rect(cx - stepW / 2, stepY + 4, stepW, 6);
+    gfx.fill({ color: 0x5a5a4a, alpha: 1 - darken });
+  }
+
+  // Darkness at bottom
+  gfx.rect(cx - 12, top + 50, 24, 12);
+  gfx.fill(0x0a0806);
+
+  // Faint green glow at bottom
+  const glowAlpha = 0.15 + 0.1 * Math.sin(time * 1.5);
+  gfx.ellipse(cx, top + 54, 14, 5);
+  gfx.fill({ color: 0x00ff88, alpha: glowAlpha });
+
+  // Metal handrail on left
+  gfx.moveTo(cx - w / 2 - 2, top);
+  gfx.lineTo(cx - w / 2 + 6, top + 50);
+  gfx.stroke({ width: 1.5, color: 0x6a6a62 });
+
+  // Faded signage rectangle
+  gfx.rect(cx + w / 2 + 2, top + 4, 12, 8);
+  gfx.fill(0x5a5a4a);
+  gfx.rect(cx + w / 2 + 3, top + 5, 10, 6);
+  gfx.fill(0x7a7a6a);
+}
+
+/* ──────────────── Rowboat ──────────────── */
+
+function drawRowboat(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Hull — flattened ellipse
+  gfx.ellipse(cx, cy, 20, 8);
+  gfx.fill(0x6a5232);
+  // Inner hull (lighter)
+  gfx.ellipse(cx, cy, 16, 5);
+  gfx.fill(0x8a7252);
+
+  // Plank seat lines
+  gfx.moveTo(cx - 8, cy - 3);
+  gfx.lineTo(cx - 8, cy + 3);
+  gfx.stroke({ width: 1.5, color: 0x5a4222 });
+  gfx.moveTo(cx + 6, cy - 3);
+  gfx.lineTo(cx + 6, cy + 3);
+  gfx.stroke({ width: 1.5, color: 0x5a4222 });
+
+  // Oar suggestion
+  gfx.moveTo(cx + 16, cy - 2);
+  gfx.lineTo(cx + 28, cy - 8);
+  gfx.stroke({ width: 1, color: 0x7a6242, alpha: 0.6 });
 }

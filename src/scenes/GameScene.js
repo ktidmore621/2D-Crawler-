@@ -17,14 +17,11 @@ import {
   PLAYER_START_ROW,
   DUNGEON_TILE_ROW,
   DUNGEON_TILE_COL,
+  CAVE_TRIGGERS,
+  TUNNEL_TRIGGER,
 } from '../data/worldMap.js';
 
 export default class GameScene {
-  /**
-   * @param {import('pixi.js').Application} app
-   * @param {string} characterType - 'male' | 'female' | 'androgynous'
-   * @param {string} characterName - player-chosen name
-   */
   constructor(app, characterType, characterName) {
     this.app = app;
     this.characterType = characterType;
@@ -38,6 +35,8 @@ export default class GameScene {
     this.vignette = null;
     this.elapsedTime = 0;
     this._dungeonLogged = false;
+    this._caveLogged = {};
+    this._tunnelLogged = false;
   }
 
   async init() {
@@ -45,64 +44,46 @@ export default class GameScene {
     this.app.renderer.background.color = BG_COLOR;
     this.app.stage.addChild(this.container);
 
-    // World container holds tiles, props, and player
     this.container.addChild(this.worldContainer);
 
-    // Create tile map renderer
     this.tilemap = createTilemap();
     this.worldContainer.addChild(this.tilemap.gfx);
 
-    // Create props renderer
     this.propsRenderer = createPropsRenderer();
     this.worldContainer.addChild(this.propsRenderer.gfx);
 
-    // Create and load player
     this.player = new Player(this.characterType, this.characterName);
     await this.player.load();
 
-    // Start position — base camp
     this.player.x = PLAYER_START_COL * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
     this.player.y = PLAYER_START_ROW * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
     this.worldContainer.addChild(this.player.view);
 
-    // Create vignette overlay (on top of everything, fixed to screen)
     this._createVignette(width, height);
 
-    // Set up unified input
     this.inputState = createInputState();
     this._onKeyDown = this.inputState.onKeyDown;
     this._onKeyUp = this.inputState.onKeyUp;
     window.addEventListener('keydown', this._onKeyDown);
     window.addEventListener('keyup', this._onKeyUp);
 
-    // Update status strip
     updateStatusStrip(this.characterName);
 
-    // Initial camera + render
     this._updateWorld(0);
   }
 
   _createVignette(w, h) {
     this.vignette = new Graphics();
-
-    // Subtle dark edges only — atmosphere without blocking visibility
-    // Top edge
     this.vignette.rect(0, 0, w, 30);
     this.vignette.fill({ color: 0x000000, alpha: 0.15 });
-    // Bottom edge
     this.vignette.rect(0, h - 30, w, 30);
     this.vignette.fill({ color: 0x000000, alpha: 0.15 });
-    // Left edge
     this.vignette.rect(0, 0, 20, h);
     this.vignette.fill({ color: 0x000000, alpha: 0.12 });
-    // Right edge
     this.vignette.rect(w - 20, 0, 20, h);
     this.vignette.fill({ color: 0x000000, alpha: 0.12 });
-
-    // Very light full-screen tint for just a hint of vignette — max 0.25
     this.vignette.rect(0, 0, w, h);
     this.vignette.fill({ color: 0x000000, alpha: 0.05 });
-
     this.container.addChild(this.vignette);
   }
 
@@ -110,39 +91,27 @@ export default class GameScene {
     if (!this.player || !this.inputState) return;
 
     this.elapsedTime += deltaSeconds;
-
-    // Merge keyboard + touch into dirs
     this.inputState.updateDirs();
-
-    // Update player (movement + collision)
     this.player.update(this.inputState.dirs, worldMap, deltaSeconds);
 
-    // Check dungeon entrance trigger
-    this._checkDungeonTrigger();
-
-    // Update world rendering
+    this._checkTriggers();
     this._updateWorld(deltaSeconds);
   }
 
   _updateWorld(deltaSeconds) {
     const { width, height } = this.app.screen;
-
-    // Camera
     const cam = updateCamera(this.player, WORLD_WIDTH, WORLD_HEIGHT, width, height);
     this.worldContainer.x = cam.x;
     this.worldContainer.y = cam.y;
-
-    // Render tiles (only visible ones)
     this.tilemap.render(worldMap, cam.x, cam.y, width, height, this.elapsedTime);
-
-    // Render props (only visible ones)
     this.propsRenderer.render(cam.x, cam.y, width, height, this.elapsedTime);
   }
 
-  _checkDungeonTrigger() {
+  _checkTriggers() {
     const playerTileCol = Math.floor(this.player.x / WORLD_TILE_SIZE);
     const playerTileRow = Math.floor(this.player.y / WORLD_TILE_SIZE);
 
+    // Dungeon entrance
     if (playerTileCol === DUNGEON_TILE_COL && playerTileRow === DUNGEON_TILE_ROW) {
       if (!this._dungeonLogged) {
         console.log('Enter dungeon');
@@ -150,6 +119,29 @@ export default class GameScene {
       }
     } else {
       this._dungeonLogged = false;
+    }
+
+    // Cave entrances
+    for (const cave of CAVE_TRIGGERS) {
+      const key = cave.label;
+      if (playerTileCol === cave.col && playerTileRow === cave.row) {
+        if (!this._caveLogged[key]) {
+          console.log(`Enter ${cave.label}`);
+          this._caveLogged[key] = true;
+        }
+      } else {
+        this._caveLogged[key] = false;
+      }
+    }
+
+    // Tunnel entrance
+    if (playerTileCol === TUNNEL_TRIGGER.col && playerTileRow === TUNNEL_TRIGGER.row) {
+      if (!this._tunnelLogged) {
+        console.log('Enter tunnel');
+        this._tunnelLogged = true;
+      }
+    } else {
+      this._tunnelLogged = false;
     }
   }
 
