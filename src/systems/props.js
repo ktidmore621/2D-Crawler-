@@ -62,6 +62,44 @@ export const PROP_LIST = [
 
   // Dungeon arch
   { type: 'dungeon_arch', col: 38, row: 9 },
+
+  // Dense forest bushes — fill gaps between trees at forest edges
+  // Top forest edge (rows 0-4)
+  { type: 'bush', col: 5, row: 1 },
+  { type: 'bush', col: 10, row: 2 },
+  { type: 'bush', col: 16, row: 1 },
+  { type: 'bush', col: 22, row: 3 },
+  { type: 'bush', col: 28, row: 2 },
+  { type: 'bush', col: 34, row: 1 },
+  { type: 'bush', col: 40, row: 3 },
+  { type: 'bush', col: 48, row: 2 },
+  { type: 'bush', col: 54, row: 1 },
+  { type: 'bush', col: 60, row: 3 },
+  { type: 'bush', col: 66, row: 2 },
+  { type: 'bush', col: 72, row: 1 },
+  // North forest section (rows 4-20)
+  { type: 'bush', col: 4, row: 6 },
+  { type: 'bush', col: 8, row: 8 },
+  { type: 'bush', col: 12, row: 5 },
+  { type: 'bush', col: 18, row: 10 },
+  { type: 'bush', col: 6, row: 14 },
+  { type: 'bush', col: 14, row: 18 },
+  { type: 'bush', col: 22, row: 7 },
+  { type: 'bush', col: 26, row: 12 },
+  { type: 'bush', col: 50, row: 6 },
+  { type: 'bush', col: 56, row: 9 },
+  { type: 'bush', col: 62, row: 5 },
+  { type: 'bush', col: 68, row: 8 },
+  { type: 'bush', col: 52, row: 14 },
+  { type: 'bush', col: 58, row: 18 },
+  { type: 'bush', col: 64, row: 12 },
+  { type: 'bush', col: 70, row: 16 },
+  // Right forest edge
+  { type: 'bush', col: 75, row: 25 },
+  { type: 'bush', col: 74, row: 35 },
+  { type: 'bush', col: 75, row: 45 },
+  { type: 'bush', col: 74, row: 55 },
+  { type: 'bush', col: 75, row: 65 },
 ];
 
 /**
@@ -114,6 +152,9 @@ export function createPropsRenderer() {
         case 'base_building':
           drawBaseBuilding(gfx, px, py);
           break;
+        case 'bush':
+          drawBushProp(gfx, px, py);
+          break;
       }
     }
 
@@ -138,64 +179,64 @@ function drawCar(gfx, x, y, rotation) {
     cy + dx * sin + dy * cos,
   ];
 
+  // Car: 72px wide × 44px tall
+  const hw = 36; // half width (72/2)
+  const hh = 22; // half height (44/2)
+
   // Shadow underneath — elongated dark ellipse
-  gfx.ellipse(cx + 4, cy + 10, 24, 8);
+  gfx.ellipse(cx + 4, cy + hh + 4, hw + 2, 10);
   gfx.fill({ color: 0x000000, alpha: 0.2 });
 
   // ── Car body (main) ──
-  const hw = 22; // half width
-  const hh = 11; // half height
   const bodyCorners = [
     rot(-hw, -hh), rot(hw, -hh), rot(hw, hh), rot(-hw, hh),
   ];
-
-  // Main body fill
   gfx.moveTo(bodyCorners[0][0], bodyCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(bodyCorners[i][0], bodyCorners[i][1]);
   gfx.closePath();
-  gfx.fill(0x3a3530);
+  gfx.fill(0x5a5248);
 
   // ── Shadow side (right/bottom strip) — darker ──
   const shadowCorners = [
-    rot(hw - 4, -hh), rot(hw, -hh), rot(hw, hh), rot(hw - 4, hh),
+    rot(hw - 6, -hh), rot(hw, -hh), rot(hw, hh), rot(hw - 6, hh),
   ];
   gfx.moveTo(shadowCorners[0][0], shadowCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(shadowCorners[i][0], shadowCorners[i][1]);
   gfx.closePath();
-  gfx.fill(0x252220);
+  gfx.fill(0x4a4438);
 
   // Bottom shadow strip (south-facing depth)
   const btmCorners = [
-    rot(-hw, hh - 3), rot(hw, hh - 3), rot(hw, hh), rot(-hw, hh),
+    rot(-hw, hh - 5), rot(hw, hh - 5), rot(hw, hh), rot(-hw, hh),
   ];
   gfx.moveTo(btmCorners[0][0], btmCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(btmCorners[i][0], btmCorners[i][1]);
   gfx.closePath();
-  gfx.fill(0x252220);
+  gfx.fill(0x4a4438);
 
   // ── Hood (north-facing end — slightly lighter) ──
   const hoodCorners = [
-    rot(-hw, -hh), rot(hw, -hh), rot(hw, -hh + 6), rot(-hw, -hh + 6),
+    rot(-hw, -hh), rot(hw, -hh), rot(hw, -hh + 10), rot(-hw, -hh + 10),
   ];
   gfx.moveTo(hoodCorners[0][0], hoodCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(hoodCorners[i][0], hoodCorners[i][1]);
   gfx.closePath();
-  gfx.fill(0x424038);
+  gfx.fill(0x646058);
 
   // ── Roof — lighter smaller rectangle centered on body ──
-  const rw = 12;
-  const rh = 7;
+  const rw = 20;
+  const rh = 12;
   const roofCorners = [
     rot(-rw, -rh), rot(rw, -rh), rot(rw, rh), rot(-rw, rh),
   ];
   gfx.moveTo(roofCorners[0][0], roofCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(roofCorners[i][0], roofCorners[i][1]);
   gfx.closePath();
-  gfx.fill(0x4a4540);
+  gfx.fill(0x6a6460);
 
   // ── Windshield — dark blue-grey on front face, with crack ──
   const wsCorners = [
-    rot(-10, -hh + 6), rot(10, -hh + 6), rot(10, -hh + 10), rot(-10, -hh + 10),
+    rot(-16, -hh + 10), rot(16, -hh + 10), rot(16, -hh + 16), rot(-16, -hh + 16),
   ];
   gfx.moveTo(wsCorners[0][0], wsCorners[0][1]);
   for (let i = 1; i < 4; i++) gfx.lineTo(wsCorners[i][0], wsCorners[i][1]);
@@ -203,21 +244,20 @@ function drawCar(gfx, x, y, rotation) {
   gfx.fill(0x1a2028);
 
   // Windshield crack line
-  const crk1 = rot(-4, -hh + 7);
-  const crk2 = rot(5, -hh + 9);
+  const crk1 = rot(-6, -hh + 11);
+  const crk2 = rot(8, -hh + 14);
   gfx.moveTo(crk1[0], crk1[1]);
   gfx.lineTo(crk2[0], crk2[1]);
   gfx.stroke({ width: 1, color: 0x5a5a6a, alpha: 0.7 });
 
-  // ── Wheels — small dark ellipses at corners (3/4 squashed) ──
+  // ── Wheels — dark ellipses at corners (3/4 squashed) ──
   const wheelPositions = [
-    [-hw + 3, -hh + 2], [hw - 3, -hh + 2],
-    [-hw + 3, hh - 2], [hw - 3, hh - 2],
+    [-hw + 6, -hh + 4], [hw - 6, -hh + 4],
+    [-hw + 6, hh - 4], [hw - 6, hh - 4],
   ];
   for (const [dx, dy] of wheelPositions) {
     const [wx, wy] = rot(dx, dy);
-    // Squashed ellipse for 3/4 view
-    gfx.ellipse(wx, wy, 3.5, 2);
+    gfx.ellipse(wx, wy, 5, 3);
     gfx.fill(0x1a1a1a);
   }
 }
@@ -228,39 +268,40 @@ function drawStreetlight(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
+  // Streetlight: 6px wide × 80px tall
   // Shadow on ground
-  gfx.ellipse(bx + 4, by + 2, 6, 2);
+  gfx.ellipse(bx + 4, by + 2, 8, 3);
   gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Pole — narrow rounded rectangle with left/right face for cylindrical depth
+  // Pole — 6px wide × 80px tall
   // Left face (lit)
-  gfx.rect(bx - 2, by - 38, 2, 38);
-  gfx.fill(0x7a6a4a);
+  gfx.rect(bx - 3, by - 80, 3, 80);
+  gfx.fill(0x8a7a5a);
   // Right face (shadow)
-  gfx.rect(bx, by - 38, 2, 38);
-  gfx.fill(0x4a3a2a);
+  gfx.rect(bx, by - 80, 3, 80);
+  gfx.fill(0x5a4a32);
 
   // Bent top section
-  gfx.moveTo(bx - 1, by - 38);
-  gfx.lineTo(bx - 10, by - 42);
-  gfx.stroke({ width: 2.5, color: 0x4a3a2a });
-  gfx.moveTo(bx - 1, by - 39);
-  gfx.lineTo(bx - 10, by - 43);
-  gfx.stroke({ width: 1.5, color: 0x7a6a4a });
+  gfx.moveTo(bx - 1, by - 80);
+  gfx.lineTo(bx - 14, by - 86);
+  gfx.stroke({ width: 3, color: 0x5a4a32 });
+  gfx.moveTo(bx - 1, by - 81);
+  gfx.lineTo(bx - 14, by - 87);
+  gfx.stroke({ width: 2, color: 0x8a7a5a });
 
   // Lamp head — small rectangle with darker underside
-  gfx.rect(bx - 14, by - 45, 8, 3);
-  gfx.fill(0x5a5040); // top face
-  gfx.rect(bx - 14, by - 42, 8, 2);
-  gfx.fill(0x3a3020); // underside darker
+  gfx.rect(bx - 18, by - 89, 10, 4);
+  gfx.fill(0x6a6050); // top face
+  gfx.rect(bx - 18, by - 85, 10, 3);
+  gfx.fill(0x4a4030); // underside darker
 
-  // Broken wire — bezier drooping down (2 lines for shadow depth)
-  gfx.moveTo(bx - 10, by - 42);
-  gfx.quadraticCurveTo(bx - 6, by - 30, bx - 2, by - 34);
-  gfx.stroke({ width: 1, color: 0x3a3a3a, alpha: 0.5 });
-  gfx.moveTo(bx - 10, by - 41);
-  gfx.quadraticCurveTo(bx - 6, by - 29, bx - 2, by - 33);
-  gfx.stroke({ width: 0.8, color: 0x5a5a5a, alpha: 0.3 });
+  // Broken wire — bezier drooping down
+  gfx.moveTo(bx - 14, by - 85);
+  gfx.quadraticCurveTo(bx - 8, by - 60, bx - 2, by - 66);
+  gfx.stroke({ width: 1, color: 0x4a4a4a, alpha: 0.5 });
+  gfx.moveTo(bx - 14, by - 84);
+  gfx.quadraticCurveTo(bx - 8, by - 59, bx - 2, by - 65);
+  gfx.stroke({ width: 0.8, color: 0x6a6a6a, alpha: 0.3 });
 }
 
 /* ──────────────── Telephone Pole — 3/4 cylindrical ──────────────── */
@@ -269,26 +310,50 @@ function drawTelephonePole(gfx, x, y) {
   const bx = x + WORLD_TILE_SIZE / 2;
   const by = y + WORLD_TILE_SIZE;
 
+  // Telephone pole: 8px wide × 96px tall, crossbar 40px wide
   // Shadow on ground
-  gfx.ellipse(bx + 4, by + 2, 5, 2);
+  gfx.ellipse(bx + 4, by + 2, 8, 3);
   gfx.fill({ color: 0x000000, alpha: 0.15 });
 
-  // Pole — cylindrical with left/right face
-  gfx.rect(bx - 3, by - 44, 3, 44);
-  gfx.fill(0x5a4a30); // left face (lit)
-  gfx.rect(bx, by - 44, 3, 44);
-  gfx.fill(0x3a2a1a); // right face (shadow)
+  // Pole — 8px wide × 96px tall
+  gfx.rect(bx - 4, by - 96, 4, 96);
+  gfx.fill(0x8a7248); // left face (lit)
+  gfx.rect(bx, by - 96, 4, 96);
+  gfx.fill(0x6a5232); // right face (shadow)
 
-  // Crossbar — wider rectangle with top/front/underside
+  // Crossbar — 40px wide
   // Top face (lightest)
-  gfx.rect(bx - 14, by - 42, 28, 2);
-  gfx.fill(0x6a5a40);
+  gfx.rect(bx - 20, by - 92, 40, 3);
+  gfx.fill(0x8a7248);
   // Front face (mid)
-  gfx.rect(bx - 14, by - 40, 28, 3);
-  gfx.fill(0x4a3a28);
+  gfx.rect(bx - 20, by - 89, 40, 4);
+  gfx.fill(0x6a5232);
   // Underside (darkest)
-  gfx.rect(bx - 14, by - 37, 28, 2);
-  gfx.fill(0x2a1a10);
+  gfx.rect(bx - 20, by - 85, 40, 3);
+  gfx.fill(0x4a3a20);
+}
+
+/* ──────────────── Bush prop — dense forest filler ──────────────── */
+
+function drawBushProp(gfx, x, y) {
+  const cx = x + WORLD_TILE_SIZE / 2;
+  const cy = y + WORLD_TILE_SIZE / 2;
+
+  // Shadow
+  gfx.ellipse(cx + 3, cy + 14, 20, 6);
+  gfx.fill({ color: 0x000000, alpha: 0.18 });
+
+  // Front-bottom ellipse: darker
+  gfx.ellipse(cx, cy + 4, 18, 12);
+  gfx.fill(0x389018);
+
+  // Back-top ellipse: lighter
+  gfx.ellipse(cx - 2, cy - 4, 16, 10);
+  gfx.fill(0x489228);
+
+  // Top highlight
+  gfx.ellipse(cx - 3, cy - 8, 10, 6);
+  gfx.fill({ color: 0x58a232, alpha: 0.5 });
 }
 
 /* ──────────────── Wires between telephone poles — 3/4 ──────────────── */
@@ -299,10 +364,10 @@ function drawWires(gfx) {
     const p1 = poles[i];
     const p2 = poles[i + 1];
 
-    const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 + 14;
-    const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 40;
-    const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 14;
-    const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 40;
+    const x1 = p1.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 + 20;
+    const y1 = p1.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 90;
+    const x2 = p2.col * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2 - 20;
+    const y2 = p2.row * WORLD_TILE_SIZE + WORLD_TILE_SIZE - 90;
 
     const midX = (x1 + x2) / 2;
     const midY = Math.max(y1, y2) + 22;
@@ -332,34 +397,34 @@ function drawDebris(gfx, x, y) {
   // Back pieces — smaller, higher (further away in 3/4)
   // Piece 1 — concrete grey
   gfx.rect(cx - 6, cy - 8, 8, 4); // top face
-  gfx.fill(0x7a7068);
+  gfx.fill(0x7a6a58);
   gfx.rect(cx - 6, cy - 4, 8, 5); // front face
-  gfx.fill(0x6a6058);
+  gfx.fill(0x6a5a48);
 
   // Piece 2 — rust colored (back)
   gfx.rect(cx + 4, cy - 6, 6, 3); // top face
-  gfx.fill(0x8a5a3a);
+  gfx.fill(0x9a6a4a);
   gfx.rect(cx + 4, cy - 3, 6, 5); // front face
-  gfx.fill(0x7a4a2a);
+  gfx.fill(0x8a5a3a);
 
   // Front pieces — larger, lower (closer to camera)
   // Piece 3 — dark wood
   gfx.rect(cx - 8, cy + 1, 10, 3); // top face
-  gfx.fill(0x5a4028);
+  gfx.fill(0x7a6a58);
   gfx.rect(cx - 8, cy + 4, 10, 6); // front face
-  gfx.fill(0x4a3018);
+  gfx.fill(0x6a5a48);
 
   // Piece 4 — concrete
   gfx.rect(cx + 3, cy + 2, 7, 3); // top face
-  gfx.fill(0x7a7068);
+  gfx.fill(0x8a7a68);
   gfx.rect(cx + 3, cy + 5, 7, 4); // front face
-  gfx.fill(0x5a5848);
+  gfx.fill(0x6a6058);
 
   // Piece 5 — small rust piece in front
   gfx.rect(cx - 2, cy + 6, 5, 2); // top face
-  gfx.fill(0x8a5a3a);
+  gfx.fill(0x9a6a4a);
   gfx.rect(cx - 2, cy + 8, 5, 3); // front face
-  gfx.fill(0x6a3a1a);
+  gfx.fill(0x7a4a2a);
 }
 
 /* ──────────────── Barrel — 3/4 ──────────────── */
@@ -368,42 +433,46 @@ function drawBarrel(gfx, x, y) {
   const cx = x + WORLD_TILE_SIZE / 2;
   const cy = y + WORLD_TILE_SIZE / 2;
 
+  // Barrel: 20px wide × 26px tall
+  const hw = 10; // half width
+  const hh = 13; // half height
+
   // Small shadow ellipse underneath
-  gfx.ellipse(cx + 3, cy + 10, 9, 3);
+  gfx.ellipse(cx + 3, cy + hh + 3, hw + 2, 4);
   gfx.fill({ color: 0x000000, alpha: 0.18 });
 
   // Front face — rectangle (mid tone)
-  gfx.rect(cx - 7, cy - 4, 14, 14);
-  gfx.fill(0x7a4a2a);
+  gfx.rect(cx - hw, cy - hh + 4, hw * 2, hh * 2 - 4);
+  gfx.fill(0x9a6232);
 
   // Bottom darker strip
-  gfx.rect(cx - 7, cy + 7, 14, 3);
-  gfx.fill(0x4a2a10);
+  gfx.rect(cx - hw, cy + hh - 4, hw * 2, 4);
+  gfx.fill(0x6a4218);
 
   // Horizontal hoop lines on front face
-  gfx.moveTo(cx - 7, cy);
-  gfx.lineTo(cx + 7, cy);
-  gfx.stroke({ width: 1.5, color: 0x5a3218, alpha: 0.7 });
+  gfx.moveTo(cx - hw, cy - 2);
+  gfx.lineTo(cx + hw, cy - 2);
+  gfx.stroke({ width: 1.5, color: 0x7a4a28, alpha: 0.7 });
 
-  gfx.moveTo(cx - 7, cy + 5);
-  gfx.lineTo(cx + 7, cy + 5);
-  gfx.stroke({ width: 1.5, color: 0x5a3218, alpha: 0.6 });
+  gfx.moveTo(cx - hw, cy + 6);
+  gfx.lineTo(cx + hw, cy + 6);
+  gfx.stroke({ width: 1.5, color: 0x7a4a28, alpha: 0.6 });
 
-  gfx.moveTo(cx - 7, cy - 2);
-  gfx.lineTo(cx + 7, cy - 2);
-  gfx.stroke({ width: 1, color: 0x5a3218, alpha: 0.5 });
+  gfx.moveTo(cx - hw, cy - 6);
+  gfx.lineTo(cx + hw, cy - 6);
+  gfx.stroke({ width: 1, color: 0x7a4a28, alpha: 0.5 });
 
   // Top ellipse — lighter rusty orange (top face)
-  gfx.ellipse(cx, cy - 4, 7, 3);
-  gfx.fill(0x8a5a2a);
+  gfx.ellipse(cx, cy - hh + 4, hw, 4);
+  gfx.fill(0x8a5228);
 
   // Top face inner ring
-  gfx.ellipse(cx, cy - 4, 4, 2);
-  gfx.fill({ color: 0x6a3a1a, alpha: 0.5 });
+  gfx.ellipse(cx, cy - hh + 4, 6, 3);
+  gfx.fill({ color: 0x7a4218, alpha: 0.5 });
 
   // Bottom ellipse shadow (implied curve)
-  gfx.ellipse(cx, cy + 10, 7, 2);
-  gfx.fill({ color: 0x3a1a08, alpha: 0.3 });
+  gfx.ellipse(cx, cy + hh, hw, 3);
+  gfx.fill({ color: 0x4a2a10, alpha: 0.3 });
 }
 
 /* ──────────────── Campfire — 3/4 ──────────────── */
@@ -421,11 +490,11 @@ function drawCampfire(gfx, x, y, time) {
   gfx.ellipse(cx, cy + 2, CAMP_GLOW_RADIUS * 0.7, CAMP_GLOW_RADIUS * 0.45);
   gfx.fill({ color: 0x885511, alpha: glowAlpha * 0.5 });
 
-  // Stone ring — each stone as a 3/4 block
+  // Stone ring — 44px diameter, each stone as a 3/4 block
   for (let i = 0; i < 8; i++) {
     const angle = (Math.PI * 2 * i) / 8;
-    const sx = cx + Math.cos(angle) * 11;
-    const sy = cy + Math.sin(angle) * 9; // elliptical ring (3/4)
+    const sx = cx + Math.cos(angle) * 22;
+    const sy = cy + Math.sin(angle) * 18; // elliptical ring (3/4)
 
     // Top face (light grey)
     gfx.rect(sx - 3, sy - 3, 6, 3);
@@ -478,10 +547,11 @@ function drawCampfire(gfx, x, y, time) {
 /* ──────────────── Dungeon Entrance Archway — 3/4 ──────────────── */
 
 function drawDungeonArch(gfx, x, y, time) {
-  const cx = x + WORLD_TILE_SIZE * 1.5;
+  // Dungeon archway: 80px wide × 90px tall
+  const archWidth = 80;
+  const archHeight = 90;
+  const cx = x + archWidth / 2;
   const top = y;
-  const archWidth = WORLD_TILE_SIZE * 3;
-  const archHeight = WORLD_TILE_SIZE * 2.5;
 
   // ── Steps leading down — 3 steps going into the arch ──
   const stepWidth = archWidth - 24;
