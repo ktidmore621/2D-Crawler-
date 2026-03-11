@@ -104,7 +104,7 @@ export const SPRITE_FRAME_WIDTH = 48;
 export const SPRITE_FRAME_HEIGHT = 64;
 export const PLAYER_SPEED = 260;               // px per second
 export const PLAYER_ANIM_SPEED = 0.15;         // frames per tick for AnimatedSprite
-export const PLAYER_SCALE = 0.5;               // small player in a massive world
+export const PLAYER_SCALE = 0.625;             // 25% larger player in a massive world
 
 // ── Character Types ─────────────────────────────────
 export const CHARACTER_TYPES = ['male', 'female', 'androgynous'];
