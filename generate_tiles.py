@@ -162,30 +162,29 @@ dirt_color = (168,120,72)
 def make_transition(name, grass_top, grass_right, grass_bottom, grass_left):
     img = Image.new('RGBA', (TILE, TILE))
     d = ImageDraw.Draw(img)
-    # fill base
-    d.rectangle([0,0,TILE,TILE], fill=dirt_color)
-    # grass regions
-    if grass_top:
-        d.rectangle([0,0,TILE,20], fill=grass_color)
-        # jagged edge
+    # Start with full grass base
+    d.rectangle([0,0,TILE,TILE], fill=grass_color)
+    # Fill dirt regions with jagged grass edge cutting INTO dirt
+    if grass_bottom:  # dirt is on TOP — grass edge faces upward into dirt
+        d.rectangle([0,0,TILE,26], fill=dirt_color)
         for x in range(0,TILE,4):
-            h = 18 + (x % 3)*2
-            d.rectangle([x,h,x+4,22], fill=dirt_color)
-    if grass_bottom:
-        d.rectangle([0,26,TILE,TILE], fill=grass_color)
+            h = 20 + (x % 3)*3
+            d.rectangle([x,h,x+4,26], fill=grass_color)
+    if grass_top:  # dirt is on BOTTOM — grass edge faces downward into dirt
+        d.rectangle([0,22,TILE,TILE], fill=dirt_color)
         for x in range(0,TILE,4):
-            h = 24 + (x % 3)*2
-            d.rectangle([x,24,x+4,h], fill=dirt_color)
-    if grass_left:
-        d.rectangle([0,0,20,TILE], fill=grass_color)
+            h = 22 + (x % 3)*3
+            d.rectangle([x,22,x+4,h], fill=grass_color)
+    if grass_right:  # dirt is on LEFT — grass edge faces left into dirt
+        d.rectangle([0,0,26,TILE], fill=dirt_color)
         for y in range(0,TILE,4):
-            w = 18 + (y % 3)*2
-            d.rectangle([w,y,22,y+4], fill=dirt_color)
-    if grass_right:
-        d.rectangle([26,0,TILE,TILE], fill=grass_color)
+            w = 20 + (y % 3)*3
+            d.rectangle([w,y,26,y+4], fill=grass_color)
+    if grass_left:  # dirt is on RIGHT — grass edge faces right into dirt
+        d.rectangle([22,0,TILE,TILE], fill=dirt_color)
         for y in range(0,TILE,4):
-            w = 24 + (y % 3)*2
-            d.rectangle([24,y,w,y+4], fill=dirt_color)
+            w = 22 + (y % 3)*3
+            d.rectangle([22,y,w,y+4], fill=grass_color)
     save(img, name)
 
 make_transition('trans_grass_N',  True,  False, False, False)
