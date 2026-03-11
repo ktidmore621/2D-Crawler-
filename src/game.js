@@ -20,6 +20,7 @@ export async function bootstrapGame() {
     height: Math.floor(rect.height),
     backgroundColor: BG_COLOR,
     antialias: true,
+    roundPixels: false,
     resizeTo: gameScreen,
   });
 
