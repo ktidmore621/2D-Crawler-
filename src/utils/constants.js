@@ -256,8 +256,8 @@ export const CAMP_GLOW_RADIUS = 80;
 
 // ── Isometric Tile Dimensions ──────────────────────
 // Each tile sprite is 256×256 but the diamond face is 2:1 ratio
-export const ISO_TILE_W = 128;           // diamond width in screen pixels
-export const ISO_TILE_H = 64;            // diamond height in screen pixels
+export const ISO_TILE_W = 64;            // diamond width in screen pixels
+export const ISO_TILE_H = 32;            // diamond height in screen pixels
 export const ISO_TILE_SPRITE = 256;      // source sprite cell size in atlas
 export const ISO_TILE_SCALE = ISO_TILE_W / ISO_TILE_SPRITE; // 0.5
 
