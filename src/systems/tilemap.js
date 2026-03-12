@@ -570,10 +570,10 @@ function drawTreeSprite(pool, idx, gfx, x, y, s, r, c) {
   } else if (variant === 4) {
     // Nature pack forest trees
     texName = 'nature_treeForest1';
-    treeW = 80; treeH = 96;
+    treeW = 80; treeH = 128;
   } else if (variant === 5) {
     texName = 'nature_treeForest2';
-    treeW = 80; treeH = 96;
+    treeW = 80; treeH = 128;
   } else {
     texName = 'tree1_bareBrown';
     treeW = 112; treeH = 152;

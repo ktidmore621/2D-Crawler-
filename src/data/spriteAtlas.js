@@ -58,32 +58,32 @@ export const SPRITE_ATLAS = {
     path: 'assets/decorations/nature.png',
     // 256×256 — bushes, logs, mushrooms, grass tufts, rocks, trees
     regions: {
-      // Bushes (top-left, ~48×48 each)
-      bush1:          { x: 0,   y: 0,   w: 48, h: 48 },
-      bush2:          { x: 48,  y: 0,   w: 48, h: 48 },
-      // Fallen log (top area)
-      log1:           { x: 0,   y: 48,  w: 64, h: 32 },
-      // Grass tufts (small, ~16×16)
-      grassTuft1:     { x: 0,   y: 80,  w: 16, h: 16 },
-      grassTuft2:     { x: 16,  y: 80,  w: 16, h: 16 },
-      grassTuft3:     { x: 32,  y: 80,  w: 16, h: 16 },
-      // Cattails/reeds
-      cattail1:       { x: 64,  y: 64,  w: 16, h: 32 },
-      cattail2:       { x: 80,  y: 64,  w: 16, h: 32 },
-      // Mushroom clusters (right side)
-      mushroom1:      { x: 192, y: 0,   w: 32, h: 32 },
-      mushroom2:      { x: 224, y: 0,   w: 32, h: 32 },
-      mushroom3:      { x: 192, y: 32,  w: 32, h: 32 },
-      mushroomSmall1: { x: 224, y: 32,  w: 16, h: 16 },
-      mushroomSmall2: { x: 224, y: 48,  w: 16, h: 16 },
-      // Rocks (bottom-right ~96-128 area)
+      // Bushes — stacked vertically in top-left (each ~35×27 content)
+      bush1:          { x: 0,   y: 0,   w: 48, h: 32 },
+      bush2:          { x: 0,   y: 32,  w: 48, h: 32 },
+      // Fallen log — brown horizontal log, upper-middle area
+      log1:           { x: 64,  y: 0,   w: 64, h: 64 },
+      // Grass tufts — tall grass sprites (each ~14×22 content in 32×32 cell)
+      grassTuft1:     { x: 0,   y: 64,  w: 32, h: 32 },
+      grassTuft2:     { x: 32,  y: 64,  w: 32, h: 32 },
+      grassTuft3:     { x: 0,   y: 96,  w: 32, h: 32 },
+      // Cattails/reeds — taller plant clusters
+      cattail1:       { x: 64,  y: 64,  w: 32, h: 32 },
+      cattail2:       { x: 96,  y: 64,  w: 32, h: 32 },
+      // Mushroom clusters — 3×3 grid on right side (each ~13×14 content)
+      mushroom1:      { x: 160, y: 0,   w: 32, h: 32 },
+      mushroom2:      { x: 192, y: 0,   w: 32, h: 32 },
+      mushroom3:      { x: 224, y: 0,   w: 32, h: 32 },
+      mushroomSmall1: { x: 160, y: 32,  w: 32, h: 32 },
+      mushroomSmall2: { x: 192, y: 32,  w: 32, h: 32 },
+      // Rocks — small rocks at y=96, larger clusters at y=128
       rockSmall1:     { x: 160, y: 96,  w: 32, h: 32 },
       rockSmall2:     { x: 192, y: 96,  w: 32, h: 32 },
       rockCluster:    { x: 224, y: 96,  w: 32, h: 32 },
-      // Trees (large, bottom section ~96px wide)
-      treeForest1:    { x: 0,   y: 160, w: 80, h: 96 },
-      treeForest2:    { x: 80,  y: 160, w: 80, h: 96 },
-      treeForest3:    { x: 160, y: 160, w: 80, h: 96 },
+      // Trees — large, bottom section; start at y=128 to capture full canopy
+      treeForest1:    { x: 0,   y: 128, w: 80, h: 128 },
+      treeForest2:    { x: 80,  y: 128, w: 80, h: 128 },
+      treeForest3:    { x: 160, y: 128, w: 96, h: 128 },
     },
   },
 
