@@ -102,7 +102,7 @@ export const EMBER_COLORS = [0x66ff33, 0x88ff44, 0xccff66, 0xffff88, 0xffffcc];
 // ── Sprite / Player ─────────────────────────────────
 export const SPRITE_FRAME_WIDTH = 48;
 export const SPRITE_FRAME_HEIGHT = 64;
-export const PLAYER_SPEED = 260;               // px per second
+export const PLAYER_SPEED = 180;               // screen pixels per second
 export const PLAYER_ANIM_SPEED = 0.15;         // frames per tick for AnimatedSprite
 export const PLAYER_SCALE = 0.625;             // 25% larger player in a massive world
 
