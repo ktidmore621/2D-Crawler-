@@ -50,7 +50,7 @@ function hashTile(r, c) {
 export function createTilemap() {
   const container = new Container();
 
-  const POOL_SIZE = 2000;
+  const POOL_SIZE = 2400;
   const pool = [];
   for (let i = 0; i < POOL_SIZE; i++) {
     const s = new Sprite();
@@ -75,7 +75,7 @@ export function createTilemap() {
 
     const camCol = Math.floor(centerCol);
     const camRow = Math.floor(centerRow);
-    if (Math.abs(camCol - lastCamCol) < 1 && Math.abs(camRow - lastCamRow) < 1) {
+    if (Math.abs(camCol - lastCamCol) < 0.5 && Math.abs(camRow - lastCamRow) < 0.5) {
       return;
     }
     lastCamCol = camCol;
@@ -83,9 +83,11 @@ export function createTilemap() {
 
     let idx = 0;
 
-    const startCol = Math.max(0, camCol - viewRadius);
+    // Asymmetric buffer: extra 4 tiles in upward direction (lower col/row)
+    // because walking up reveals tiles faster in isometric projection
+    const startCol = Math.max(0, camCol - viewRadius - 4);
     const endCol = Math.min(MAP_COLS - 1, camCol + viewRadius);
-    const startRow = Math.max(0, camRow - viewRadius);
+    const startRow = Math.max(0, camRow - viewRadius - 4);
     const endRow = Math.min(MAP_ROWS - 1, camRow + viewRadius);
 
     for (let depth = startCol + startRow; depth <= endCol + endRow; depth++) {
