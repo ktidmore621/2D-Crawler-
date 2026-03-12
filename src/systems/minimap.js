@@ -1,14 +1,13 @@
 /**
  * Mini map overlay — renders a scaled-down view of the 160×160 world.
- * Uses an offscreen canvas for the terrain (rendered once at startup).
- * Player dot updates only when player moves more than 1 tile.
+ * For isometric, displays as a top-down 2D overview (not isometric).
+ * Player dot position converts from grid col/row to flat 2D position.
  */
 
 import { Container, Graphics, Sprite, Texture, Text } from 'pixi.js';
 import {
-  WORLD_COLS,
-  WORLD_ROWS,
-  WORLD_TILE_SIZE,
+  MAP_COLS,
+  MAP_ROWS,
   TILE_GRASS,
   TILE_DIRT,
   TILE_TREE,
@@ -40,7 +39,6 @@ import {
   DUNGEON_TILE_COL,
 } from '../data/worldMap.js';
 
-// ── Tile → mini map color (as [r,g,b]) ──────────────────
 function hexToRGB(hex) {
   return [(hex >> 16) & 0xff, (hex >> 8) & 0xff, hex & 0xff];
 }
@@ -71,51 +69,37 @@ const TILE_COLOR_MAP = {
 };
 
 const DEFAULT_COLOR = hexToRGB(0x4a7a30);
-
 const SMALL_SIZE = 120;
 const EXPANDED_SIZE = 200;
 const MARGIN = 20;
 
-/**
- * Create the mini map system.
- * @param {number[][]} worldMap - the 160×160 tile array
- * @returns {{ container, update, destroy }}
- */
 export function createMiniMap(worldMap) {
   const container = new Container();
   let currentSize = SMALL_SIZE;
   let expanded = false;
   let lastLayoutSize = -1;
 
-  // ── Offscreen canvas — 1 pixel per tile ────────────────
   const offCanvas = document.createElement('canvas');
-  offCanvas.width = WORLD_COLS;
-  offCanvas.height = WORLD_ROWS;
+  offCanvas.width = MAP_COLS;
+  offCanvas.height = MAP_ROWS;
   const offCtx = offCanvas.getContext('2d');
 
-  // Draw terrain
   _drawTerrain(offCtx, worldMap);
-  // Draw entrance markers + town center
   _drawEntrances(offCtx);
   _drawTownCenter(offCtx);
 
-  // Create texture from canvas
   const terrainTexture = Texture.from(offCanvas);
   terrainTexture.source.scaleMode = 'nearest';
 
-  // ── Background + border ────────────────────────────────
   const bg = new Graphics();
   container.addChild(bg);
 
-  // ── Terrain sprite ─────────────────────────────────────
   const terrainSprite = new Sprite(terrainTexture);
   container.addChild(terrainSprite);
 
-  // ── Player dot ─────────────────────────────────────────
   const playerDot = new Graphics();
   container.addChild(playerDot);
 
-  // ── Label ──────────────────────────────────────────────
   const label = new Text({
     text: 'MAP',
     style: {
@@ -127,12 +111,10 @@ export function createMiniMap(worldMap) {
   });
   container.addChild(label);
 
-  // Track last player tile for dirty check
   let lastTileCol = -1;
   let lastTileRow = -1;
   let needsRedraw = true;
 
-  // ── Click/tap to toggle size ───────────────────────────
   bg.eventMode = 'static';
   bg.cursor = 'pointer';
   terrainSprite.eventMode = 'static';
@@ -151,32 +133,29 @@ export function createMiniMap(worldMap) {
     lastLayoutSize = currentSize;
 
     const mapX = vpWidth - currentSize - MARGIN;
-    const mapY = MARGIN + 14; // room for label above
+    const mapY = MARGIN + 14;
 
-    // Background + border
     bg.clear();
     bg.rect(mapX - 1, mapY - 1, currentSize + 2, currentSize + 2);
     bg.fill({ color: 0xc07a2a, alpha: 1 });
     bg.rect(mapX, mapY, currentSize, currentSize);
     bg.fill({ color: 0x0a0805, alpha: 0.8 });
 
-    // Position + scale terrain sprite
     terrainSprite.x = mapX;
     terrainSprite.y = mapY;
     terrainSprite.width = currentSize;
     terrainSprite.height = currentSize;
 
-    // Label
     label.x = mapX;
     label.y = mapY - 14;
   }
 
   /**
-   * Update mini map. Call each frame from GameScene.
+   * Update mini map. playerCol/playerRow are grid float positions.
    */
-  function update(playerX, playerY, vpWidth) {
-    const tileCol = Math.floor(playerX / WORLD_TILE_SIZE);
-    const tileRow = Math.floor(playerY / WORLD_TILE_SIZE);
+  function update(playerCol, playerRow, vpWidth) {
+    const tileCol = Math.floor(playerCol);
+    const tileRow = Math.floor(playerRow);
 
     if (tileCol !== lastTileCol || tileRow !== lastTileRow) {
       needsRedraw = true;
@@ -192,9 +171,9 @@ export function createMiniMap(worldMap) {
     const mapX = vpWidth - currentSize - MARGIN;
     const mapY = MARGIN + 14;
 
-    // Player dot (2×2 amber)
-    const px = mapX + (playerX / (WORLD_COLS * WORLD_TILE_SIZE)) * currentSize;
-    const py = mapY + (playerY / (WORLD_ROWS * WORLD_TILE_SIZE)) * currentSize;
+    // Player dot — convert grid col/row to flat 2D minimap position
+    const px = mapX + (playerCol / MAP_COLS) * currentSize;
+    const py = mapY + (playerRow / MAP_ROWS) * currentSize;
     playerDot.clear();
     playerDot.rect(px - 1, py - 1, 3, 3);
     playerDot.fill(0xc07a2a);
@@ -208,17 +187,15 @@ export function createMiniMap(worldMap) {
   return { container, update, destroy };
 }
 
-/* ── Private helpers ──────────────────────────────────── */
-
 function _drawTerrain(ctx, worldMap) {
-  const imgData = ctx.createImageData(WORLD_COLS, WORLD_ROWS);
+  const imgData = ctx.createImageData(MAP_COLS, MAP_ROWS);
   const data = imgData.data;
 
-  for (let r = 0; r < WORLD_ROWS; r++) {
-    for (let c = 0; c < WORLD_COLS; c++) {
+  for (let r = 0; r < MAP_ROWS; r++) {
+    for (let c = 0; c < MAP_COLS; c++) {
       const tileId = worldMap[r][c];
       const rgb = TILE_COLOR_MAP[tileId] || DEFAULT_COLOR;
-      const idx = (r * WORLD_COLS + c) * 4;
+      const idx = (r * MAP_COLS + c) * 4;
       data[idx] = rgb[0];
       data[idx + 1] = rgb[1];
       data[idx + 2] = rgb[2];
@@ -231,18 +208,14 @@ function _drawTerrain(ctx, worldMap) {
 
 function _drawEntrances(ctx) {
   ctx.fillStyle = '#ffffff';
-  // Cave entrances
   for (const cave of CAVE_TRIGGERS) {
     ctx.fillRect(cave.col, cave.row, 2, 2);
   }
-  // Tunnel entrance
   ctx.fillRect(TUNNEL_TRIGGER.col, TUNNEL_TRIGGER.row, 2, 2);
-  // Dungeon entrance
   ctx.fillRect(DUNGEON_TILE_COL, DUNGEON_TILE_ROW, 2, 2);
 }
 
 function _drawTownCenter(ctx) {
-  // Town center cluster around cols 97-104, rows 53-58
   ctx.fillStyle = '#8a8a8a';
   const dots = [
     [55, 100], [55, 101], [56, 100], [56, 101],

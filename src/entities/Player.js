@@ -1,30 +1,47 @@
+/**
+ * Isometric Player entity.
+ * Movement is stored as (gridCol, gridRow) floats.
+ * Screen position is derived using gridToScreen().
+ *
+ * Isometric movement mapping:
+ *   Up arrow    → row-1 (move NW visually)
+ *   Down arrow  → row+1 (move SE visually)
+ *   Left arrow  → col-1 (move SW visually)
+ *   Right arrow → col+1 (move NE visually)
+ */
+
 import { Container } from 'pixi.js';
 import {
   PLAYER_SPEED,
   PLAYER_SCALE,
-  WORLD_WIDTH,
-  WORLD_HEIGHT,
-  WORLD_TILE_SIZE,
+  MAP_COLS,
+  MAP_ROWS,
 } from '../utils/constants.js';
 import {
   loadCharacterAnimations,
   createAnimatedSprite,
   resolveAnimation,
 } from '../systems/animation.js';
-import { isPositionPassable, getSpeedMultiplier } from '../systems/collision.js';
-import { getElevationAtPixel, getElevationYOffset } from '../systems/elevation.js';
+import { isPassable, getSpeedMultiplier } from '../systems/collision.js';
+import { gridToScreen } from '../systems/iso.js';
+
+// Speed in grid-tiles per second (player moves ~5.4 tiles/sec at 260 px/s with 48px tiles)
+const GRID_SPEED = PLAYER_SPEED / 48;
 
 export default class Player {
   constructor(characterType, characterName) {
     this.characterType = characterType;
     this.characterName = characterName;
-    this.speed = PLAYER_SPEED;
+    this.speed = GRID_SPEED;
     this.facing = 'down';
     this.currentAnimKey = null;
     this.animations = null;
     this.sprite = null;
     this.view = new Container();
-    this._elevationOffset = 0;
+
+    // Grid position (floats)
+    this.gridCol = 0;
+    this.gridRow = 0;
   }
 
   async load() {
@@ -44,6 +61,8 @@ export default class Player {
 
     this.sprite = createAnimatedSprite(textures);
     this.sprite.scale.set(PLAYER_SCALE);
+    // Anchor at bottom-center so feet are at tile center
+    this.sprite.anchor.set(0.5, 1.0);
     this.view.addChild(this.sprite);
     this.currentAnimKey = key;
   }
@@ -54,53 +73,62 @@ export default class Player {
     this._setAnimation(animKey);
 
     if (moving) {
-      let dx = 0;
-      let dy = 0;
-      if (dirs.left) dx -= 1;
-      if (dirs.right) dx += 1;
-      if (dirs.up) dy -= 1;
-      if (dirs.down) dy += 1;
+      let dc = 0;
+      let dr = 0;
+      if (dirs.up) dr -= 1;
+      if (dirs.down) dr += 1;
+      if (dirs.left) dc -= 1;
+      if (dirs.right) dc += 1;
 
-      if (dx !== 0 && dy !== 0) {
+      if (dc !== 0 && dr !== 0) {
         const inv = 1 / Math.SQRT2;
-        dx *= inv;
-        dy *= inv;
+        dc *= inv;
+        dr *= inv;
       }
 
-      // Get speed multiplier for current tile (shallow water, flooded floor etc.)
-      const feetOffsetY = 8;
-      const speedMult = getSpeedMultiplier(this.x, this.y + feetOffsetY, worldMap);
+      // Speed multiplier from tile type
+      const currentCol = Math.floor(this.gridCol);
+      const currentRow = Math.floor(this.gridRow);
+      const speedMult = getSpeedMultiplier(currentCol, currentRow, worldMap);
 
-      const moveX = dx * this.speed * speedMult * deltaSeconds;
-      const moveY = dy * this.speed * speedMult * deltaSeconds;
+      const moveC = dc * this.speed * speedMult * deltaSeconds;
+      const moveR = dr * this.speed * speedMult * deltaSeconds;
 
-      const newX = this.x + moveX;
-      const newY = this.y + moveY;
+      const newCol = this.gridCol + moveC;
+      const newRow = this.gridRow + moveR;
 
-      if (isPositionPassable(newX, this.y + feetOffsetY, worldMap)) {
-        this.x = newX;
+      // Try X (col) movement
+      if (isPassable(Math.floor(newCol), Math.floor(this.gridRow), worldMap)) {
+        this.gridCol = newCol;
       }
-      if (isPositionPassable(this.x, newY + feetOffsetY, worldMap)) {
-        this.y = newY;
+      // Try Y (row) movement
+      if (isPassable(Math.floor(this.gridCol), Math.floor(newRow), worldMap)) {
+        this.gridRow = newRow;
       }
     }
 
     // Clamp to world bounds
-    const margin = WORLD_TILE_SIZE;
-    this.x = Math.max(margin, Math.min(WORLD_WIDTH - margin, this.x));
-    this.y = Math.max(margin, Math.min(WORLD_HEIGHT - margin, this.y));
+    this.gridCol = Math.max(1, Math.min(MAP_COLS - 2, this.gridCol));
+    this.gridRow = Math.max(1, Math.min(MAP_ROWS - 2, this.gridRow));
 
-    // Apply elevation visual offset
-    const elev = getElevationAtPixel(this.x, this.y + 8);
-    const targetOffset = getElevationYOffset(elev);
-    this._elevationOffset = targetOffset;
-    if (this.sprite) {
-      this.sprite.y = this._elevationOffset;
-    }
+    // Convert grid position to screen position
+    const screen = gridToScreen(this.gridCol, this.gridRow);
+    this.view.x = screen.x;
+    this.view.y = screen.y;
   }
 
+  // Screen position (for camera tracking)
   get x() { return this.view.x; }
-  set x(v) { this.view.x = v; }
+  set x(v) { /* no-op — position is driven by gridCol/gridRow */ }
   get y() { return this.view.y; }
-  set y(v) { this.view.y = v; }
+  set y(v) { /* no-op — position is driven by gridCol/gridRow */ }
+
+  // Set initial position in grid coordinates
+  setGridPosition(col, row) {
+    this.gridCol = col;
+    this.gridRow = row;
+    const screen = gridToScreen(col, row);
+    this.view.x = screen.x;
+    this.view.y = screen.y;
+  }
 }

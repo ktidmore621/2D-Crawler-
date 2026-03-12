@@ -1,17 +1,19 @@
 import { Container, Graphics } from 'pixi.js';
 import {
   BG_COLOR,
-  WORLD_WIDTH,
-  WORLD_HEIGHT,
-  WORLD_TILE_SIZE,
+  ISO_TILE_W,
+  ISO_TILE_H,
+  MAP_COLS,
+  MAP_ROWS,
 } from '../utils/constants.js';
 import Player from '../entities/Player.js';
 import { createInputState, updateStatusStrip } from '../systems/input.js';
 import { updateCamera } from '../systems/camera.js';
 import { createTilemap } from '../systems/tilemap.js';
-import { createPropsRenderer } from '../systems/props.js';
-import { isPositionPassable } from '../systems/collision.js';
+import { createPropsRenderer, getBuildingCollisionTiles } from '../systems/props.js';
+import { addBuildingCollision } from '../systems/collision.js';
 import { createMiniMap } from '../systems/minimap.js';
+import { gridToScreen } from '../systems/iso.js';
 import {
   worldMap,
   PLAYER_START_COL,
@@ -48,26 +50,34 @@ export default class GameScene {
 
     this.container.addChild(this.worldContainer);
 
+    // Register building collision tiles
+    const bldgTiles = getBuildingCollisionTiles();
+    for (const t of bldgTiles) {
+      addBuildingCollision(t.col, t.row);
+    }
+
+    // Tilemap layer
     this.tilemap = createTilemap();
     this.worldContainer.addChild(this.tilemap.gfx);
 
-    // Decoration layer — rendered above tiles but below player
+    // Props layer (above tiles, depth-sorted)
     this.propsRenderer = createPropsRenderer();
+    this.propsRenderer.setWorldMap(worldMap);
     this.worldContainer.addChild(this.propsRenderer.gfx);
 
+    // Player
     this.player = new Player(this.characterType, this.characterName);
     await this.player.load();
-
-    this.player.x = PLAYER_START_COL * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
-    this.player.y = PLAYER_START_ROW * WORLD_TILE_SIZE + WORLD_TILE_SIZE / 2;
+    this.player.setGridPosition(PLAYER_START_COL, PLAYER_START_ROW);
     this.worldContainer.addChild(this.player.view);
 
     this._createVignette(width, height);
 
-    // Mini map overlay (added to container so it stays on top of vignette)
+    // Mini map
     this.miniMap = createMiniMap(worldMap);
     this.container.addChild(this.miniMap.container);
 
+    // Input
     this.inputState = createInputState();
     this._onKeyDown = this.inputState.onKeyDown;
     this._onKeyUp = this.inputState.onKeyUp;
@@ -104,16 +114,19 @@ export default class GameScene {
     this._checkTriggers();
     this._updateWorld(deltaSeconds);
 
-    // Update mini map with player position
+    // Update mini map with player grid position
     if (this.miniMap) {
       const { width } = this.app.screen;
-      this.miniMap.update(this.player.x, this.player.y, width);
+      this.miniMap.update(this.player.gridCol, this.player.gridRow, width);
     }
   }
 
   _updateWorld(deltaSeconds) {
     const { width, height } = this.app.screen;
-    const cam = updateCamera(this.player, WORLD_WIDTH, WORLD_HEIGHT, width, height);
+    // Isometric world dimensions (approximate bounding box)
+    const isoWorldW = (MAP_COLS + MAP_ROWS) * (ISO_TILE_W / 2);
+    const isoWorldH = (MAP_COLS + MAP_ROWS) * (ISO_TILE_H / 2);
+    const cam = updateCamera(this.player, isoWorldW, isoWorldH, width, height);
     this.worldContainer.x = cam.x;
     this.worldContainer.y = cam.y;
     this.tilemap.render(worldMap, cam.x, cam.y, width, height, this.elapsedTime);
@@ -121,10 +134,9 @@ export default class GameScene {
   }
 
   _checkTriggers() {
-    const playerTileCol = Math.floor(this.player.x / WORLD_TILE_SIZE);
-    const playerTileRow = Math.floor(this.player.y / WORLD_TILE_SIZE);
+    const playerTileCol = Math.floor(this.player.gridCol);
+    const playerTileRow = Math.floor(this.player.gridRow);
 
-    // Dungeon entrance
     if (playerTileCol === DUNGEON_TILE_COL && playerTileRow === DUNGEON_TILE_ROW) {
       if (!this._dungeonLogged) {
         console.log('Enter dungeon');
@@ -134,7 +146,6 @@ export default class GameScene {
       this._dungeonLogged = false;
     }
 
-    // Cave entrances
     for (const cave of CAVE_TRIGGERS) {
       const key = cave.label;
       if (playerTileCol === cave.col && playerTileRow === cave.row) {
@@ -147,7 +158,6 @@ export default class GameScene {
       }
     }
 
-    // Tunnel entrance
     if (playerTileCol === TUNNEL_TRIGGER.col && playerTileRow === TUNNEL_TRIGGER.row) {
       if (!this._tunnelLogged) {
         console.log('Enter tunnel');

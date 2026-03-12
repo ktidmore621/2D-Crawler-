@@ -1,133 +1,174 @@
 /**
  * Texture cache — loads all sprite sheets at startup and extracts
- * sub-region Textures that are reused throughout the game.
- * Never create new Textures per tile — always pull from this cache.
+ * sub-region Textures. Now includes isometric asset loading.
  */
 
 import { Assets, Texture, Rectangle } from 'pixi.js';
-import { SPRITE_ATLAS, GENERATED_TILES, getAllAssetPaths, getGeneratedTilePaths } from '../data/spriteAtlas.js';
+import { SPRITE_ATLAS, getAllAssetPaths } from '../data/spriteAtlas.js';
+import { ISO_ATLAS } from '../data/isoAtlas.js';
 
 /** Cached sub-textures keyed by name */
 const cache = {};
 
-/** Whether the cache has been initialized */
+/** Isometric tile textures keyed by atlas group */
+const isoTileCache = {};
+
+/** Isometric prop textures keyed by prop name */
+const isoPropCache = {};
+
+/** Isometric building textures keyed by building name */
+const isoBuildingCache = {};
+
+/** Isometric cart textures keyed by cart name */
+const isoCartCache = {};
+
 let initialized = false;
 
 /**
  * Preload all sprite sheets and extract sub-textures.
- * Call once at startup before any rendering.
- * @param {function} [onProgress] - optional progress callback (0..1)
  */
 export async function initTextureCache(onProgress) {
   if (initialized) return;
 
-  // Register all assets as a bundle
+  // ── Load original sprite assets (for character animations, etc.) ──
   const assets = getAllAssetPaths();
-  const genAssets = getGeneratedTilePaths();
   Assets.addBundle('sprites', assets);
-  Assets.addBundle('generated', genAssets);
-  const textures = await Assets.loadBundle('sprites', (p) => onProgress && onProgress(p * 0.8));
-  const genTextures = await Assets.loadBundle('generated', (p) => onProgress && onProgress(0.8 + p * 0.2));
+  const textures = await Assets.loadBundle('sprites', (p) => onProgress && onProgress(p * 0.4));
 
-  // ── Cache generated terrain tiles (already 48×48, no slicing needed) ──
-  for (const val of Object.values(GENERATED_TILES)) {
-    const names = Array.isArray(val) ? val : [val];
-    for (const name of names) {
-      const tex = genTextures[`gen_${name}`];
-      if (tex) cache[`gen_${name}`] = tex;
-    }
-  }
+  // ── Extract character-related textures we still need ──
+  _extractOriginalTextures(textures);
 
-  // ── Extract floor tile sub-textures ──
-  const floorsTex = textures.floors;
-  const fc = SPRITE_ATLAS.floors;
-  for (const [name, pos] of Object.entries(fc.tiles)) {
-    cache[`floor_${name}`] = extractTile(floorsTex, pos.col, pos.row, fc.tileW, fc.tileH);
-  }
+  // ── Load isometric assets ──
+  Assets.addBundle('iso', [
+    { alias: 'isoTiles',     src: ISO_ATLAS.tiles.path },
+    { alias: 'isoProps',     src: ISO_ATLAS.props.path },
+    { alias: 'isoBuildings', src: ISO_ATLAS.buildings.path },
+    { alias: 'isoCarts',     src: ISO_ATLAS.carts.path },
+  ]);
+  const isoTextures = await Assets.loadBundle('iso', (p) => onProgress && onProgress(0.4 + p * 0.6));
 
-  // ── Extract wall tile sub-textures ──
-  const wallsTex = textures.walls;
-  const wc = SPRITE_ATLAS.walls;
-  for (const [name, pos] of Object.entries(wc.tiles)) {
-    cache[`wall_${name}`] = extractTile(wallsTex, pos.col, pos.row, wc.tileW, wc.tileH);
-  }
+  // ── Slice iso tile textures ──
+  _sliceIsoTiles(isoTextures.isoTiles);
 
-  // ── Extract water tile sub-textures ──
-  const waterTex = textures.water;
-  const wtc = SPRITE_ATLAS.water;
-  for (const [name, pos] of Object.entries(wtc.tiles)) {
-    cache[`water_${name}`] = extractTile(waterTex, pos.col, pos.row, wtc.tileW, wtc.tileH);
-  }
+  // ── Slice iso prop textures ──
+  _sliceIsoProps(isoTextures.isoProps);
 
-  // ── Extract tree sub-textures ──
-  const tree1Tex = textures.treeModel1;
-  const t1 = SPRITE_ATLAS.treeModel1;
-  for (const [name, pos] of Object.entries(t1.trees)) {
-    cache[`tree1_${name}`] = extractRect(tree1Tex, pos.col * t1.frameW, pos.row * t1.frameH, t1.frameW, t1.frameH);
-  }
+  // ── Slice iso building textures ──
+  _sliceIsoBuildings(isoTextures.isoBuildings);
 
-  const tree2Tex = textures.treeModel2;
-  const t2 = SPRITE_ATLAS.treeModel2;
-  for (const [name, pos] of Object.entries(t2.trees)) {
-    cache[`tree2_${name}`] = extractRect(tree2Tex, pos.col * t2.frameW, pos.row * t2.frameH, t2.frameW, t2.frameH);
-  }
-
-  // ── Extract bonfire frames ──
-  const bonfireTex = textures.bonfire;
-  const bf = SPRITE_ATLAS.bonfire;
-  for (let i = 0; i < bf.frameCount; i++) {
-    cache[`bonfire_${i}`] = extractRect(bonfireTex, i * bf.frameW, 0, bf.frameW, bf.frameH);
-  }
-
-  // ── Extract fire frames ──
-  const fireTex = textures.fire;
-  const ff = SPRITE_ATLAS.fire;
-  for (let i = 0; i < ff.frameCount; i++) {
-    cache[`fire_${i}`] = extractRect(fireTex, i * ff.frameW, 0, ff.frameW, ff.frameH);
-  }
-
-  // ── Extract rock sub-textures ──
-  const rocksTex = textures.rocks;
-  for (const [name, rect] of Object.entries(SPRITE_ATLAS.rocks.regions)) {
-    cache[`rock_${name}`] = extractRect(rocksTex, rect.x, rect.y, rect.w, rect.h);
-  }
-
-  // ── Extract vegetation sub-textures ──
-  const vegTex = textures.vegetation;
-  for (const [name, rect] of Object.entries(SPRITE_ATLAS.vegetation.regions)) {
-    cache[`veg_${name}`] = extractRect(vegTex, rect.x, rect.y, rect.w, rect.h);
-  }
-
-  // ── Extract building wall sub-textures ──
-  const bwTex = textures.buildingWalls;
-  for (const [name, rect] of Object.entries(SPRITE_ATLAS.buildingWalls.regions)) {
-    cache[`bwall_${name}`] = extractRect(bwTex, rect.x, rect.y, rect.w, rect.h);
-  }
-
-  // ── Extract building roof sub-textures ──
-  const brTex = textures.buildingRoofs;
-  for (const [name, rect] of Object.entries(SPRITE_ATLAS.buildingRoofs.regions)) {
-    cache[`broof_${name}`] = extractRect(brTex, rect.x, rect.y, rect.w, rect.h);
-  }
-
-  // ── Extract nature decoration sub-textures ──
-  const natureTex = textures.nature;
-  if (natureTex) {
-    for (const [name, rect] of Object.entries(SPRITE_ATLAS.nature.regions)) {
-      cache[`nature_${name}`] = extractRect(natureTex, rect.x, rect.y, rect.w, rect.h);
-    }
-  }
+  // ── Slice iso cart textures ──
+  _sliceIsoCarts(isoTextures.isoCarts);
 
   initialized = true;
 }
 
+function _extractOriginalTextures(textures) {
+  // Extract bonfire frames (still used)
+  const bonfireTex = textures.bonfire;
+  if (bonfireTex) {
+    const bf = SPRITE_ATLAS.bonfire;
+    for (let i = 0; i < bf.frameCount; i++) {
+      cache[`bonfire_${i}`] = extractRect(bonfireTex, i * bf.frameW, 0, bf.frameW, bf.frameH);
+    }
+  }
+
+  // Extract fire frames
+  const fireTex = textures.fire;
+  if (fireTex) {
+    const ff = SPRITE_ATLAS.fire;
+    for (let i = 0; i < ff.frameCount; i++) {
+      cache[`fire_${i}`] = extractRect(fireTex, i * ff.frameW, 0, ff.frameW, ff.frameH);
+    }
+  }
+}
+
+function _sliceIsoTiles(baseTex) {
+  const cell = ISO_ATLAS.tiles.cellSize;
+  const tileGroups = [
+    'grass', 'dirt', 'stone', 'rock',
+    'flatGrass', 'flatDirt', 'flatStone', 'flatMisc',
+  ];
+
+  for (const group of tileGroups) {
+    const defs = ISO_ATLAS.tiles[group];
+    if (!Array.isArray(defs)) continue;
+    isoTileCache[group] = defs.map(d =>
+      extractRect(baseTex, d.col * cell, d.row * cell, cell, cell)
+    );
+  }
+
+  // Single ramp textures
+  const rampKeys = [
+    'rampN', 'rampS', 'rampE', 'rampW',
+    'rampGrassN', 'rampGrassS', 'rampGrassE', 'rampGrassW',
+    'rampStone1', 'rampStone2',
+    'halfRampS', 'halfRampN', 'halfRampW', 'halfRampE',
+    'halfRampS2', 'halfRampN2',
+    'stairs1', 'stairs2', 'stairsStone1', 'stairsStone2',
+  ];
+  for (const key of rampKeys) {
+    const d = ISO_ATLAS.tiles[key];
+    if (d) {
+      isoTileCache[key] = extractRect(baseTex, d.col * cell, d.row * cell, cell, cell);
+    }
+  }
+}
+
+function _sliceIsoProps(baseTex) {
+  const propKeys = Object.keys(ISO_ATLAS.props).filter(k => k !== 'path' && k !== 'cellSize');
+  for (const key of propKeys) {
+    const d = ISO_ATLAS.props[key];
+    isoPropCache[key] = extractRect(baseTex, d.x, d.y, d.w, d.h);
+  }
+}
+
+function _sliceIsoBuildings(baseTex) {
+  const keys = Object.keys(ISO_ATLAS.buildings).filter(k => k !== 'path' && k !== 'cellSize');
+  for (const key of keys) {
+    const d = ISO_ATLAS.buildings[key];
+    isoBuildingCache[key] = extractRect(baseTex, d.x, d.y, d.w, d.h);
+  }
+}
+
+function _sliceIsoCarts(baseTex) {
+  const keys = Object.keys(ISO_ATLAS.carts).filter(k => k !== 'path' && k !== 'cellSize');
+  for (const key of keys) {
+    const d = ISO_ATLAS.carts[key];
+    isoCartCache[key] = extractRect(baseTex, d.x, d.y, d.w, d.h);
+  }
+}
+
 /**
- * Get a cached sub-texture by name.
- * @param {string} name
- * @returns {Texture|null}
+ * Get a cached sub-texture by name (original assets).
  */
 export function getTex(name) {
   return cache[name] || null;
+}
+
+/**
+ * Get an isometric tile texture by group name and variant hash.
+ */
+export function getIsoTex(group, variantHash) {
+  const arr = isoTileCache[group];
+  if (!arr) return null;
+  if (Array.isArray(arr)) {
+    return arr[Math.abs(variantHash) % arr.length];
+  }
+  return arr; // single texture (ramps, etc.)
+}
+
+/**
+ * Get an isometric prop texture by name.
+ */
+export function getIsoPropTex(name) {
+  return isoPropCache[name] || isoCartCache[name] || null;
+}
+
+/**
+ * Get an isometric building texture by name.
+ */
+export function getIsoBuildingTex(name) {
+  return isoBuildingCache[name] || null;
 }
 
 /**
@@ -135,8 +176,10 @@ export function getTex(name) {
  */
 export function getBonfireFrames() {
   const frames = [];
-  for (let i = 0; i < SPRITE_ATLAS.bonfire.frameCount; i++) {
-    frames.push(cache[`bonfire_${i}`]);
+  const bf = SPRITE_ATLAS.bonfire;
+  for (let i = 0; i < bf.frameCount; i++) {
+    const t = cache[`bonfire_${i}`];
+    if (t) frames.push(t);
   }
   return frames;
 }
@@ -146,18 +189,15 @@ export function getBonfireFrames() {
  */
 export function getFireFrames() {
   const frames = [];
-  for (let i = 0; i < SPRITE_ATLAS.fire.frameCount; i++) {
-    frames.push(cache[`fire_${i}`]);
+  const ff = SPRITE_ATLAS.fire;
+  for (let i = 0; i < ff.frameCount; i++) {
+    const t = cache[`fire_${i}`];
+    if (t) frames.push(t);
   }
   return frames;
 }
 
 // ── Internal helpers ──
-
-function extractTile(baseTexture, col, row, tileW, tileH) {
-  const frame = new Rectangle(col * tileW, row * tileH, tileW, tileH);
-  return new Texture({ source: baseTexture.source, frame });
-}
 
 function extractRect(baseTexture, x, y, w, h) {
   const frame = new Rectangle(x, y, w, h);

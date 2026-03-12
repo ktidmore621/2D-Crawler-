@@ -1,29 +1,22 @@
 /**
- * Camera system — centers on player, clamped to world bounds.
+ * Isometric camera system — centers on player's screen position.
+ * The player's screen position is calculated from their grid position
+ * using gridToScreen(). The camera offsets the worldContainer.
  */
 
 /**
- * Calculate camera offset so player is centered in viewport,
- * clamped so world edges never show empty space.
+ * Calculate camera offset so player is centered in viewport.
+ * For isometric, no clamping to world bounds (isometric world has
+ * diamond shape, clamping is more complex — skip for now).
  *
- * @param {{ x: number, y: number }} player - player world position
- * @param {number} worldWidth - total world width in pixels
- * @param {number} worldHeight - total world height in pixels
- * @param {number} viewportWidth - visible screen width
- * @param {number} viewportHeight - visible screen height
- * @returns {{ x: number, y: number }} camera offset (negative values to shift world container)
+ * @param {{ x: number, y: number }} player - player screen position (from gridToScreen)
+ * @param {number} viewportWidth
+ * @param {number} viewportHeight
+ * @returns {{ x: number, y: number }}
  */
 export function updateCamera(player, worldWidth, worldHeight, viewportWidth, viewportHeight) {
-  // Desired camera position: center player in viewport
   let x = viewportWidth / 2 - player.x;
   let y = viewportHeight / 2 - player.y;
 
-  // Clamp so world edges don't scroll past viewport edges
-  const minX = viewportWidth - worldWidth;
-  const minY = viewportHeight - worldHeight;
-
-  x = Math.min(0, Math.max(minX, x));
-  y = Math.min(0, Math.max(minY, y));
-
-  return { x, y };
+  return { x: Math.round(x), y: Math.round(y) };
 }
