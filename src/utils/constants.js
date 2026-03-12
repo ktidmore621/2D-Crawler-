@@ -253,3 +253,14 @@ export const TREE_TRUNK_BROWN = 0x3a2a1a;
 export const CAMP_FIRE_COLORS = [0x0a5a1a, 0x1a8a2a, 0x3acc3a, 0x66ff33];
 export const CAMP_GLOW_COLOR = 0x33cc33;
 export const CAMP_GLOW_RADIUS = 80;
+
+// ── Isometric Tile Dimensions ──────────────────────
+// Each tile sprite is 256×256 but the diamond face is 2:1 ratio
+export const ISO_TILE_W = 128;           // diamond width in screen pixels
+export const ISO_TILE_H = 64;            // diamond height in screen pixels
+export const ISO_TILE_SPRITE = 256;      // source sprite cell size in atlas
+export const ISO_TILE_SCALE = ISO_TILE_W / ISO_TILE_SPRITE; // 0.5
+
+// Isometric map dimensions (same grid size as before)
+export const MAP_COLS = 160;
+export const MAP_ROWS = 160;
