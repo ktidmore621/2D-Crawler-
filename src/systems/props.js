@@ -606,15 +606,13 @@ function drawRockSprite(pool, idx, x, y, col, row) {
 
   if (!tex || idx >= pool.length) return idx;
 
-  const cx = x + WORLD_TILE_SIZE / 2;
-  const cy = y + WORLD_TILE_SIZE / 2;
-
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center
   const scale = 1.8; // 32px source × 1.8 ≈ 58px on screen
   sprite.scale.set(scale);
-  sprite.x = cx - 32 * scale / 2;
-  sprite.y = cy - 32 * scale / 2;
+  sprite.x = x + WORLD_TILE_SIZE / 2;
+  sprite.y = y + WORLD_TILE_SIZE;
   sprite.visible = true;
 
   return idx;
@@ -630,15 +628,13 @@ function drawVegetationSprite(pool, idx, x, y, col, row) {
 
   if (!tex || idx >= pool.length) return idx;
 
-  const cx = x + WORLD_TILE_SIZE / 2;
-  const cy = y + WORLD_TILE_SIZE / 2;
-
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center
   const scale = 1.2; // 32px source × 1.2 ≈ 38px
   sprite.scale.set(scale);
-  sprite.x = cx - 32 * scale / 2;
-  sprite.y = cy - 32 * scale / 2;
+  sprite.x = x + WORLD_TILE_SIZE / 2;
+  sprite.y = y + WORLD_TILE_SIZE;
   sprite.visible = true;
 
   return idx;
@@ -655,10 +651,11 @@ function drawGrassTuftSprite(pool, idx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
-  const scale = 2.5; // 16px source × 2.5 = 40px
+  sprite.anchor.set(0.5, 1.0); // bottom-center
+  const scale = 1.5; // 32px source × 1.5 = 48px
   sprite.scale.set(scale);
-  sprite.x = x + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 10) - 5;
-  sprite.y = y + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 8) - 4;
+  sprite.x = x + WORLD_TILE_SIZE / 2 + (h % 10) - 5;
+  sprite.y = y + WORLD_TILE_SIZE + (h % 8) - 4;
   sprite.visible = true;
   return idx;
 }
@@ -674,10 +671,11 @@ function drawMushroomSprite(pool, idx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center
   const scale = 1.5; // 32px source × 1.5 = 48px
   sprite.scale.set(scale);
-  sprite.x = x + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
-  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.x = x + WORLD_TILE_SIZE / 2;
+  sprite.y = y + WORLD_TILE_SIZE;
   sprite.visible = true;
   return idx;
 }
@@ -690,10 +688,11 @@ function drawFallenLogSprite(pool, idx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
-  const scale = 1.2; // 64×32 source × 1.2 = 77×38px
+  sprite.anchor.set(0.5, 1.0); // bottom-center
+  const scale = 0.9; // 64×64 source × 0.9 ≈ 58×58px
   sprite.scale.set(scale);
-  sprite.x = x + WORLD_TILE_SIZE / 2 - 64 * scale / 2;
-  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2 + 4;
+  sprite.x = x + WORLD_TILE_SIZE / 2;
+  sprite.y = y + WORLD_TILE_SIZE;
   sprite.visible = true;
   return idx;
 }
@@ -709,10 +708,11 @@ function drawCattailSprite(pool, idx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
-  const scale = 2.5; // 16×32 source × 2.5 = 40×80px
+  sprite.anchor.set(0.5, 1.0); // bottom-center
+  const scale = 1.5; // 32×32 source × 1.5 = 48×48px
   sprite.scale.set(scale);
-  sprite.x = x + WORLD_TILE_SIZE / 2 - 16 * scale / 2 + (h % 6) - 3;
-  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
+  sprite.x = x + WORLD_TILE_SIZE / 2 + (h % 6) - 3;
+  sprite.y = y + WORLD_TILE_SIZE;
   sprite.visible = true;
   return idx;
 }
@@ -728,10 +728,11 @@ function drawNatureRockSprite(pool, idx, x, y, col, row) {
 
   const sprite = pool[idx++];
   sprite.texture = tex;
+  sprite.anchor.set(0.5, 1.0); // bottom-center
   const scale = 1.8; // 32px source × 1.8 = 58px
   sprite.scale.set(scale);
-  sprite.x = x + WORLD_TILE_SIZE / 2 - 32 * scale / 2;
-  sprite.y = y + WORLD_TILE_SIZE / 2 - 32 * scale / 2 + 4;
+  sprite.x = x + WORLD_TILE_SIZE / 2;
+  sprite.y = y + WORLD_TILE_SIZE + 4;
   sprite.visible = true;
   return idx;
 }
@@ -755,7 +756,7 @@ function drawNatureBushSprite(pool, idx, gfx, x, y, col, row) {
   const sprite = pool[idx++];
   sprite.texture = tex;
   sprite.anchor.set(0.5, 1.0); // bottom-center — bush grows upward from base
-  const scale = 1.0; // 48px source → 48px display
+  const scale = 1.2; // 48×32 source × 1.2 ≈ 58×38px display
   sprite.scale.set(scale);
   sprite.x = cx;
   sprite.y = y + WORLD_TILE_SIZE; // base of sprite sits at bottom of tile
