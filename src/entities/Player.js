@@ -73,6 +73,7 @@ export default class Player {
     this._setAnimation(animKey);
 
     if (moving) {
+      console.log(`Moving to col:${this.gridCol} row:${this.gridRow}`);
       let dc = 0;
       let dr = 0;
       if (dirs.up) dr -= 1;

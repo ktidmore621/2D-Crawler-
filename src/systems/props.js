@@ -26,7 +26,7 @@ function hashTile(r, c) {
 // Building placements in base camp area
 const BUILDING_PLACEMENTS = [
   { key: 'house1', col: 5,  row: 73, scaleW: 4, scaleH: 4, label: 'shelter' },
-  { key: 'house2', col: 12, row: 71, scaleW: 4, scaleH: 5, label: 'crafting' },
+  { key: 'house2', col: 12, row: 71, scaleW: 4, scaleH: 4, label: 'crafting' },
   { key: 'house3', col: 5,  row: 68, scaleW: 4, scaleH: 4, label: 'barn' },
   { key: 'well',   col: 9,  row: 72, scaleW: 2, scaleH: 2, label: 'well' },
 ];

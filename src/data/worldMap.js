@@ -85,14 +85,14 @@ function fillBorder(r1, c1, r2, c2, id) {
 // Top edge of old area — thick tree band (rows 0-3)
 for (let r = 0; r <= 3; r++) {
   for (let c = 0; c < 80; c++) {
-    setTile(r, c, seededRandom() < 0.7 ? 2 : 3);
+    setTile(r, c, seededRandom() < 0.25 ? 2 : 0);
   }
 }
 
 // Original right edge — now internal, thin forest band (cols 76-79)
 for (let r = 0; r < 80; r++) {
   for (let c = 76; c < 80; c++) {
-    setTile(r, c, seededRandom() < 0.5 ? 2 : 0);
+    setTile(r, c, seededRandom() < 0.15 ? 2 : 0);
   }
 }
 
@@ -100,14 +100,14 @@ for (let r = 0; r < 80; r++) {
 // Now these are internal to the larger map, keep sparse
 for (let r = 77; r < 80; r++) {
   for (let c = 0; c < 80; c++) {
-    setTile(r, c, seededRandom() < 0.3 ? 2 : 0);
+    setTile(r, c, seededRandom() < 0.1 ? 2 : 0);
   }
 }
 
 // Left edge — scattered trees (cols 0-1)
 for (let r = 0; r < WORLD_ROWS; r++) {
   for (let c = 0; c <= 1; c++) {
-    setTile(r, c, seededRandom() < 0.5 ? 2 : 0);
+    setTile(r, c, seededRandom() < 0.15 ? 2 : 0);
   }
 }
 
@@ -266,31 +266,31 @@ setTile(31, 66, 7);
 setTile(55, 20, 7);
 setTile(56, 21, 7);
 
-// Dense forest patches in north section (rows 4-20)
+// Dense forest patches in north section (rows 4-20) — reduced density
 _seed = 54321;
 for (let r = 4; r <= 20; r++) {
   for (let c = 0; c < 80; c++) {
     if (map[r][c] !== 0) continue;
     if (c < 30 || c > 46) {
-      if (seededRandom() < 0.55) {
+      if (seededRandom() < 0.12) {
         setTile(r, c, 2);
-      } else if (seededRandom() < 0.2) {
+      } else if (seededRandom() < 0.04) {
         setTile(r, c, 3);
       }
     }
   }
 }
 
-// Scattered trees and bushes throughout middle area
+// Scattered trees and bushes throughout middle area — reduced density
 _seed = 99999;
 for (let r = 20; r < 68; r++) {
   for (let c = 12; c < 76; c++) {
     if (map[r][c] !== 0) continue;
     if (r >= 35 && r <= 55 && c >= 40 && c <= 58) continue;
     const rng = seededRandom();
-    if (rng < 0.06) {
+    if (rng < 0.02) {
       setTile(r, c, 2);
-    } else if (rng < 0.09) {
+    } else if (rng < 0.03) {
       setTile(r, c, 3);
     }
   }
@@ -411,12 +411,12 @@ fillRect(27, 109, 28, 110, 4);
 setTile(23, 92, 4);
 setTile(23, 93, 4);
 
-// Some trees on plateau
+// Some trees on plateau — reduced
 _seed = 77777;
 for (let r = 21; r <= 37; r++) {
   for (let c = 89; c <= 113; c++) {
     if (map[r][c] !== 15) continue;
-    if (seededRandom() < 0.04) setTile(r, c, 2);
+    if (seededRandom() < 0.02) setTile(r, c, 2);
   }
 }
 
@@ -1013,12 +1013,12 @@ for (const [pr, pc] of craterPuddles) {
 for (let r = 155; r < WORLD_ROWS; r++) {
   for (let c = 0; c < WORLD_COLS; c++) {
     if (map[r][c] === 0) {
-      setTile(r, c, seededRandom() < 0.5 ? 2 : 3);
+      setTile(r, c, seededRandom() < 0.15 ? 2 : 0);
     }
   }
 }
 
-// Fill empty areas with scattered vegetation
+// Fill empty areas with scattered vegetation — reduced density
 _seed = 33333;
 for (let r = 0; r < WORLD_ROWS; r++) {
   for (let c = 0; c < WORLD_COLS; c++) {
@@ -1029,14 +1029,69 @@ for (let r = 0; r < WORLD_ROWS; r++) {
     if (r >= 155) continue; // bottom edge
 
     const rng = seededRandom();
-    if (rng < 0.04) {
+    if (rng < 0.015) {
       setTile(r, c, 2);
-    } else if (rng < 0.06) {
+    } else if (rng < 0.025) {
       setTile(r, c, 3);
     }
   }
 }
 
+
+// ── POST-PROCESSING: enforce tree spacing, clear player start, cap total ──
+// Remove all trees within 8 tiles of player start
+const _pStartCol = 15;
+const _pStartRow = 145;
+for (let r = _pStartRow - 8; r <= _pStartRow + 8; r++) {
+  for (let c = _pStartCol - 8; c <= _pStartCol + 8; c++) {
+    if (r >= 0 && r < WORLD_ROWS && c >= 0 && c < WORLD_COLS) {
+      if (map[r][c] === 2 || map[r][c] === 3) {
+        map[r][c] = 0;
+      }
+    }
+  }
+}
+
+// Enforce minimum 3-tile spacing between trees — remove crowded trees
+for (let r = 0; r < WORLD_ROWS; r++) {
+  for (let c = 0; c < WORLD_COLS; c++) {
+    if (map[r][c] !== 2) continue;
+    // Check 3-tile radius for other trees; remove this one if neighbor found first
+    let hasNeighbor = false;
+    for (let dr = -3; dr <= 3 && !hasNeighbor; dr++) {
+      for (let dc = -3; dc <= 3 && !hasNeighbor; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < WORLD_ROWS && nc >= 0 && nc < WORLD_COLS) {
+          if (map[nr][nc] === 2 && (nr < r || (nr === r && nc < c))) {
+            // A previously-kept tree is too close — remove this one
+            hasNeighbor = true;
+          }
+        }
+      }
+    }
+    if (hasNeighbor) {
+      map[r][c] = 0;
+    }
+  }
+}
+
+// Cap total tree count at 300
+{
+  const treeTiles = [];
+  for (let r = 0; r < WORLD_ROWS; r++) {
+    for (let c = 0; c < WORLD_COLS; c++) {
+      if (map[r][c] === 2) treeTiles.push({ r, c });
+    }
+  }
+  if (treeTiles.length > 300) {
+    // Remove excess trees deterministically (keep first 300 in scan order)
+    for (let i = 300; i < treeTiles.length; i++) {
+      map[treeTiles[i].r][treeTiles[i].c] = 0;
+    }
+  }
+}
 
 // ── Dungeon entrance trigger tile coordinates (for GameScene) ──
 export const DUNGEON_TILE_ROW = 10;
@@ -1053,8 +1108,9 @@ export const CAVE_TRIGGERS = [
 export const TUNNEL_TRIGGER = { row: 123, col: 78, label: 'tunnel' };
 
 // ── Player start position (world pixels) ─────────────────
-export const PLAYER_START_COL = 6;
-export const PLAYER_START_ROW = 74;
+// Set player start to open grass area away from buildings and trees
+export const PLAYER_START_COL = 15;
+export const PLAYER_START_ROW = 145;
 
 // ── Campfire position (world tile coords) ────────────────
 export const CAMPFIRE_TILE_ROW = 74;
