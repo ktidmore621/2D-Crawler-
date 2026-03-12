@@ -45,7 +45,8 @@ export default class GameScene {
 
   async init() {
     const { width, height } = this.app.screen;
-    this.app.renderer.background.color = BG_COLOR;
+    // Deep forest green so any gap at edges blends with terrain
+    this.app.renderer.background.color = 0x2a3d1a;
     this.app.stage.addChild(this.container);
 
     this.container.addChild(this.worldContainer);

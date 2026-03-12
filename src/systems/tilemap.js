@@ -37,7 +37,8 @@ import {
 } from '../utils/constants.js';
 import { getIsoTex } from './textureCache.js';
 
-const TILE_BUFFER = 4;
+// Extend render buffer so edges are never visible
+const TILE_BUFFER = 8;
 
 function hashTile(r, c) {
   return ((r * 137 + c * 311) & 0xFFFF);
@@ -49,7 +50,7 @@ function hashTile(r, c) {
 export function createTilemap() {
   const container = new Container();
 
-  const POOL_SIZE = 1200;
+  const POOL_SIZE = 2000;
   const pool = [];
   for (let i = 0; i < POOL_SIZE; i++) {
     const s = new Sprite();
@@ -109,10 +110,13 @@ export function createTilemap() {
         sprite.tint = 0xffffff;
         sprite.visible = true;
 
-        if (tileId === TILE_WATER || tileId === TILE_WATERFALL) {
-          sprite.tint = 0x8888ff;
+        // Dirt/path tiles — warm sandy brown tint to stand out from grass
+        if (tileId === TILE_DIRT || tileId === TILE_DRY_LAKEBED || tileId === TILE_FARMLAND) {
+          sprite.tint = 0xd4a96a;
+        } else if (tileId === TILE_WATER || tileId === TILE_WATERFALL) {
+          sprite.tint = 0x5599cc;
         } else if (tileId === TILE_SHALLOW_WATER || tileId === TILE_FLOODED_FLOOR) {
-          sprite.tint = 0xaaaaff;
+          sprite.tint = 0x77bbdd;
         }
       }
     }
@@ -147,10 +151,10 @@ function getTileTexture(tileId, col, row) {
       return getIsoTex('rock', h);
     case TILE_WATER:
     case TILE_WATERFALL:
-      return getIsoTex('flatGrass', h);
+      return getIsoTex('flatMisc', h);
     case TILE_SHALLOW_WATER:
     case TILE_FLOODED_FLOOR:
-      return getIsoTex('flatGrass', h);
+      return getIsoTex('flatMisc', h);
     case TILE_MOUNTAIN_WALL:
     case TILE_MOUNTAIN_TOP:
     case TILE_CLIFF_EDGE:

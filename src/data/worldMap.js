@@ -1038,10 +1038,25 @@ for (let r = 0; r < WORLD_ROWS; r++) {
 }
 
 
+// ── VILLAGE COURTYARD CLEARING ──
+// Clear a large area around village center (col 75, row 140) for buildings and walkways
+const _vcCol = 75;
+const _vcRow = 140;
+// Clear 20-tile radius around village center — make all passable grass
+for (let r = _vcRow - 20; r <= _vcRow + 12; r++) {
+  for (let c = _vcCol - 20; c <= _vcCol + 20; c++) {
+    if (r >= 0 && r < WORLD_ROWS && c >= 0 && c < WORLD_COLS) {
+      if (map[r][c] === 2 || map[r][c] === 3) {
+        map[r][c] = 0;
+      }
+    }
+  }
+}
+
 // ── POST-PROCESSING: enforce tree spacing, clear player start, cap total ──
-// Remove all trees within 8 tiles of player start
-const _pStartCol = 15;
-const _pStartRow = 145;
+// Remove all trees within 8 tiles of player start (village courtyard)
+const _pStartCol = 75;
+const _pStartRow = 140;
 for (let r = _pStartRow - 8; r <= _pStartRow + 8; r++) {
   for (let c = _pStartCol - 8; c <= _pStartCol + 8; c++) {
     if (r >= 0 && r < WORLD_ROWS && c >= 0 && c < WORLD_COLS) {
@@ -1107,10 +1122,10 @@ export const CAVE_TRIGGERS = [
 // ── Tunnel entrance trigger ───────────────────────────────
 export const TUNNEL_TRIGGER = { row: 123, col: 78, label: 'tunnel' };
 
-// ── Player start position (world pixels) ─────────────────
-// Set player start to open grass area away from buildings and trees
-export const PLAYER_START_COL = 15;
-export const PLAYER_START_ROW = 145;
+// ── Player start position — village courtyard ────────────
+// Spawn in open courtyard between buildings
+export const PLAYER_START_COL = 75;
+export const PLAYER_START_ROW = 140;
 
 // ── Campfire position (world tile coords) ────────────────
 export const CAMPFIRE_TILE_ROW = 74;
