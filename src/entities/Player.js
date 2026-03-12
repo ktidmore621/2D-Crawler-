@@ -3,17 +3,22 @@
  * Movement is stored as (gridCol, gridRow) floats.
  * Screen position is derived using gridToScreen().
  *
- * Isometric movement mapping:
- *   Up arrow    → row-1 (move NW visually)
- *   Down arrow  → row+1 (move SE visually)
- *   Left arrow  → col-1 (move SW visually)
- *   Right arrow → col+1 (move NE visually)
+ * D-pad directions map to screen-space movement:
+ *   Up arrow    → straight up on screen
+ *   Down arrow  → straight down on screen
+ *   Left arrow  → straight left on screen
+ *   Right arrow → straight right on screen
+ *
+ * Screen deltas are converted to isometric grid deltas via the
+ * inverse of gridToScreen() so the player moves along screen axes.
  */
 
 import { Container } from 'pixi.js';
 import {
   PLAYER_SPEED,
   PLAYER_SCALE,
+  ISO_TILE_W,
+  ISO_TILE_H,
   MAP_COLS,
   MAP_ROWS,
 } from '../utils/constants.js';
@@ -25,14 +30,10 @@ import {
 import { isPassable, getSpeedMultiplier } from '../systems/collision.js';
 import { gridToScreen } from '../systems/iso.js';
 
-// Speed in grid-tiles per second (player moves ~5.4 tiles/sec at 260 px/s with 48px tiles)
-const GRID_SPEED = PLAYER_SPEED / 48;
-
 export default class Player {
   constructor(characterType, characterName) {
     this.characterType = characterType;
     this.characterName = characterName;
-    this.speed = GRID_SPEED;
     this.facing = 'down';
     this.currentAnimKey = null;
     this.animations = null;
@@ -73,36 +74,42 @@ export default class Player {
     this._setAnimation(animKey);
 
     if (moving) {
-      console.log(`Moving to col:${this.gridCol} row:${this.gridRow}`);
-      let dc = 0;
-      let dr = 0;
-      if (dirs.up) dr -= 1;
-      if (dirs.down) dr += 1;
-      if (dirs.left) dc -= 1;
-      if (dirs.right) dc += 1;
+      // Screen-space input: d-pad maps directly to screen axes
+      let inputX = 0;
+      let inputY = 0;
+      if (dirs.left)  inputX -= 1;
+      if (dirs.right) inputX += 1;
+      if (dirs.up)    inputY -= 1;
+      if (dirs.down)  inputY += 1;
 
-      if (dc !== 0 && dr !== 0) {
-        const inv = 1 / Math.SQRT2;
-        dc *= inv;
-        dr *= inv;
-      }
+      // Normalize diagonal so speed is consistent in all directions
+      const len = Math.sqrt(inputX * inputX + inputY * inputY);
+      if (len > 0) { inputX /= len; inputY /= len; }
 
       // Speed multiplier from tile type
       const currentCol = Math.floor(this.gridCol);
       const currentRow = Math.floor(this.gridRow);
       const speedMult = getSpeedMultiplier(currentCol, currentRow, worldMap);
 
-      const moveC = dc * this.speed * speedMult * deltaSeconds;
-      const moveR = dr * this.speed * speedMult * deltaSeconds;
+      // Screen-space movement
+      const speed = PLAYER_SPEED * speedMult * deltaSeconds;
+      const screenDX = inputX * speed;
+      const screenDY = inputY * speed;
 
-      const newCol = this.gridCol + moveC;
-      const newRow = this.gridRow + moveR;
+      // Convert screen delta to isometric grid delta
+      // Derived from inverse of gridToScreen():
+      //   screenX = (col - row) * (ISO_TILE_W / 2)
+      //   screenY = (col + row) * (ISO_TILE_H / 2)
+      const dCol = (screenDX / (ISO_TILE_W / 2) + screenDY / (ISO_TILE_H / 2)) / 2;
+      const dRow = (screenDY / (ISO_TILE_H / 2) - screenDX / (ISO_TILE_W / 2)) / 2;
 
-      // Try X (col) movement
+      // Apply with collision — try each axis independently for wall sliding
+      const newCol = this.gridCol + dCol;
+      const newRow = this.gridRow + dRow;
+
       if (isPassable(Math.floor(newCol), Math.floor(this.gridRow), worldMap)) {
         this.gridCol = newCol;
       }
-      // Try Y (row) movement
       if (isPassable(Math.floor(this.gridCol), Math.floor(newRow), worldMap)) {
         this.gridRow = newRow;
       }
