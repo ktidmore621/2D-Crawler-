@@ -38,6 +38,8 @@ export default class GameScene {
     this.vignette = null;
     this.miniMap = null;
     this.elapsedTime = 0;
+    this.waterTimer = 0;
+    this.waterFrame = 0;
     this._dungeonLogged = false;
     this._caveLogged = {};
     this._tunnelLogged = false;
@@ -109,6 +111,15 @@ export default class GameScene {
     if (!this.player || !this.inputState) return;
 
     this.elapsedTime += deltaSeconds;
+
+    // Cycle water animation frames every 0.7 seconds
+    this.waterTimer += deltaSeconds;
+    if (this.waterTimer >= 0.7) {
+      this.waterTimer = 0;
+      this.waterFrame = (this.waterFrame + 1) % 4;
+      this.tilemap.setWaterFrame(this.waterFrame);
+    }
+
     this.inputState.updateDirs();
     this.player.update(this.inputState.dirs, worldMap, deltaSeconds);
 

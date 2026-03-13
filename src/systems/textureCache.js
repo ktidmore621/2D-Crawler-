@@ -5,7 +5,7 @@
 
 import { Assets, Texture, Rectangle } from 'pixi.js';
 import { SPRITE_ATLAS, getAllAssetPaths } from '../data/spriteAtlas.js';
-import { ISO_ATLAS } from '../data/isoAtlas.js';
+import { ISO_ATLAS, WATER_ATLAS } from '../data/isoAtlas.js';
 
 /** Cached sub-textures keyed by name */
 const cache = {};
@@ -21,6 +21,13 @@ const isoBuildingCache = {};
 
 /** Isometric cart textures keyed by cart name */
 const isoCartCache = {};
+
+/** Water tile textures */
+const waterCache = {
+  deep: [],     // 4 animation frames
+  shallow: [],  // 4 animation frames
+  shore: {},    // top, bottom, left, right
+};
 
 let initialized = false;
 
@@ -58,6 +65,22 @@ export async function initTextureCache(onProgress) {
 
   // ── Slice iso cart textures ──
   _sliceIsoCarts(isoTextures.isoCarts);
+
+  // ── Load water tile textures (individual PNGs) ──
+  const waterAssets = [];
+  WATER_ATLAS.deep.forEach((src, i) => waterAssets.push({ alias: `waterDeep${i}`, src }));
+  WATER_ATLAS.shallow.forEach((src, i) => waterAssets.push({ alias: `waterShallow${i}`, src }));
+  Object.entries(WATER_ATLAS.shore).forEach(([dir, src]) => waterAssets.push({ alias: `waterShore_${dir}`, src }));
+  Assets.addBundle('water', waterAssets);
+  const waterTextures = await Assets.loadBundle('water');
+
+  for (let i = 0; i < 4; i++) {
+    waterCache.deep.push(waterTextures[`waterDeep${i}`]);
+    waterCache.shallow.push(waterTextures[`waterShallow${i}`]);
+  }
+  for (const dir of ['top', 'bottom', 'left', 'right']) {
+    waterCache.shore[dir] = waterTextures[`waterShore_${dir}`];
+  }
 
   initialized = true;
 }
@@ -195,6 +218,23 @@ export function getFireFrames() {
     if (t) frames.push(t);
   }
   return frames;
+}
+
+/**
+ * Get a water texture by type and frame/direction.
+ * @param {'deep'|'shallow'} type
+ * @param {number} frame - animation frame 0-3
+ */
+export function getWaterTex(type, frame) {
+  return waterCache[type]?.[frame] || null;
+}
+
+/**
+ * Get a shore transition texture by direction.
+ * @param {'top'|'bottom'|'left'|'right'} direction
+ */
+export function getShoreTex(direction) {
+  return waterCache.shore[direction] || null;
 }
 
 // ── Internal helpers ──

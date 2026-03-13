@@ -189,3 +189,24 @@ export const ISO_ATLAS = {
     cart3: { x: 1024, y: 0, w: 512, h: 512 },
   },
 };
+
+export const WATER_ATLAS = {
+  deep: [
+    'assets/iso/water/water_0.png',
+    'assets/iso/water/water_1.png',
+    'assets/iso/water/water_2.png',
+    'assets/iso/water/water_3.png',
+  ],
+  shallow: [
+    'assets/iso/water/shallow_0.png',
+    'assets/iso/water/shallow_1.png',
+    'assets/iso/water/shallow_2.png',
+    'assets/iso/water/shallow_3.png',
+  ],
+  shore: {
+    top:    'assets/iso/water/shore_top.png',
+    bottom: 'assets/iso/water/shore_bottom.png',
+    left:   'assets/iso/water/shore_left.png',
+    right:  'assets/iso/water/shore_right.png',
+  },
+};

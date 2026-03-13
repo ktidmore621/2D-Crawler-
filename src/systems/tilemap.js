@@ -35,7 +35,7 @@ import {
   TILE_HIGHWAY,
   TILE_WATERFALL,
 } from '../utils/constants.js';
-import { getIsoTex } from './textureCache.js';
+import { getIsoTex, getWaterTex, getShoreTex } from './textureCache.js';
 
 // Extend render buffer so edges are never visible
 const TILE_BUFFER = 8;
@@ -62,6 +62,15 @@ export function createTilemap() {
 
   let lastCamCol = -999;
   let lastCamRow = -999;
+  let waterFrame = 0;
+  let dirty = false;
+
+  function setWaterFrame(frame) {
+    if (frame !== waterFrame) {
+      waterFrame = frame;
+      dirty = true;
+    }
+  }
 
   function render(worldMap, camX, camY, vpWidth, vpHeight) {
     const centerWorldX = -camX + vpWidth / 2;
@@ -75,11 +84,12 @@ export function createTilemap() {
 
     const camCol = Math.floor(centerCol);
     const camRow = Math.floor(centerRow);
-    if (Math.abs(camCol - lastCamCol) < 0.5 && Math.abs(camRow - lastCamRow) < 0.5) {
+    if (!dirty && Math.abs(camCol - lastCamCol) < 0.5 && Math.abs(camRow - lastCamRow) < 0.5) {
       return;
     }
     lastCamCol = camCol;
     lastCamRow = camRow;
+    dirty = false;
 
     let idx = 0;
 
@@ -99,7 +109,7 @@ export function createTilemap() {
         if (idx >= POOL_SIZE) break;
 
         const tileId = worldMap[r][c];
-        const tex = getTileTexture(tileId, c, r);
+        const tex = getWaterAwareTex(tileId, c, r, worldMap, waterFrame);
         if (!tex) continue;
 
         const screen = gridToScreen(c, r);
@@ -115,10 +125,6 @@ export function createTilemap() {
         // Dirt/path tiles — warm sandy brown tint to stand out from grass
         if (tileId === TILE_DIRT || tileId === TILE_DRY_LAKEBED || tileId === TILE_FARMLAND) {
           sprite.tint = 0xd4a96a;
-        } else if (tileId === TILE_WATER || tileId === TILE_WATERFALL) {
-          sprite.tint = 0x5599cc;
-        } else if (tileId === TILE_SHALLOW_WATER || tileId === TILE_FLOODED_FLOOR) {
-          sprite.tint = 0x77bbdd;
         }
       }
     }
@@ -128,13 +134,30 @@ export function createTilemap() {
     }
   }
 
-  return { gfx: container, render };
+  return { gfx: container, render, setWaterFrame };
 }
 
-function getTileTexture(tileId, col, row) {
+/**
+ * Resolve the texture for a tile, using dedicated water sprites for water tiles
+ * and detecting shore transitions where water borders grass.
+ */
+function getWaterAwareTex(tileId, col, row, worldMap, wFrame) {
   const h = hashTile(row, col);
 
   switch (tileId) {
+    case TILE_WATER:
+    case TILE_WATERFALL: {
+      // Check adjacent tiles for grass to pick shore transitions
+      const isGrass = (r, c) => worldMap[r]?.[c] === TILE_GRASS;
+      if (isGrass(row - 1, col) && isGrass(row, col - 1)) return getShoreTex('top');
+      if (isGrass(row + 1, col) && isGrass(row, col + 1)) return getShoreTex('bottom');
+      if (isGrass(row - 1, col)) return getShoreTex('left');
+      if (isGrass(row + 1, col)) return getShoreTex('right');
+      return getWaterTex('deep', wFrame);
+    }
+    case TILE_SHALLOW_WATER:
+    case TILE_FLOODED_FLOOR:
+      return getWaterTex('shallow', wFrame);
     case TILE_GRASS:
     case TILE_TREE:
     case TILE_BUSH:
@@ -151,12 +174,6 @@ function getTileTexture(tileId, col, row) {
       return getIsoTex('flatDirt', h);
     case TILE_ALIEN:
       return getIsoTex('rock', h);
-    case TILE_WATER:
-    case TILE_WATERFALL:
-      return getIsoTex('flatMisc', h);
-    case TILE_SHALLOW_WATER:
-    case TILE_FLOODED_FLOOR:
-      return getIsoTex('flatMisc', h);
     case TILE_MOUNTAIN_WALL:
     case TILE_MOUNTAIN_TOP:
     case TILE_CLIFF_EDGE:
